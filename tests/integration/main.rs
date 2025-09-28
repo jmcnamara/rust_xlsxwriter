@@ -220,6 +220,7 @@ mod chart_chartarea03;
 mod chart_chartarea04;
 mod chart_chartarea05;
 mod chart_chartarea06;
+mod chart_clustered01;
 mod chart_column01;
 mod chart_column02;
 mod chart_column03;

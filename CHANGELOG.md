@@ -5,6 +5,17 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.91.0] - 2025-XX-XX
+
+### Added
+
+- Added support for chart clustered/2D categories. See the [Clustered Chart] cookbook example.
+
+  <img src="https://rustxlsxwriter.github.io/images/app_chart_clustered.png">
+
+ [Clustered Chart]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#chart-clustered-categories
+
+
 ## [0.90.2] - 2025-09-26
 
 ### Added

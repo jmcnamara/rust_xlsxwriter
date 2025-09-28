@@ -16972,6 +16972,17 @@ impl Worksheet {
             }
         }
 
+        // Calculate the major and minor dimensions of the data range. This is
+        // generally a 1D array but for clustered ranges it can be 2D.
+        let row_dim = (last_row - first_row + 1) as usize;
+        let col_dim = (last_col - first_col + 1) as usize;
+        cache.major_dim = cmp::max(row_dim, col_dim);
+        cache.minor_dim = cmp::min(row_dim, col_dim);
+
+        if cache.cache_type == ChartRangeCacheDataType::String && row_dim > 1 && col_dim > 1 {
+            cache.cache_type = ChartRangeCacheDataType::MultiLevelString;
+        }
+
         cache.data = data;
         cache
     }

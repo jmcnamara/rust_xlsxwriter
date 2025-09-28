@@ -3837,9 +3837,12 @@ impl Chart {
 
             // Write the c:cat element.
             if series.category_range.has_data() {
-                // We only set a default num format for non-string categories.
-                self.category_has_num_format =
-                    series.category_range.cache.cache_type != ChartRangeCacheDataType::String;
+                // We only set a default num format for numeric categories.
+                self.category_has_num_format = matches!(
+                    series.category_range.cache.cache_type,
+                    ChartRangeCacheDataType::Number | ChartRangeCacheDataType::Date
+                );
+
                 self.write_cat(&series.category_range);
             }
 
@@ -4064,11 +4067,13 @@ impl Chart {
         xml_end_tag(&mut self.writer, "c:yVal");
     }
 
-    // Write the <c:numRef> or <c:strRef> elements. Value range must be written
-    // as a numRef where strings are treated as zero.
+    // Write the <c:numRef> or <c:strRef> or <c:multiLvlStrRef> elements. Value
+    // range must be written as a numRef where strings are treated as zero.
     fn write_cache_ref(&mut self, range: &ChartRange, is_num_only: bool) {
         if range.cache.cache_type == ChartRangeCacheDataType::String && !is_num_only {
             self.write_str_ref(range);
+        } else if range.cache.cache_type == ChartRangeCacheDataType::MultiLevelString {
+            self.write_multi_level_str_ref(range);
         } else {
             self.write_num_ref(range);
         }
@@ -4134,6 +4139,21 @@ impl Chart {
         xml_end_tag(&mut self.writer, "c:numCache");
     }
 
+    // Write the <c:multiLvlStrRef> element.
+    fn write_multi_level_str_ref(&mut self, range: &ChartRange) {
+        xml_start_tag_only(&mut self.writer, "c:multiLvlStrRef");
+
+        // Write the c:f element.
+        self.write_range_formula(&range.formula_abs());
+
+        // Write the c:strCache element.
+        if range.cache.has_data() {
+            self.write_multi_level_str_cache(&range.cache);
+        }
+
+        xml_end_tag(&mut self.writer, "c:multiLvlStrRef");
+    }
+
     // Write the <c:strCache> element.
     fn write_str_cache(&mut self, cache: &ChartRangeCacheData) {
         xml_start_tag_only(&mut self.writer, "c:strCache");
@@ -4147,6 +4167,32 @@ impl Chart {
         }
 
         xml_end_tag(&mut self.writer, "c:strCache");
+    }
+
+    // Write the <c:multiLvlStrCache> element.
+    fn write_multi_level_str_cache(&mut self, cache: &ChartRangeCacheData) {
+        xml_start_tag_only(&mut self.writer, "c:multiLvlStrCache");
+
+        // Write the c:ptCount element.
+        self.write_pt_count(cache.major_dim);
+
+        // Split the cache data into levels, in reverse order.
+        for depth in (0..cache.minor_dim).rev() {
+            xml_start_tag_only(&mut self.writer, "c:lvl");
+
+            for index in 0..cache.major_dim {
+                let offset = depth + cache.minor_dim * index;
+                let value = &cache.data[offset];
+
+                if !value.is_empty() {
+                    self.write_pt(index, value);
+                }
+            }
+
+            xml_end_tag(&mut self.writer, "c:lvl");
+        }
+
+        xml_end_tag(&mut self.writer, "c:multiLvlStrCache");
     }
 
     // Write the <c:f> element.
@@ -8580,6 +8626,8 @@ impl ChartRange {
         cache_type: ChartRangeCacheDataType,
     ) -> &mut ChartRange {
         self.cache = ChartRangeCacheData {
+            major_dim: data.len(),
+            minor_dim: 1,
             cache_type,
             data: data.iter().map(std::string::ToString::to_string).collect(),
         };
@@ -8589,6 +8637,8 @@ impl ChartRange {
 
 #[derive(Clone, PartialEq)]
 pub(crate) struct ChartRangeCacheData {
+    pub(crate) major_dim: usize,
+    pub(crate) minor_dim: usize,
     pub(crate) cache_type: ChartRangeCacheDataType,
     pub(crate) data: Vec<String>,
 }
@@ -8596,6 +8646,8 @@ pub(crate) struct ChartRangeCacheData {
 impl ChartRangeCacheData {
     pub(crate) fn new() -> ChartRangeCacheData {
         ChartRangeCacheData {
+            major_dim: 0,
+            minor_dim: 0,
             cache_type: ChartRangeCacheDataType::None,
             data: vec![],
         }
@@ -8610,6 +8662,7 @@ impl ChartRangeCacheData {
 pub(crate) enum ChartRangeCacheDataType {
     None,
     String,
+    MultiLevelString,
     Number,
     Date,
 }
@@ -17023,6 +17076,7 @@ impl ChartErrorBars {
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/chart_error_bars_types.png">
 ///
+#[allow(clippy::large_enum_variant)]
 pub enum ChartErrorBarsType {
     /// Set a fixed value for the positive and negative error bars. In Excel
     /// this must be > 0.0.
