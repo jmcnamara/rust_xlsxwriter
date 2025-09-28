@@ -227,6 +227,8 @@ mod chart_column03;
 mod chart_column04;
 mod chart_column05;
 mod chart_column06;
+mod chart_column07;
+mod chart_column08;
 mod chart_column09;
 mod chart_column10;
 mod chart_column11;

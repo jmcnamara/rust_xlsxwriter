@@ -243,7 +243,7 @@ use crate::worksheet::Worksheet;
 use crate::{
     utility, Border, Chart, ChartRange, ChartRangeCacheData, ColNum, Color, DefinedName,
     DefinedNameType, DocProperties, Fill, Font, FormatPattern, Image, RowNum, Visible,
-    NUM_IMAGE_FORMATS,
+    NUM_IMAGE_FORMATS, UNPARSED_SHEET_RANGE,
 };
 
 use crate::xmlwriter::{
@@ -2402,11 +2402,14 @@ impl Workbook {
                 *cache = worksheet.get_cache_data(key.1, key.2, key.3, key.4);
             } else {
                 let sheet_name = key.0.clone();
-                let range = utility::chart_range_abs(&key.0, key.1, key.2, key.3, key.4);
-                let error =
-                    format!("Unknown worksheet name '{sheet_name}' in chart range '{range}'");
 
-                return Err(XlsxError::UnknownWorksheetNameOrIndex(error));
+                if sheet_name != UNPARSED_SHEET_RANGE {
+                    let range = utility::chart_range_abs(&key.0, key.1, key.2, key.3, key.4);
+                    let error =
+                        format!("Unknown worksheet name '{sheet_name}' in chart range '{range}'");
+
+                    return Err(XlsxError::UnknownWorksheetNameOrIndex(error));
+                }
             }
         }
 

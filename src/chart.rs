@@ -754,6 +754,11 @@ use crate::{
     ColNum, Color, IntoExcelDateTime, ObjectMovement, RowNum, XlsxError, COL_MAX, ROW_MAX,
 };
 
+// Some chart ranges are structured references or non-contiguous ranges that
+// can't be parsed to create a data cache so we just store the range string and
+// ignore the cache.
+pub(crate) const UNPARSED_SHEET_RANGE: &str = "UNPARSED_SHEET_RANGE";
+
 #[derive(Clone)]
 /// The `Chart` struct is used to create an object to represent an chart that
 /// can be inserted into a worksheet.
@@ -4084,7 +4089,7 @@ impl Chart {
         xml_start_tag_only(&mut self.writer, "c:numRef");
 
         // Write the c:f element.
-        self.write_range_formula(&range.formula_abs());
+        self.write_range_formula(&range.formula_string());
 
         // Write the c:numCache element.
         if range.cache.has_data() {
@@ -4099,7 +4104,7 @@ impl Chart {
         xml_start_tag_only(&mut self.writer, "c:strRef");
 
         // Write the c:f element.
-        self.write_range_formula(&range.formula_abs());
+        self.write_range_formula(&range.formula_string());
 
         // Write the c:strCache element.
         if range.cache.has_data() {
@@ -4144,7 +4149,7 @@ impl Chart {
         xml_start_tag_only(&mut self.writer, "c:multiLvlStrRef");
 
         // Write the c:f element.
-        self.write_range_formula(&range.formula_abs());
+        self.write_range_formula(&range.formula_string());
 
         // Write the c:strCache element.
         if range.cache.has_data() {
@@ -8332,6 +8337,7 @@ pub struct ChartRange {
     last_row: RowNum,
     last_col: ColNum,
     range_string: String,
+    is_string_only: bool,
     pub(crate) cache: ChartRangeCacheData,
 }
 
@@ -8382,6 +8388,7 @@ impl ChartRange {
             last_row,
             last_col,
             range_string: String::new(),
+            is_string_only: false,
             cache: ChartRangeCacheData::new(),
         }
     }
@@ -8415,6 +8422,27 @@ impl ChartRange {
         let mut first_col = 0;
         let mut last_row = 0;
         let mut last_col = 0;
+
+        // Allow `=(Sheet1!$A$1:$A$2,Sheet1!$A$4:$A$5)` style non-contiguous
+        // ranges but don't try to parse them.
+        if range_string.starts_with("=(") || range_string.starts_with('(') {
+            let mut contiguous = range_string;
+
+            if contiguous.starts_with('=') {
+                contiguous = &contiguous[1..];
+            }
+
+            return ChartRange {
+                sheet_name: UNPARSED_SHEET_RANGE.to_string(),
+                first_row: 0,
+                first_col: 0,
+                last_row: 0,
+                last_col: 0,
+                range_string: contiguous.to_string(),
+                is_string_only: true,
+                cache: ChartRangeCacheData::new(),
+            };
+        }
 
         // Parse the chart range string into the worksheet name and range parts.
         if let Some(position) = range_string.find('!') {
@@ -8475,6 +8503,7 @@ impl ChartRange {
             last_row,
             last_col,
             range_string: range_string.to_string(),
+            is_string_only: false,
             cache: ChartRangeCacheData::new(),
         }
     }
@@ -8501,6 +8530,15 @@ impl ChartRange {
         )
     }
 
+    // Create or return the chart range string.
+    pub(crate) fn formula_string(&self) -> String {
+        if self.is_string_only {
+            return self.range_string.clone();
+        }
+
+        self.formula_abs()
+    }
+
     // Convert the row/col range into a range error string.
     pub(crate) fn error_range(&self) -> String {
         utility::chart_error_range(
@@ -8525,7 +8563,7 @@ impl ChartRange {
 
     // Check that the range has data.
     pub(crate) fn has_data(&self) -> bool {
-        !self.sheet_name.is_empty()
+        self.is_string_only || !self.sheet_name.is_empty()
     }
 
     // Get the number of X or Y data points in the range.
@@ -8569,6 +8607,10 @@ impl ChartRange {
     // Check that the row/column values in the range are valid.
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
         let range = self.error_range();
+
+        if self.is_string_only {
+            return Ok(());
+        }
 
         let error_message = format!("Sheet name error for range: '{range}'");
         utility::validate_sheetname(&self.sheet_name, &error_message)?;
