@@ -8337,7 +8337,7 @@ pub struct ChartRange {
     last_row: RowNum,
     last_col: ColNum,
     range_string: String,
-    is_string_only: bool,
+    is_formula_string_only: bool,
     pub(crate) cache: ChartRangeCacheData,
 }
 
@@ -8388,7 +8388,7 @@ impl ChartRange {
             last_row,
             last_col,
             range_string: String::new(),
-            is_string_only: false,
+            is_formula_string_only: false,
             cache: ChartRangeCacheData::new(),
         }
     }
@@ -8424,12 +8424,15 @@ impl ChartRange {
         let mut last_col = 0;
 
         // Allow `=(Sheet1!$A$1:$A$2,Sheet1!$A$4:$A$5)` style non-contiguous
-        // ranges but don't try to parse them.
-        if range_string.starts_with("=(") || range_string.starts_with('(') {
-            let mut contiguous = range_string;
+        // ranges and `=Table1[Column1]` Table ranges but don't try to parse.
+        if range_string.starts_with("=(")
+            || range_string.starts_with('(')
+            || range_string.contains('[')
+        {
+            let mut range_string = range_string;
 
-            if contiguous.starts_with('=') {
-                contiguous = &contiguous[1..];
+            if range_string.starts_with('=') {
+                range_string = &range_string[1..];
             }
 
             return ChartRange {
@@ -8438,8 +8441,8 @@ impl ChartRange {
                 first_col: 0,
                 last_row: 0,
                 last_col: 0,
-                range_string: contiguous.to_string(),
-                is_string_only: true,
+                range_string: range_string.to_string(),
+                is_formula_string_only: true,
                 cache: ChartRangeCacheData::new(),
             };
         }
@@ -8503,7 +8506,7 @@ impl ChartRange {
             last_row,
             last_col,
             range_string: range_string.to_string(),
-            is_string_only: false,
+            is_formula_string_only: false,
             cache: ChartRangeCacheData::new(),
         }
     }
@@ -8532,7 +8535,7 @@ impl ChartRange {
 
     // Create or return the chart range string.
     pub(crate) fn formula_string(&self) -> String {
-        if self.is_string_only {
+        if self.is_formula_string_only {
             return self.range_string.clone();
         }
 
@@ -8563,7 +8566,7 @@ impl ChartRange {
 
     // Check that the range has data.
     pub(crate) fn has_data(&self) -> bool {
-        self.is_string_only || !self.sheet_name.is_empty()
+        self.is_formula_string_only || !self.sheet_name.is_empty()
     }
 
     // Get the number of X or Y data points in the range.
@@ -8608,7 +8611,7 @@ impl ChartRange {
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
         let range = self.error_range();
 
-        if self.is_string_only {
+        if self.is_formula_string_only {
             return Ok(());
         }
 
