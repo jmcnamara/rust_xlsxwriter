@@ -13,6 +13,7 @@ use std::{collections::HashSet, fmt};
 
 use crate::xmlwriter::{
     xml_data_element_only, xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag,
+    xml_start_tag_only,
 };
 use crate::{utility::ToXmlBoolean, CellRange, Format, Formula, RowNum, XlsxError};
 
@@ -127,6 +128,9 @@ pub struct Table {
     pub(crate) show_banded_columns: bool,
     pub(crate) show_autofilter: bool,
     pub(crate) is_serde_table: bool,
+
+    pub(crate) alt_text: String,
+    pub(crate) alt_text_title: String,
 }
 
 impl Table {
@@ -212,6 +216,8 @@ impl Table {
             show_header_row: true,
             show_total_row: false,
             is_serde_table: false,
+            alt_text: String::new(),
+            alt_text_title: String::new(),
         }
     }
 
@@ -1114,6 +1120,88 @@ impl Table {
         self
     }
 
+    /// Set the alt text for the table to help accessibility.
+    ///
+    /// The alt text is used with screen readers to help people with visual
+    /// disabilities.
+    ///
+    /// See the following Microsoft documentation on [Everything you need to
+    /// know to write effective alt
+    /// text](https://support.microsoft.com/en-us/office/everything-you-need-to-know-to-write-effective-alt-text-df98f884-ca3d-456c-807b-1a1fa82f5dc2).
+    ///
+    /// # Parameters
+    ///
+    /// - `alt_text`: The alt text string to add to the table.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a worksheet table with alt text.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_alt_text.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the column widths for clarity.
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
+    /// #
+    ///     // Create a new table with alt text.
+    ///     let table = Table::new().set_alt_text("Table with volume data for fruit sales.");
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/table_set_alt_text.png">
+    ///
+    pub fn set_alt_text(mut self, alt_text: impl Into<String>) -> Table {
+        self.alt_text = alt_text.into();
+        self
+    }
+
+    /// Set the alt text title for the table to help accessibility.
+    ///
+    /// The alt text title is used in conjunction with the alt text, and the
+    /// [`Table::set_alt_text()`] method, to provide context for the table. It
+    /// is only displayed as a title in Excel for Windows.
+    ///
+    /// # Parameters
+    ///
+    /// - `title`: The alt text title string to add to the table.
+    ///
+    pub fn set_alt_text_title(mut self, title: impl Into<String>) -> Table {
+        self.alt_text_title = title.into();
+        self
+    }
+
     /// Check if the table has a header row.
     ///
     /// This method is mainly used by polars_excel_writer and hidden from the
@@ -1204,6 +1292,11 @@ impl Table {
 
         // Write the tableStyleInfo element.
         self.write_table_style_info();
+
+        // Write the alt text elements if present.
+        if !self.alt_text.is_empty() || !self.alt_text_title.is_empty() {
+            self.write_extension_list();
+        }
 
         // Close the table tag.
         xml_end_tag(&mut self.writer, "table");
@@ -1324,6 +1417,41 @@ impl Table {
         attributes.push(("showColumnStripes", self.show_banded_columns.to_xml_bool()));
 
         xml_empty_tag(&mut self.writer, "tableStyleInfo", &attributes);
+    }
+
+    // Write the <extLst> element for the alt text elements.
+    fn write_extension_list(&mut self) {
+        let attributes = [
+            ("uri", "{504A1905-F514-4f6f-8877-14C23A59335A}"),
+            (
+                "xmlns:x14",
+                "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main",
+            ),
+        ];
+
+        xml_start_tag_only(&mut self.writer, "extLst");
+        xml_start_tag(&mut self.writer, "ext", &attributes);
+
+        // Write the x14:table element.
+        self.write_x14_table();
+
+        xml_end_tag(&mut self.writer, "ext");
+        xml_end_tag(&mut self.writer, "extLst");
+    }
+
+    // Write the <x14:table> element.
+    fn write_x14_table(&mut self) {
+        let mut attributes = vec![];
+
+        if !self.alt_text_title.is_empty() {
+            attributes.push(("altText", self.alt_text_title.clone()));
+        }
+
+        if !self.alt_text.is_empty() {
+            attributes.push(("altTextSummary", self.alt_text.clone()));
+        }
+
+        xml_empty_tag(&mut self.writer, "x14:table", &attributes);
     }
 }
 

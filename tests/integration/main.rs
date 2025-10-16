@@ -1154,6 +1154,8 @@ mod table34;
 mod table35;
 mod table36;
 mod table37;
+mod table38;
+mod table39;
 mod textbox01;
 mod textbox02;
 mod textbox03;
