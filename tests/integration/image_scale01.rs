@@ -8,7 +8,7 @@
 use crate::common;
 use rust_xlsxwriter::{Image, Workbook, XlsxError};
 
-// Test to demonstrate adding image scaling.
+// Test to demonstrate adding image scaling (manually scaled).
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -33,7 +33,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test to demonstrate adding image scaling.
+// Test to demonstrate adding image scaling (automatically scaled).
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -56,7 +56,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test to demonstrate adding image scaling.
+// Test to demonstrate adding image scaling (manually sized).
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 

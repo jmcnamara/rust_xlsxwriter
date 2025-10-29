@@ -741,6 +741,8 @@ mod image56;
 mod image57;
 mod image58;
 mod image_scale01;
+mod image_scale02;
+mod image_scale03;
 mod landscape01;
 mod macro01;
 mod macro02;

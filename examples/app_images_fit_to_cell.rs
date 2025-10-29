@@ -4,8 +4,7 @@
 
 //! An example of inserting images into a worksheet using `rust_xlsxwriter` so
 //! that they are scaled to a cell. This approach can be useful if you are
-//! building up a spreadsheet of products with a column of images for each
-//! product.
+//! building a spreadsheet of products with a column of images for each product.
 //!
 //! See also the `app_embedded_image.rs` example that shows a better approach
 //! for newer versions of Excel.
@@ -22,13 +21,14 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Widen the first column to make the text clearer.
-    worksheet.set_column_width(0, 30)?;
+    worksheet.set_column_width_pixels(0, 250)?;
 
     // Set larger cells to accommodate the images.
     worksheet.set_column_width_pixels(1, 200)?;
     worksheet.set_row_height_pixels(0, 140)?;
     worksheet.set_row_height_pixels(2, 140)?;
     worksheet.set_row_height_pixels(4, 140)?;
+    worksheet.set_row_height_pixels(6, 140)?;
 
     // Create a new image object.
     let image = Image::new("examples/rust_logo.png")?;
@@ -45,6 +45,11 @@ fn main() -> Result<(), XlsxError> {
     // In this case it is scaled to the smaller of the width or height scales.
     worksheet.write_with_format(4, 0, "Image scaled with a fixed aspect ratio:", &center)?;
     worksheet.insert_image_fit_to_cell(4, 1, &image, true)?;
+
+    // Insert the image and scale it to the cell while keeping it centered. This
+    // also maintains the aspect ratio.
+    worksheet.write_with_format(6, 0, "Image scaled and centered:", &center)?;
+    worksheet.insert_image_fit_to_cell_centered(6, 1, &image)?;
 
     // Save the file to disk.
     workbook.save("images_fit_to_cell.xlsx")?;

@@ -5306,8 +5306,8 @@ impl Worksheet {
     /// the image automatically scale to the width and height of the cell. This
     /// is similar to the [`Worksheet::embed_image()`] above but it allows you
     /// to add an additional cell format using [`Format`]. This is occasionally
-    /// useful if you want to set a cell border around the image or a cell
-    /// background color.
+    /// useful if you want to center the image, set a cell border around it, or
+    /// add a cell background color.
     ///
     /// # Parameters
     ///
@@ -5331,14 +5331,14 @@ impl Worksheet {
         self.store_embedded_image(row, col, image, Some(format))
     }
 
-    /// Add an image to a worksheet and fit it to a cell.
+    /// Add an image to a worksheet and scale it fit in a cell.
     ///
     /// Add an image to a worksheet and scale it so that it fits in a cell. This
     /// is similar in effect to [`Worksheet::embed_image()`] but in Excel's
     /// terminology it inserts the image placed *over* the cell instead of *in*
     /// the cell. The only advantage of this method is that the output file will
     /// work will all versions of Excel. The `Worksheet::embed_image()` method
-    /// only works with versions of Excel from 2003 onwards.
+    /// only works with versions of Excel from 2023 onwards.
     ///
     /// This method can be useful when creating a product spreadsheet with a
     /// column of images for each product. The image should be encapsulated in
@@ -5368,10 +5368,13 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// An example of inserting images into a worksheet using `rust_xlsxwriter`
-    /// so that they are scaled to a cell. This approach can be useful if you
-    /// are building up a spreadsheet of products with a column of images for
-    /// each product.
+    /// An example of inserting images into a worksheet using `rust_xlsxwriter` so
+    /// that they are scaled to a cell. This approach can be useful if you are
+    /// building up a spreadsheet of products with a column of images for each
+    /// product.
+    ///
+    /// See also the `app_embedded_image.rs` example that shows a better approach
+    /// for newer versions of Excel.
     ///
     /// ```
     /// # // This code is available in examples/app_images_fit_to_cell.rs
@@ -5388,13 +5391,14 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Widen the first column to make the text clearer.
-    ///     worksheet.set_column_width(0, 30)?;
+    ///     worksheet.set_column_width_pixels(0, 250)?;
     ///
     ///     // Set larger cells to accommodate the images.
     ///     worksheet.set_column_width_pixels(1, 200)?;
     ///     worksheet.set_row_height_pixels(0, 140)?;
     ///     worksheet.set_row_height_pixels(2, 140)?;
     ///     worksheet.set_row_height_pixels(4, 140)?;
+    ///     worksheet.set_row_height_pixels(6, 140)?;
     ///
     ///     // Create a new image object.
     ///     let image = Image::new("examples/rust_logo.png")?;
@@ -5411,6 +5415,11 @@ impl Worksheet {
     ///     // In this case it is scaled to the smaller of the width or height scales.
     ///     worksheet.write_with_format(4, 0, "Image scaled with a fixed aspect ratio:", &center)?;
     ///     worksheet.insert_image_fit_to_cell(4, 1, &image, true)?;
+    ///
+    ///     // Insert the image and scale it to the cell while keeping it centered. This
+    ///     // also maintains the aspect ratio.
+    ///     worksheet.write_with_format(6, 0, "Image scaled and centered:", &center)?;
+    ///     worksheet.insert_image_fit_to_cell_centered(6, 1, &image)?;
     /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("images_fit_to_cell.xlsx")?;
@@ -5436,14 +5445,86 @@ impl Worksheet {
             return Err(XlsxError::RowColumnLimitError);
         }
 
-        let width = self.column_pixel_width(col, image.object_movement);
-        let height = self.row_pixel_height(row, image.object_movement);
+        let column_width = self.column_pixel_width(col, image.object_movement);
+        let row_height = self.row_pixel_height(row, image.object_movement);
 
         let image = image
             .clone()
-            .set_scale_to_size(width, height, keep_aspect_ratio);
+            .set_scale_to_size(column_width, row_height, keep_aspect_ratio);
 
         self.images.insert((row, col, 0, 0), image);
+
+        Ok(self)
+    }
+
+    /// Add an image to a worksheet and scale it to fit, centered in a cell.
+    ///
+    /// Add an image to a worksheet and scale it so that it fits, centered, in a
+    /// cell. This is similar in effect to [`Worksheet::embed_image()`] with a
+    /// "center" cell format but in Excel's terminology it inserts the image
+    /// placed *over* the cell instead of *in* the cell. The only advantage of
+    /// this method is that the output file will work will all versions of
+    /// Excel. The `Worksheet::embed_image()` method only works with versions of
+    /// Excel from 2023 onwards.
+    ///
+    /// This method is similar to [`Worksheet::insert_image_fit_to_cell()`]
+    /// above, except that it always keeps the aspect ratio of the image and
+    /// centers the image within the cell.
+    ///
+    /// See the example in [`Worksheet::embed_image()`] above.
+    ///
+    /// **Note for macOS Excel users**: the image scale and centering may appear
+    /// different in Excel for macOS compared to Windows. This is an Excel
+    /// issue and not a `rust_xlsxwriter` issue. See this [Microsoft support
+    /// article].
+    ///
+    /// [Microsoft support article]: https://learn.microsoft.com/en-us/answers/questions/4938947/size-of-images-changes-(mac-windows)?forum=msoffice-all&referrer=answers
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `image`: The [`Image`] to insert into the cell.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    pub fn insert_image_fit_to_cell_centered(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        image: &Image,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let column_width = self.column_pixel_width(col, image.object_movement);
+        let row_height = self.row_pixel_height(row, image.object_movement);
+
+        let mut image = image
+            .clone()
+            .set_scale_to_size(column_width, row_height, true);
+
+        let mut x_offset = 0;
+        let mut y_offset = 0;
+
+        let image_width = image.scaled_width() as u32;
+        let image_height = image.scaled_height() as u32;
+
+        if image_height == row_height {
+            x_offset = (column_width - image_width) / 2;
+        } else {
+            y_offset = (row_height - image_height) / 2;
+        }
+
+        image.x_offset = x_offset;
+        image.y_offset = y_offset;
+
+        self.images.insert((row, col, x_offset, y_offset), image);
 
         Ok(self)
     }

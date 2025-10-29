@@ -280,7 +280,10 @@ impl Image {
     ///
     /// **Note for macOS Excel users**: the width shown on Excel for macOS can
     /// be different from the width on Windows. This is an Excel issue and not a
-    /// `rust_xlsxwriter` issue.
+    /// `rust_xlsxwriter` issue. See this [Microsoft support article].
+    ///
+    /// [Microsoft support article]: https://learn.microsoft.com/en-us/answers/questions/4938947/size-of-images-changes-(mac-windows)?forum=msoffice-all&referrer=answers
+    ///
     ///
     /// # Parameters
     ///
@@ -363,7 +366,9 @@ impl Image {
     ///
     /// **Note for macOS Excel users**: the scale shown on Excel for macOS is
     /// different from the scale on Windows. This is an Excel issue and not a
-    /// `rust_xlsxwriter` issue.
+    /// `rust_xlsxwriter` issue. See this [Microsoft support article].
+    ///
+    /// [Microsoft support article]: https://learn.microsoft.com/en-us/answers/questions/4938947/size-of-images-changes-(mac-windows)?forum=msoffice-all&referrer=answers
     ///
     /// # Parameters
     ///
@@ -419,6 +424,12 @@ impl Image {
     ///
     /// Set the width scale for the image relative to 1.0 (i.e. 100%). See the
     /// [`Image::set_scale_height()`] method for details.
+    ///
+    /// **Note for macOS Excel users**: the scale shown on Excel for macOS is
+    /// different from the scale on Windows. This is an Excel issue and not a
+    /// `rust_xlsxwriter` issue. See this [Microsoft support article].
+    ///
+    /// [Microsoft support article]: https://learn.microsoft.com/en-us/answers/questions/4938947/size-of-images-changes-(mac-windows)?forum=msoffice-all&referrer=answers
     ///
     /// # Parameters
     ///
@@ -841,8 +852,8 @@ impl Image {
     // to store the required image information in that format.
     pub(crate) fn vml_info(&self) -> VmlInfo {
         VmlInfo {
-            width: self.vml_width(),
-            height: self.vml_height(),
+            width: self.scaled_width(),
+            height: self.scaled_height(),
             text: self.vml_name(),
             header_position: self.vml_position(),
             is_scaled: self.is_scaled(),
@@ -850,14 +861,14 @@ impl Image {
         }
     }
 
-    // Get the image width as used by header/footer VML.
-    fn vml_width(&self) -> f64 {
+    // Get the scaled image width as used by header/footer VML.
+    pub(crate) fn scaled_width(&self) -> f64 {
         // Scale the image dimension relative to 96dpi.
         self.width * 96.0 / self.width_dpi * self.scale_width
     }
 
-    // Get the image height as used by header/footer VML.
-    fn vml_height(&self) -> f64 {
+    // Get the scaled image height as used by header/footer VML.
+    pub(crate) fn scaled_height(&self) -> f64 {
         // Scale the image dimension relative to 96dpi.
         self.height * 96.0 / self.height_dpi * self.scale_height
     }
