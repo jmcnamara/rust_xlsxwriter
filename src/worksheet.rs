@@ -5255,11 +5255,15 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/app_embedded_images.rs
     /// #
-    /// use rust_xlsxwriter::{Image, Workbook, XlsxError};
+    /// use rust_xlsxwriter::{Format, FormatAlign, Image, Workbook, XlsxError};
     ///
     /// fn main() -> Result<(), XlsxError> {
     ///     // Create a new Excel file object.
     ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Create some formats to use in the example.
+    ///     let vertical_center = Format::new().set_align(FormatAlign::VerticalCenter);
+    ///     let center = Format::new().set_align(FormatAlign::Center);
     ///
     ///     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -5267,18 +5271,26 @@ impl Worksheet {
     ///     // Create a new image object.
     ///     let image = Image::new("examples/rust_logo.png")?;
     ///
-    ///     // Widen the first column to make the caption clearer.
+    ///     // Widen the first column to make the captions clearer.
     ///     worksheet.set_column_width(0, 30)?;
-    ///     worksheet.write(0, 0, "Embed images that scale to the cell size")?;
     ///
     ///     // Change cell widths/heights to demonstrate the image differences.
     ///     worksheet.set_column_width(1, 14)?;
     ///     worksheet.set_row_height(1, 60)?;
-    ///     worksheet.set_row_height(3, 90)?;
+    ///     worksheet.set_row_height(3, 60)?;
+    ///     worksheet.set_row_height(5, 90)?;
     ///
-    ///     // Embed the images in cells of different widths/heights.
+    ///     // Embed an image in a cell. The height and width scale automatically.
+    ///     worksheet.write_with_format(1, 0, "Embed image in cell:", &vertical_center)?;
     ///     worksheet.embed_image(1, 1, &image)?;
-    ///     worksheet.embed_image(3, 1, &image)?;
+    ///
+    ///     // Embed and center an image in a cell.
+    ///     worksheet.write_with_format(3, 0, "Embed and center image:", &vertical_center)?;
+    ///     worksheet.embed_image_with_format(3, 1, &image, &center)?;
+    ///
+    ///     // Embed an image in a larger cell.
+    ///     worksheet.write_with_format(5, 0, "Embed image in larger cell:", &vertical_center)?;
+    ///     worksheet.embed_image(5, 1, &image)?;
     ///
     ///     // Save the file to disk.
     ///     workbook.save("embedded_images.xlsx")?;
@@ -5289,7 +5301,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/embedded_images.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/app_embedded_images.png">
     ///
     pub fn embed_image(
         &mut self,
@@ -5307,7 +5320,8 @@ impl Worksheet {
     /// is similar to the [`Worksheet::embed_image()`] above but it allows you
     /// to add an additional cell format using [`Format`]. This is occasionally
     /// useful if you want to center the image, set a cell border around it, or
-    /// add a cell background color.
+    /// add a cell background color. See the [`Worksheet::embed_image()`]
+    /// example above.
     ///
     /// # Parameters
     ///
