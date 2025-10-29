@@ -5,7 +5,7 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.91.0] - 2025-XX-XX
+## [0.91.0] - 2025-10-29
 
 ### Added
 
@@ -14,6 +14,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   <img src="https://rustxlsxwriter.github.io/images/app_chart_clustered.png">
 
  [Clustered Chart]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#chart-clustered-categories
+
+- Added support for non-contiguous chart ranges like
+  `=(Sheet1!$A$1:$A$2,Sheet1!$A$4:$A$5)`. These can only be added as strings.
+
+- Added `Table::set_alt_text()` and `Table::set_alt_text_title()` methods to the
+  [`Table`] object to allow alternative text to be specified for screen readers.
+
+  <img src="https://rustxlsxwriter.github.io/images/table_set_alt_text.png">
+
+- Added [`Worksheet::insert_image_fit_to_cell_centered()`] method to fit an
+  image to a cell and also center it.
+
+  [Request #157].
+
+  [Request #157]: https://github.com/jmcnamara/rust_xlsxwriter/issues/157
+
+  <img src="https://rustxlsxwriter.github.io/images/app_images_fit_to_cell.png">
+
+  [`Worksheet::insert_image_fit_to_cell_centered()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image_fit_to_cell_centered
 
 
 ## [0.90.2] - 2025-09-26

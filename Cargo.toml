@@ -5,9 +5,10 @@ authors = ["John McNamara <jmcnamara@cpan.org>"]
 homepage = "https://rustxlsxwriter.github.io"
 repository = "https://github.com/jmcnamara/rust_xlsxwriter"
 keywords = ["excel", "xlsx"]
+exclude = ["tests/**/*"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.90.2"
+version = "0.91.0"
 edition = "2021"
 rust-version = "1.75.0" # For zip.rs compatibility.
 

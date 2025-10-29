@@ -111,10 +111,10 @@ The `rust_xlsxwriter` crate was designed and implemented based around the
 following design considerations:
 
 - **Fidelity with the Excel file format**.
-- **Performance**. It also supports a constant memory mode for writing large
-  files, which keeps memory usage to a minimum.
-- **Comprehensive documentation**. In addition to the API documentation, the
-  library has extensive user guides, a tutorial, and a cookbook of examples.
+- **Performance**. The library is within 10% of the similar C library and it
+  also supports a constant memory mode for writing large files.
+- **Comprehensive documentation**. There is extensive API documentation as well
+  as user guides, a tutorial, and a cookbook of examples.
 - **Feature richness**. The library supports a wide range of Excel features,
   including charts, conditional formatting, data validation, rich text,
   hyperlinks, images, and even sparklines.
@@ -212,9 +212,8 @@ cargo add rust_xlsxwriter -F constant_memory
 
 Recent changes:
 
+- Added support for grouped and non-contiguous chart ranges.
 - Added support for `Jiff` date/time civil types.
-- Added worksheet outline groupings.
-- Added worksheet background images.
 
 See the full [Release Notes and Changelog].
 

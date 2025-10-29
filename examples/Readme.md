@@ -33,6 +33,9 @@ documentation and generally show how an individual function works.
 * `app_chart_bar.rs` - An example of creating bar charts using the
   `rust_xlsxwriter` library.
 
+* `app_chart_clustered.rs` - A demo of a clustered category chart using
+  rust_xlsxwriter.
+
 * `app_chart_column.rs` - An example of creating column charts using the
   `rust_xlsxwriter` library.
 
@@ -180,10 +183,9 @@ documentation and generally show how an individual function works.
 
 * `app_images_fit_to_cell.rs` - An example of inserting images into a
   worksheet using `rust_xlsxwriter` so that they are scaled to a cell. This
-  approach can be useful if you are building up a spreadsheet of products
-  with a column of images for each product. See also the
-  `app_embedded_image.rs` example that shows a better approach for newer
-  versions of Excel.
+  approach can be useful if you are building a spreadsheet of products with
+  a column of images for each product. See also the `app_embedded_image.rs`
+  example that shows a better approach for newer versions of Excel.
 
 * `app_images.rs` - An example of inserting images into a worksheet using
   `rust_xlsxwriter`.
@@ -1187,6 +1189,9 @@ documentation and generally show how an individual function works.
 
 * `doc_sparkline_set_sparkline_color.rs` - Demonstrates adding a sparkline
   to a worksheet.
+
+* `doc_table_set_alt_text.rs` - Example of adding a worksheet table with
+  alt text.
 
 * `doc_table_set_autofilter.rs` - Example of turning off the autofilter in
   a worksheet table.

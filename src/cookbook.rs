@@ -2468,11 +2468,15 @@ option to "Place in Cell" which is only available in Excel 365 versions from
 ```rust
 // Sample code from examples/app_embedded_images.rs
 
-use rust_xlsxwriter::{Image, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, Image, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
     let mut workbook = Workbook::new();
+
+    // Create some formats to use in the example.
+    let vertical_center = Format::new().set_align(FormatAlign::VerticalCenter);
+    let center = Format::new().set_align(FormatAlign::Center);
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -2480,18 +2484,26 @@ fn main() -> Result<(), XlsxError> {
     // Create a new image object.
     let image = Image::new("examples/rust_logo.png")?;
 
-    // Widen the first column to make the caption clearer.
+    // Widen the first column to make the captions clearer.
     worksheet.set_column_width(0, 30)?;
-    worksheet.write(0, 0, "Embed images that scale to the cell size")?;
 
     // Change cell widths/heights to demonstrate the image differences.
     worksheet.set_column_width(1, 14)?;
     worksheet.set_row_height(1, 60)?;
-    worksheet.set_row_height(3, 90)?;
+    worksheet.set_row_height(3, 60)?;
+    worksheet.set_row_height(5, 90)?;
 
-    // Embed the images in cells of different widths/heights.
+    // Embed an image in a cell. The height and width scale automatically.
+    worksheet.write_with_format(1, 0, "Embed image in cell:", &vertical_center)?;
     worksheet.embed_image(1, 1, &image)?;
-    worksheet.embed_image(3, 1, &image)?;
+
+    // Embed and center an image in a cell.
+    worksheet.write_with_format(3, 0, "Embed and center image:", &vertical_center)?;
+    worksheet.embed_image_with_format(3, 1, &image, &center)?;
+
+    // Embed an image in a larger cell.
+    worksheet.write_with_format(5, 0, "Embed image in larger cell:", &vertical_center)?;
+    worksheet.embed_image(5, 1, &image)?;
 
     // Save the file to disk.
     workbook.save("embedded_images.xlsx")?;
@@ -2519,7 +2531,6 @@ shows a better approach for newer versions of Excel.
 ```rust
 // Sample code from examples/app_images_fit_to_cell.rs
 
-//! See also the `app_embedded_image.rs` example that shows a better approach
 //! for newer versions of Excel.
 
 use rust_xlsxwriter::{Format, FormatAlign, Image, Workbook, XlsxError};
@@ -2534,13 +2545,14 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Widen the first column to make the text clearer.
-    worksheet.set_column_width(0, 30)?;
+    worksheet.set_column_width_pixels(0, 250)?;
 
     // Set larger cells to accommodate the images.
     worksheet.set_column_width_pixels(1, 200)?;
     worksheet.set_row_height_pixels(0, 140)?;
     worksheet.set_row_height_pixels(2, 140)?;
     worksheet.set_row_height_pixels(4, 140)?;
+    worksheet.set_row_height_pixels(6, 140)?;
 
     // Create a new image object.
     let image = Image::new("examples/rust_logo.png")?;
@@ -2557,6 +2569,11 @@ fn main() -> Result<(), XlsxError> {
     // In this case it is scaled to the smaller of the width or height scales.
     worksheet.write_with_format(4, 0, "Image scaled with a fixed aspect ratio:", &center)?;
     worksheet.insert_image_fit_to_cell(4, 1, &image, true)?;
+
+    // Insert the image and scale it to the cell while keeping it centered. This
+    // also maintains the aspect ratio.
+    worksheet.write_with_format(6, 0, "Image scaled and centered:", &center)?;
+    worksheet.insert_image_fit_to_cell_centered(6, 1, &image)?;
 
     // Save the file to disk.
     workbook.save("images_fit_to_cell.xlsx")?;
