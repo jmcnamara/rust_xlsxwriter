@@ -1231,7 +1231,7 @@ impl Drawing {
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct DrawingCoordinates {
     pub(crate) col: u32,
     pub(crate) row: u32,
@@ -1274,7 +1274,7 @@ impl Default for DrawingInfo {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct DrawingInfo {
     pub(crate) from: DrawingCoordinates,
     pub(crate) to: DrawingCoordinates,

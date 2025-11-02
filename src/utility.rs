@@ -1212,6 +1212,23 @@ pub(crate) fn formula_to_string(formula: &str) -> String {
     formula
 }
 
+// Get default font metrics for a default column width.
+//
+// This function returns the font metrics (max_digit_width, padding,
+// max_col_width) based on the column pixel width for a default font.
+pub(crate) fn default_column_metrics(width: u16) -> Option<(u16, u16, u16)> {
+    match width {
+        56 => Some((6, 5, 1533)),
+        64 => Some((7, 5, 1790)),
+        72 => Some((8, 5, 2043)),
+        80 => Some((9, 7, 2300)),
+        96 => Some((11, 7, 2810)),
+        104 => Some((12, 7, 3065)),
+        120 => Some((13, 9, 3323)),
+        _ => None,
+    }
+}
+
 // Trait to convert bool to XML "0" or "1".
 pub(crate) trait ToXmlBoolean {
     fn to_xml_bool(self) -> String;

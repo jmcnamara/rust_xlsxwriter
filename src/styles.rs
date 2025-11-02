@@ -509,26 +509,14 @@ impl<'a> Styles<'a> {
 
         xml_start_tag(&mut self.writer, "cellStyleXfs", &attributes);
 
-        // Write the style xf elements.
-        self.write_normal_style_xf();
+        let xf_format = self.xf_formats.first().unwrap();
+        self.write_cell_xf(xf_format, XFormatType::Style);
 
         if self.has_hyperlink_style {
             self.write_hyperlink_style_xf();
         }
 
         xml_end_tag(&mut self.writer, "cellStyleXfs");
-    }
-
-    // Write the style <xf> element for the "Normal" style.
-    fn write_normal_style_xf(&mut self) {
-        let attributes = [
-            ("numFmtId", "0"),
-            ("fontId", "0"),
-            ("fillId", "0"),
-            ("borderId", "0"),
-        ];
-
-        xml_empty_tag(&mut self.writer, "xf", &attributes);
     }
 
     // Write the style <xf> element for the "Hyperlink" style.
@@ -573,20 +561,21 @@ impl<'a> Styles<'a> {
         xml_start_tag(&mut self.writer, "cellXfs", &attributes);
 
         // Write the cell xf element.
+        let mut cell_type = XFormatType::Default;
         for xf_format in self.xf_formats {
-            self.write_cell_xf(xf_format);
+            self.write_cell_xf(xf_format, cell_type);
+            cell_type = XFormatType::User;
         }
 
         xml_end_tag(&mut self.writer, "cellXfs");
     }
 
     // Write the cell <xf> element.
-    fn write_cell_xf(&mut self, xf_format: &Format) {
+    fn write_cell_xf(&mut self, xf_format: &Format, xf_type: XFormatType) {
         let has_checkbox = xf_format.has_checkbox();
         let is_hyperlink = xf_format.font.is_hyperlink;
         let has_alignment = xf_format.has_alignment();
         let has_protection = xf_format.has_protection();
-        let apply_alignment = xf_format.apply_alignment();
         let xf_id = i32::from(is_hyperlink);
 
         let mut attributes = vec![
@@ -594,8 +583,14 @@ impl<'a> Styles<'a> {
             ("fontId", xf_format.font_index.to_string()),
             ("fillId", xf_format.fill_index.to_string()),
             ("borderId", xf_format.border_index.to_string()),
-            ("xfId", xf_id.to_string()),
         ];
+
+        let apply_alignment =
+            (xf_format.apply_alignment() || is_hyperlink) && xf_type == XFormatType::User;
+
+        if xf_type != XFormatType::Style {
+            attributes.push(("xfId", xf_id.to_string()));
+        }
 
         if xf_format.quote_prefix {
             attributes.push(("quotePrefix", "1".to_string()));
@@ -617,7 +612,7 @@ impl<'a> Styles<'a> {
             attributes.push(("applyBorder", "1".to_string()));
         }
 
-        if apply_alignment || is_hyperlink {
+        if apply_alignment {
             attributes.push(("applyAlignment", "1".to_string()));
         }
 
@@ -908,4 +903,13 @@ impl<'a> Styles<'a> {
         xml_end_tag(&mut self.writer, "ext");
         xml_end_tag(&mut self.writer, "extLst");
     }
+}
+
+// Enum to distinguish the type of cell xf format since style and the default
+// (the first format) are handled slightly differently.
+#[derive(Clone, PartialEq)]
+enum XFormatType {
+    Style,
+    Default,
+    User,
 }

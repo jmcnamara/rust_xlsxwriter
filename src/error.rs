@@ -165,6 +165,10 @@ pub enum XlsxError {
     /// Excel limits the maximum worksheet group level to 8 levels.
     MaxGroupLevelExceeded,
 
+    /// An error that is raised when setting the default format for a workbook
+    /// or worksheet.
+    DefaultFormatError(String),
+
     /// A customizable error that can be used by third parties to raise errors
     /// or as a conversion target for other error types.
     CustomError(String),
@@ -336,6 +340,10 @@ impl fmt::Display for XlsxError {
                     f,
                     "Worksheet group level exceeds Excel's limit of 8 levels."
                 )
+            }
+
+            XlsxError::DefaultFormatError(error) => {
+                write!(f, "Default format error: '{error}'.")
             }
 
             XlsxError::CustomError(error) => {

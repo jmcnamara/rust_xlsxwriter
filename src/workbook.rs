@@ -350,6 +350,12 @@ pub struct Workbook {
     num_worksheets: u16,
     num_chartsheets: u16,
     use_large_file: bool,
+    default_format: Format,
+    default_row_height: u16,
+    default_col_width: u16,
+    max_digit_width: u16,
+    max_col_width: u16,
+    cell_padding: u16,
 
     #[cfg(feature = "constant_memory")]
     tempdir: Option<PathBuf>,
@@ -433,6 +439,12 @@ impl Workbook {
             num_chartsheets: 0,
             use_large_file: false,
             feature_property_bags: HashSet::new(),
+            default_format: Format::default(),
+            default_row_height: 20,
+            default_col_width: 64,
+            cell_padding: 5,
+            max_digit_width: 7,
+            max_col_width: 1790,
 
             #[cfg(feature = "constant_memory")]
             tempdir: None,
@@ -500,6 +512,8 @@ impl Workbook {
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
 
+        self.initialize_default_format(&mut worksheet);
+
         self.worksheets.push(worksheet);
         let worksheet = self.worksheets.last_mut().unwrap();
 
@@ -562,6 +576,8 @@ impl Workbook {
 
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
+
+        self.initialize_default_format(&mut worksheet);
 
         if let Some(tempdir) = &self.tempdir {
             worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
@@ -635,6 +651,8 @@ impl Workbook {
 
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
+
+        self.initialize_default_format(&mut worksheet);
 
         if let Some(tempdir) = &self.tempdir {
             worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
@@ -1672,6 +1690,165 @@ impl Workbook {
         self
     }
 
+    /// Set the default cell format for a workbook.
+    ///
+    /// The `rust_xlsxwriter` library uses the Excel 2007 default cell format of
+    /// "Calibri 11" for all worksheets. If required, it is possible to change
+    /// the default format, mainly the font properties, to something like the
+    /// more recent Excel default of "Aptos Narrow 11", the older "Arial 10", or
+    /// an international font such as "ＭＳ Ｐゴシック".
+    ///
+    /// Changing the default format, and font, changes the default column width
+    /// and row height for a worksheet and as a result it changes the
+    /// positioning of objects such as images on the worksheet. As such, it is
+    /// also necessary to set the default column pixel width and row pixel
+    /// height when changing the default format/font. These dimensions can be
+    /// obtained by clicking on the row and column gridlines in a sample
+    /// worksheet in Excel. See the example below for a "Aptos Narrow 11"
+    /// workbook where the required height and width dimensions would be 20 and
+    /// 64:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_aptos_narrow.png">
+    ///
+    /// These dimensions should be obtained from a Windows version of Excel
+    /// since the macOS versions use non-standard dimensions.
+    ///
+    /// Only fonts that have the following column pixel width are supported: 56,
+    /// 64, 72, 80, 96, 104 and 120. This should cover the most common fonts
+    /// that Excel uses. If you need to support a different font/width
+    /// combination please open an feature request in the GitHub repository with
+    /// a sample workbook.
+    ///
+    /// This method must be called before adding any worksheets to the workbook
+    /// so that the default format can be shared with new worksheets.
+    ///
+    /// This method doesn't currently adapt the [`Worksheet::autofit()`] method
+    /// for the new format font but this will hopefully be added in a future
+    /// release.
+    ///
+    /// # Parameters
+    ///
+    /// - `format`: The new default [`Format`] property for the workbook.
+    /// - `row_height`: The default row height in pixels.
+    /// - `col_width`: The default column width in pixels.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::DefaultFormatError`] - This error occurs if you try to
+    ///   set the default format after a worksheet have been added to the
+    ///   workbook, or if the the pixel column width is one of the supported
+    ///   values shown above.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates changing the default format for a
+    /// workbook.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_set_default_format1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     // Create a new default format for the workbook.
+    ///     let format = Format::new()
+    ///         .set_font_name("Aptos Narrow")
+    ///         .set_font_size(11);
+    ///
+    ///     // Set the default format for the workbook.
+    ///     workbook.set_default_format(&format, 20, 64)?;
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some text to demonstrate the changed default format.
+    ///     worksheet.write(0, 0, "Hello")?;
+    /// #
+    /// #     // Save the workbook to disk.
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_set_default_format1.png">
+    ///
+    /// Here is another example:
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_set_default_format2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     // Create a new default format for the workbook.
+    ///     let format = Format::new()
+    ///         .set_font_name("ＭＳ Ｐゴシック")
+    ///         .set_font_size(11)
+    ///         .set_font_charset(128)
+    ///         .set_align(FormatAlign::VerticalCenter);
+    ///
+    ///     // Set the default format for the workbook.
+    ///     workbook.set_default_format(&format, 18, 72)?;
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some text to demonstrate the changed default format.
+    ///     worksheet.write(0, 0, "結局きたよ")?;
+    ///
+    ///     // Save the workbook to disk.
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/workbook_set_default_format2.png">
+    ///
+    pub fn set_default_format(
+        &mut self,
+        format: &Format,
+        row_height: u16,
+        col_width: u16,
+    ) -> Result<&mut Workbook, XlsxError> {
+        if !self.worksheets.is_empty() {
+            return Err(XlsxError::DefaultFormatError(
+                "Default format must be set before adding worksheets.".to_string(),
+            ));
+        }
+
+        let Some((max_digit_width, padding, max_col_width)) =
+            utility::default_column_metrics(col_width)
+        else {
+            return Err(XlsxError::DefaultFormatError(format!(
+                "Unsupported default column width: {col_width}"
+            )));
+        };
+
+        self.xf_indices = Arc::new(RwLock::new(HashMap::from([(format.clone(), 0)])));
+        self.default_format = format.clone();
+
+        self.cell_padding = padding;
+        self.max_col_width = max_col_width;
+        self.max_digit_width = max_digit_width;
+        self.default_col_width = col_width;
+        self.default_row_height = row_height;
+
+        Ok(self)
+    }
+
     /// Add a vba macro file to the workbook.
     ///
     /// The `add_vba_project()` method can be used to add macros or functions to
@@ -2027,6 +2204,18 @@ impl Workbook {
         for worksheet in &mut self.worksheets {
             worksheet.reset();
         }
+    }
+
+    // Initialize the default format for a worksheet.
+    fn initialize_default_format(&mut self, worksheet: &mut Worksheet) {
+        worksheet.initialize_default_format(
+            &self.default_format,
+            self.default_row_height,
+            self.default_col_width,
+            self.max_digit_width,
+            self.cell_padding,
+            self.max_col_width,
+        );
     }
 
     // Internal function to prepare the workbook and other component files for

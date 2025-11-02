@@ -35,7 +35,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(0, 0, "A")?;
     worksheet.write_string(0, 1, "A")?;
 
-    worksheet.set_column_width(1, 1.57143)?;
+    worksheet.set_column_width(1, 1.572)?;
 
     worksheet.autofit();
     worksheet.autofit();
@@ -57,7 +57,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let max_col_width = cell_autofit_width("A");
     worksheet.set_column_autofit_width(0, max_col_width)?;
 
-    worksheet.set_column_width(1, 1.57143)?;
+    worksheet.set_column_width(1, 1.572)?;
 
     workbook.save(filename)?;
 
@@ -73,7 +73,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(0, 0, "A")?;
     worksheet.write_string(0, 1, "A")?;
 
-    worksheet.set_column_width(1, 1.57143)?;
+    worksheet.set_column_width(1, 1.572)?;
 
     worksheet.autofit_to_max_width(2000);
 

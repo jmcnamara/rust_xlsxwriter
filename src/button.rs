@@ -8,7 +8,7 @@
 
 use crate::drawing::{DrawingObject, DrawingType};
 use crate::vml::VmlInfo;
-use crate::{ObjectMovement, DEFAULT_COL_WIDTH_PIXELS, DEFAULT_ROW_HEIGHT_PIXELS};
+use crate::ObjectMovement;
 
 #[derive(Clone)]
 /// The `Button` struct represents a worksheet button object.
@@ -99,8 +99,8 @@ impl Button {
         Button {
             x_offset: 0,
             y_offset: 0,
-            width: f64::from(DEFAULT_COL_WIDTH_PIXELS),
-            height: f64::from(DEFAULT_ROW_HEIGHT_PIXELS),
+            width: 64.0,
+            height: 20.0,
             name: String::new(),
             alt_text: String::new(),
             macro_name: String::new(),
