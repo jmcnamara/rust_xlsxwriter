@@ -69,7 +69,7 @@ impl Custom {
         let attributes = [
             ("fmtid", fmtid),
             ("pid", pid.to_string()),
-            ("name", property.name.to_string()),
+            ("name", property.name.clone()),
         ];
 
         xml_start_tag(&mut self.writer, "property", &attributes);

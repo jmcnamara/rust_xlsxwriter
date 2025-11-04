@@ -18173,7 +18173,7 @@ impl Worksheet {
     }
 
     // Write the <dataValidation> element.
-    fn write_data_validation(&mut self, range: &String, data_validation: &DataValidation) {
+    fn write_data_validation(&mut self, range: &str, data_validation: &DataValidation) {
         // The Any type doesn't have a rule or values so handle that separately.
         if data_validation.validation_type == DataValidationType::Any {
             self.write_data_validation_any(range, data_validation);
@@ -18259,7 +18259,7 @@ impl Worksheet {
     }
 
     // Write the <dataValidation> element.
-    fn write_data_validation_any(&mut self, range: &String, data_validation: &DataValidation) {
+    fn write_data_validation_any(&mut self, range: &str, data_validation: &DataValidation) {
         let mut attributes = vec![];
 
         if data_validation.ignore_blank {
@@ -18322,15 +18322,15 @@ impl Worksheet {
                 attributes.push(("r:id", format!("rId{rel_id}")));
 
                 if !hyperlink.anchor.is_empty() {
-                    attributes.push(("location", hyperlink.anchor.to_string()));
+                    attributes.push(("location", hyperlink.anchor.clone()));
                 }
 
                 if hyperlink.is_object_link {
-                    attributes.push(("display", hyperlink.link.to_string()));
+                    attributes.push(("display", hyperlink.link.clone()));
                 }
 
                 if !hyperlink.tool_tip.is_empty() {
-                    attributes.push(("tooltip", hyperlink.tool_tip.to_string()));
+                    attributes.push(("tooltip", hyperlink.tool_tip.clone()));
                 }
 
                 // Store the linkage to the worksheets rels file.
@@ -18342,13 +18342,13 @@ impl Worksheet {
             }
             HyperlinkType::Internal => {
                 // Internal links don't use the rel file reference id.
-                attributes.push(("location", hyperlink.anchor.to_string()));
+                attributes.push(("location", hyperlink.anchor.clone()));
 
                 if !hyperlink.tool_tip.is_empty() {
-                    attributes.push(("tooltip", hyperlink.tool_tip.to_string()));
+                    attributes.push(("tooltip", hyperlink.tool_tip.clone()));
                 }
 
-                attributes.push(("display", hyperlink.text.to_string()));
+                attributes.push(("display", hyperlink.text.clone()));
             }
             HyperlinkType::Unknown => {}
         }

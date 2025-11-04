@@ -1141,7 +1141,7 @@ impl Drawing {
         let mut attributes = vec![];
 
         if !font.name.is_empty() {
-            attributes.push(("typeface", font.name.to_string()));
+            attributes.push(("typeface", font.name.clone()));
         }
 
         if font.pitch_family > 0 {

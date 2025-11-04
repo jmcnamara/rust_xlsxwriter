@@ -274,7 +274,7 @@ impl<'a> Styles<'a> {
         let mut attributes = vec![];
 
         if !font.scheme.is_empty() {
-            attributes.push(("val", font.scheme.to_string()));
+            attributes.push(("val", font.scheme.clone()));
             xml_empty_tag(&mut self.writer, "scheme", &attributes);
         }
     }

@@ -1545,7 +1545,7 @@ impl Workbook {
                 defined_name.name_type = DefinedNameType::Local;
             }
             None => {
-                defined_name.name = name.to_string();
+                defined_name.name.clone_from(&name);
                 defined_name.name_type = DefinedNameType::Global;
             }
         }
@@ -2361,7 +2361,7 @@ impl Workbook {
         for worksheet in &self.worksheets {
             for table in &worksheet.tables {
                 if seen_table_names.contains(&table.name.to_lowercase()) {
-                    return Err(XlsxError::TableNameReused(table.name.to_string()));
+                    return Err(XlsxError::TableNameReused(table.name.clone()));
                 }
 
                 seen_table_names.insert(table.name.to_lowercase());

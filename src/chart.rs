@@ -4836,15 +4836,15 @@ impl Chart {
     }
 
     // Write the <c:majorUnit> element.
-    fn write_major_unit(&mut self, value: &String) {
-        let attributes = [("val", value.to_string())];
+    fn write_major_unit(&mut self, value: &str) {
+        let attributes = [("val", value)];
 
         xml_empty_tag(&mut self.writer, "c:majorUnit", &attributes);
     }
 
     // Write the <c:minorUnit> element.
-    fn write_minor_unit(&mut self, value: &String) {
-        let attributes = [("val", value.to_string())];
+    fn write_minor_unit(&mut self, value: &str) {
+        let attributes = [("val", value)];
 
         xml_empty_tag(&mut self.writer, "c:minorUnit", &attributes);
     }
@@ -5858,7 +5858,7 @@ impl Chart {
         let mut attributes = vec![];
 
         if !font.name.is_empty() {
-            attributes.push(("typeface", font.name.to_string()));
+            attributes.push(("typeface", font.name.clone()));
         }
 
         if font.pitch_family > 0 {

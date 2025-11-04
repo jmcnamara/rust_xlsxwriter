@@ -132,7 +132,7 @@ impl Vml {
     fn write_idmap(&mut self) {
         let attributes = [
             ("v:ext", "edit".to_string()),
-            ("data", self.data_id.to_string()),
+            ("data", self.data_id.clone()),
         ];
 
         xml_empty_tag(&mut self.writer, "o:idmap", &attributes);
@@ -416,7 +416,7 @@ impl Vml {
         let shape_id = format!("_x0000_s{}", self.shape_id);
 
         let attributes = [
-            ("id", vml_info.header_position.to_string()),
+            ("id", vml_info.header_position.clone()),
             ("o:spid", shape_id),
             ("type", "#_x0000_t75".to_string()),
             ("style", style),
@@ -437,7 +437,7 @@ impl Vml {
     fn write_imagedata(&mut self, vml_info: &VmlInfo) {
         let attributes = [
             ("o:relid", format!("rId{}", vml_info.rel_id)),
-            ("o:title", vml_info.text.to_string()),
+            ("o:title", vml_info.text.clone()),
         ];
 
         xml_empty_tag(&mut self.writer, "v:imagedata", &attributes);

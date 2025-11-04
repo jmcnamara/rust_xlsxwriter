@@ -181,7 +181,7 @@ impl Comment {
 
     // Write the <sz> element.
     fn write_font_size(&mut self, note: &Note) {
-        let attributes = [("val", note.format.font.size.to_string())];
+        let attributes = [("val", note.format.font.size.clone())];
 
         xml_empty_tag(&mut self.writer, "sz", &attributes);
     }
