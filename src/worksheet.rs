@@ -15595,7 +15595,7 @@ impl Worksheet {
         match format {
             Some(format) => self.write_string_with_format(row, col, &hyperlink.text, format)?,
             None => {
-                let hyperlink_format = Format::new().set_hyperlink();
+                let hyperlink_format = self.default_format.clone().set_hyperlink();
                 self.write_string_with_format(row, col, &hyperlink.text, &hyperlink_format)?
             }
         };
@@ -15654,7 +15654,7 @@ impl Worksheet {
             Some(format) => self.format_xf_index(format),
             None => match image.url {
                 Some(_) => {
-                    let format = Format::new().set_hyperlink();
+                    let format = self.default_format.clone().set_hyperlink();
                     self.format_xf_index(&format)
                 }
                 None => self.row_col_format(row, col),

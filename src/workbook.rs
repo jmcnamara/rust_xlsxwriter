@@ -2419,7 +2419,7 @@ impl Workbook {
         // a hyperlink style to the global formats.
         for worksheet in &self.worksheets {
             if worksheet.has_hyperlink_style {
-                let format = Format::new().set_hyperlink();
+                let format = self.default_format.clone().set_hyperlink();
                 self.format_xf_index(&format);
                 self.has_hyperlink_style = true;
                 break;
