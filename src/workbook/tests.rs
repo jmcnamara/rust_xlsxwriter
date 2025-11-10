@@ -97,4 +97,24 @@ mod workbook_tests {
 
         assert!(matches!(result, Err(XlsxError::TableNameReused(_))));
     }
+
+    #[test]
+    fn non_xml_theme() {
+        let mut workbook = Workbook::default();
+        let theme_file = "tests/input/themes/empty.xml";
+
+        let result = workbook.use_custom_theme(theme_file);
+
+        assert!(matches!(result, Err(XlsxError::ThemeError(_))));
+    }
+
+    #[test]
+    fn image_gradient_fills_in_theme() {
+        let mut workbook = Workbook::default();
+        let theme_file = "tests/input/themes/civic.xml";
+
+        let result = workbook.use_custom_theme(theme_file);
+
+        assert!(matches!(result, Err(XlsxError::ThemeError(_))));
+    }
 }

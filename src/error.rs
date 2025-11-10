@@ -169,6 +169,9 @@ pub enum XlsxError {
     /// or worksheet.
     DefaultFormatError(String),
 
+    /// An error that is raised when setting the theme for a workbook.
+    ThemeError(String),
+
     /// A customizable error that can be used by third parties to raise errors
     /// or as a conversion target for other error types.
     CustomError(String),
@@ -344,6 +347,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::DefaultFormatError(error) => {
                 write!(f, "Default format error: '{error}'.")
+            }
+
+            XlsxError::ThemeError(error) => {
+                write!(f, "Theme error: '{error}'.")
             }
 
             XlsxError::CustomError(error) => {

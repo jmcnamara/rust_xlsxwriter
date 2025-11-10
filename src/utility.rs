@@ -1216,6 +1216,10 @@ pub(crate) fn formula_to_string(formula: &str) -> String {
 //
 // This function returns the font metrics (max_digit_width, padding,
 // max_col_width) based on the column pixel width for a default font.
+//
+// To add support for additional fonts and sizes please open a GitHub request
+// with an empty sample workbook with one worksheet.
+//
 pub(crate) fn default_column_metrics(width: u16) -> Option<(u16, u16, u16)> {
     match width {
         56 => Some((6, 5, 1533)),

@@ -1,5 +1,7 @@
 [default.extend-words]
 beng = "beng"
 caf = "caf"
-Formattings = "Formattings"
-SOMME = "SOMME"
+formattings = "formattings"
+somme = "somme"
+technic = "technic"
+thm = "thm"

@@ -116,7 +116,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.write_content_types_file(options)?;
         self.write_root_rels_file(options)?;
         self.write_workbook_rels_file(workbook, options)?;
-        self.write_theme_file()?;
+        self.write_theme_file(&workbook.theme_xml)?;
         self.write_styles_file(workbook)?;
         self.write_workbook_file(workbook)?;
 
@@ -688,13 +688,13 @@ impl<W: Write + Seek + Send> Packager<W> {
     }
 
     // Write the theme.xml file.
-    fn write_theme_file(&mut self) -> Result<(), XlsxError> {
+    fn write_theme_file(&mut self, theme_xml: &str) -> Result<(), XlsxError> {
         let mut theme = Theme::new();
 
         self.zip
             .start_file("xl/theme/theme1.xml", self.zip_options)?;
 
-        theme.assemble_xml_file();
+        theme.assemble_xml_file(theme_xml);
         self.zip.write_all(theme.writer.get_ref())?;
 
         Ok(())

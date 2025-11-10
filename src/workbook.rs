@@ -218,7 +218,7 @@
 mod tests;
 
 use std::collections::{HashMap, HashSet};
-use std::fs::File;
+use std::fs::{read_to_string, File};
 use std::io::{BufReader, Cursor, Read, Seek, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
@@ -238,6 +238,7 @@ use crate::format::Format;
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
 use crate::shared_strings_table::SharedStringsTable;
+use crate::theme::{THEME_XML_2007, THEME_XML_2023};
 use crate::worksheet::Worksheet;
 
 use crate::{
@@ -339,6 +340,7 @@ pub struct Workbook {
     pub(crate) has_comments: bool,
     pub(crate) string_table: Arc<Mutex<SharedStringsTable>>,
     pub(crate) feature_property_bags: HashSet<FeaturePropertyBagTypes>,
+    pub(crate) theme_xml: String,
 
     xf_indices: Arc<RwLock<HashMap<Format, u32>>>,
     dxf_indices: HashMap<Format, u32>,
@@ -356,6 +358,7 @@ pub struct Workbook {
     max_digit_width: u16,
     max_col_width: u16,
     cell_padding: u16,
+    default_theme_version: String,
 
     #[cfg(feature = "constant_memory")]
     tempdir: Option<PathBuf>,
@@ -445,6 +448,8 @@ impl Workbook {
             cell_padding: 5,
             max_digit_width: 7,
             max_col_width: 1790,
+            theme_xml: String::from(THEME_XML_2007),
+            default_theme_version: String::from("124226"),
 
             #[cfg(feature = "constant_memory")]
             tempdir: None,
@@ -1700,8 +1705,8 @@ impl Workbook {
     ///
     /// Changing the default format, and font, changes the default column width
     /// and row height for a worksheet and as a result it changes the
-    /// positioning of objects such as images on the worksheet. As such, it is
-    /// also necessary to set the default column pixel width and row pixel
+    /// positioning and scaling of objects such as images and charts. As such,
+    /// it is also necessary to set the default column pixel width and row pixel
     /// height when changing the default format/font. These dimensions can be
     /// obtained by clicking on the row and column gridlines in a sample
     /// worksheet in Excel. See the example below for a "Aptos Narrow 11"
@@ -1714,11 +1719,11 @@ impl Workbook {
     /// These dimensions should be obtained from a Windows version of Excel
     /// since the macOS versions use non-standard dimensions.
     ///
-    /// Only fonts that have the following column pixel width are supported: 56,
-    /// 64, 72, 80, 96, 104 and 120. This should cover the most common fonts
-    /// that Excel uses. If you need to support a different font/width
-    /// combination please open an feature request in the GitHub repository with
-    /// a sample workbook.
+    /// Only fonts that have the following column pixel width are currently
+    /// supported: 56, 64, 72, 80, 96, 104 and 120. However, this should cover
+    /// the most common fonts that Excel uses. If you need to support a
+    /// different font/width combination please open a feature request in the
+    /// GitHub repository with a sample blank workbook.
     ///
     /// This method must be called before adding any worksheets to the workbook
     /// so that the default format can be shared with new worksheets.
@@ -1736,10 +1741,9 @@ impl Workbook {
     /// # Errors
     ///
     /// - [`XlsxError::DefaultFormatError`] - This error occurs if you try to
-    ///   set the default format after a worksheet have been added to the
-    ///   workbook, or if the the pixel column width is one of the supported
+    ///   set the default format after a worksheet has been added to the
+    ///   workbook, or if the pixel column width is not one of the supported
     ///   values shown above.
-    ///
     ///
     /// # Examples
     ///
@@ -1789,7 +1793,7 @@ impl Workbook {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     // Create a new default format for the workbook.
     ///     let format = Format::new()
     ///         .set_font_name("ＭＳ Ｐゴシック")
@@ -1805,8 +1809,8 @@ impl Workbook {
     ///
     ///     // Write some text to demonstrate the changed default format.
     ///     worksheet.write(0, 0, "結局きたよ")?;
-    ///
-    ///     // Save the workbook to disk.
+    /// #
+    /// #     // Save the workbook to disk.
     /// #     workbook.save("workbook.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1815,7 +1819,8 @@ impl Workbook {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/workbook_set_default_format2.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_set_default_format2.png">
     ///
     pub fn set_default_format(
         &mut self,
@@ -1845,6 +1850,183 @@ impl Workbook {
         self.max_digit_width = max_digit_width;
         self.default_col_width = col_width;
         self.default_row_height = row_height;
+
+        Ok(self)
+    }
+
+    /// Change the default workbook theme to the Excel 2023 Office/Aptos theme.
+    ///
+    /// Excel uses themes to define default fonts and colors for a workbook. The
+    /// default theme in Excel from 2007 to 2022 was the "Office" theme with the
+    /// Calibri 11 font and an associated color palette. In Excel 2023 and later
+    /// the "Office" theme uses the Aptos 11 font and a different color palette.
+    /// The older "Office" theme is now referred to as the "Office 2013-2022"
+    /// theme.
+    ///
+    /// The `rust_xlsxwriter` library uses the original "Office" theme with
+    /// Calibri 11 as the default font but, if required,
+    /// `use_excel_2023_theme()` can be used to change to the newer Excel 2023
+    /// "Office" theme with Aptos Narrow 11.
+    ///
+    /// Changing the theme and default font also changes the default row height
+    /// and column width which in turn affects the positioning of objects such
+    /// as images and charts. These changes are handled automatically.
+    ///
+    /// This method must be called before adding any worksheets to the workbook
+    /// so that the default format can be shared with new worksheets.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::DefaultFormatError`] - This error occurs if you try to
+    ///   change the default theme, and by extension the default format, after a
+    ///   worksheet has been added to the workbook.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates changing the default theme for a
+    /// workbook. The example uses the Excel 2023 Office/Aptos theme.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_use_excel_2023_theme.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     // Use the Excel 2023 Office/Aptos theme in the workbook.
+    ///     workbook.use_excel_2023_theme()?;
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some text to demonstrate the changed theme.
+    ///     worksheet.write(0, 0, "Hello")?;
+    ///
+    ///     // Save the workbook to disk.
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_use_excel_2023_theme.png">
+    ///
+    pub fn use_excel_2023_theme(&mut self) -> Result<&mut Workbook, XlsxError> {
+        self.theme_xml = THEME_XML_2023.to_string();
+        self.default_theme_version = String::from("202300");
+
+        // Set the default font associated with the 2023 theme.
+        let format = Format::new()
+            .set_font_name("Aptos Narrow")
+            .set_font_size(11)
+            .set_font_scheme("minor");
+
+        // Set the default format and row/column dimensions.
+        self.set_default_format(&format, 20, 64)
+    }
+
+    /// Change the default workbook theme to a user defined custom theme.
+    ///
+    /// Excel uses themes to define default fonts and colors for a workbook. The
+    /// `rust_xlsxwriter` library uses the original "Office" theme with Calibri
+    /// 11 as the default font but, if required, `use_custom_theme()` can be
+    /// used to change to a custom, user-supplied, theme.
+    ///
+    /// The theme file must be a valid Excel theme XML file extracted from an
+    /// unzipped Excel xlsx file. This theme file is typically located at
+    /// `xl/theme/theme1.xml`.
+    ///
+    /// In addition to supplying the theme XML file it is also necessary to set
+    /// the default format to match the theme. This is done via the
+    /// [`Workbook::set_default_format()`] method, see the example below.
+    ///
+    /// Note, older Excel 2007 style theme files that contain image fills as
+    /// part of the theme are not currently supported and will raise an
+    /// [`XlsxError::ThemeError`] error on loading.
+    ///
+    /// # Parameters
+    ///
+    /// - `path`: A path to a `theme.xml` file.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::IoError`] - I/O errors if the path doesn't exist or is
+    ///   restricted.
+    /// - [`XlsxError::ThemeError`] - File isn't XML or it contains unsupported
+    ///   image fills.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates changing the default theme for a
+    /// workbook to a user supplied custom theme.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_use_custom_theme.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     // Add a custom theme to the workbook.
+    ///     workbook.use_custom_theme("tests/input/themes/technic.xml")?;
+    ///
+    ///     // Create a new default format to match the custom theme.
+    ///     let format = Format::new()
+    ///         .set_font_name("Arial")
+    ///         .set_font_size(11)
+    ///         .set_font_scheme("minor");
+    ///
+    ///     // Add the default format for the workbook.
+    ///     workbook.set_default_format(&format, 19, 72)?;
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some text to demonstrate the changed theme.
+    ///     worksheet.write(0, 0, "Hello")?;
+    ///
+    ///     // Save the workbook to disk.
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_use_custom_theme.png">
+    ///
+    pub fn use_custom_theme<P: AsRef<Path>>(
+        &mut self,
+        path: P,
+    ) -> Result<&mut Workbook, XlsxError> {
+        let theme_xml = read_to_string(&path)?;
+
+        // Simple check to see if the file is text/XML.
+        if !theme_xml.starts_with("<?xml") {
+            return Err(XlsxError::ThemeError(format!(
+                "Invalid XML theme file: '{}'",
+                path.as_ref().display()
+            )));
+        }
+
+        // Check for Excel 2007 theme files that contain images as fills. These
+        // aren't currently supported.
+        if theme_xml.contains("<a:blipFill>") {
+            return Err(XlsxError::ThemeError(format!(
+                "Theme file contains image fills which aren't currently supported: '{}'",
+                path.as_ref().display()
+            )));
+        }
+
+        self.theme_xml = theme_xml;
+        self.default_theme_version = String::new();
 
         Ok(self)
     }
@@ -1898,7 +2080,7 @@ impl Workbook {
     ///
     /// # Parameters
     ///
-    /// - `project`: A path to a `vbaProject.bin` file.
+    /// - `path`: A path to a `vbaProject.bin` file.
     ///
     /// # Errors
     ///
@@ -3132,7 +3314,9 @@ impl Workbook {
             attributes.push(("codeName", codename.clone()));
         }
 
-        attributes.push(("defaultThemeVersion", "124226".to_string()));
+        if !self.default_theme_version.is_empty() {
+            attributes.push(("defaultThemeVersion", self.default_theme_version.clone()));
+        }
 
         xml_empty_tag(&mut self.writer, "workbookPr", &attributes);
     }

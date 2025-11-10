@@ -8,7 +8,7 @@
 mod theme_tests {
 
     use crate::test_functions::xml_to_vec;
-    use crate::theme::Theme;
+    use crate::theme::{Theme, THEME_XML_2007};
     use crate::xmlwriter;
     use pretty_assertions::assert_eq;
 
@@ -16,7 +16,7 @@ mod theme_tests {
     fn test_assemble() {
         let mut theme = Theme::new();
 
-        theme.assemble_xml_file();
+        theme.assemble_xml_file(THEME_XML_2007);
 
         let got = xmlwriter::cursor_to_str(&theme.writer);
         let got = xml_to_vec(got);
