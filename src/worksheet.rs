@@ -1408,7 +1408,7 @@ pub(crate) const COL_MAX: ColNum = 16_384;
 pub(crate) const ROW_MAX: RowNum = 1_048_576;
 pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 pub(crate) const MAX_PARAMETER_LEN: usize = 255;
-pub(crate) const MAX_AUTOFIT_WIDTH_PIXELS: u16 = 1790;
+pub(crate) const MAX_AUTOFIT_WIDTH_PIXELS: u32 = 1790;
 const MAX_STRING_LEN: usize = 32_767;
 const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -1613,12 +1613,12 @@ pub struct Worksheet {
     sparklines: Vec<Sparkline>,
     embedded_image_ids: HashMap<String, u32>,
     show_all_notes: bool,
-    default_row_height: u16,
-    default_col_width: u16,
-    cell_padding: u16,
-    user_row_height_in_pixels: u16,
-    max_digit_width: u16,
-    max_col_width: u16,
+    default_row_height: u32,
+    default_col_width: u32,
+    cell_padding: u32,
+    user_row_height_in_pixels: u32,
+    max_digit_width: u32,
+    max_col_width: u32,
     hide_unused_rows: bool,
     has_sheet_data: bool,
     nan: String,
@@ -6536,7 +6536,7 @@ impl Worksheet {
         row: RowNum,
         height: impl Into<f64>,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let pixel_height = (height.into() * 4.0 / 3.0).round() as u16;
+        let pixel_height = (height.into() * 4.0 / 3.0).round() as u32;
         self.set_row_height_pixels(row, pixel_height)
     }
 
@@ -6593,7 +6593,7 @@ impl Worksheet {
     pub fn set_row_height_pixels(
         &mut self,
         row: RowNum,
-        height: u16,
+        height: u32,
     ) -> Result<&mut Worksheet, XlsxError> {
         // If the height is 0 then the Excel treats the row as hidden with
         // default height.
@@ -7835,7 +7835,7 @@ impl Worksheet {
             return self;
         }
 
-        let pixel_height = (height * 4.0 / 3.0).round() as u16;
+        let pixel_height = (height * 4.0 / 3.0).round() as u32;
 
         self.user_row_height_in_pixels = pixel_height;
         self
@@ -7854,7 +7854,7 @@ impl Worksheet {
     ///
     /// - `height`: The row height in pixels.
     ///
-    pub fn set_default_row_height_pixels(&mut self, height: u16) -> &mut Worksheet {
+    pub fn set_default_row_height_pixels(&mut self, height: u32) -> &mut Worksheet {
         let height = 0.75 * f64::from(height);
         self.set_default_row_height(height)
     }
@@ -8004,10 +8004,10 @@ impl Worksheet {
             width_pixels = 0;
         } else if width < 1.0 {
             width_pixels =
-                (width * f64::from(self.max_digit_width + self.cell_padding)).round() as u16;
+                (width * f64::from(self.max_digit_width + self.cell_padding)).round() as u32;
         } else {
             width_pixels =
-                (width * f64::from(self.max_digit_width)).round() as u16 + self.cell_padding;
+                (width * f64::from(self.max_digit_width)).round() as u32 + self.cell_padding;
         }
 
         self.set_column_width_internal(col, width_pixels, false)
@@ -8073,7 +8073,7 @@ impl Worksheet {
     pub fn set_column_width_pixels(
         &mut self,
         col: ColNum,
-        width: u16,
+        width: u32,
     ) -> Result<&mut Worksheet, XlsxError> {
         self.set_column_width_internal(col, width, false)
     }
@@ -8107,7 +8107,7 @@ impl Worksheet {
     pub fn set_column_autofit_width(
         &mut self,
         col: ColNum,
-        width: u16,
+        width: u32,
     ) -> Result<&mut Worksheet, XlsxError> {
         self.set_column_width_internal(col, width, true)
     }
@@ -8339,7 +8339,7 @@ impl Worksheet {
         &mut self,
         first_col: ColNum,
         last_col: ColNum,
-        width: u16,
+        width: u32,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check order of first/last values.
         if first_col > last_col {
@@ -8500,8 +8500,8 @@ impl Worksheet {
     pub fn set_default_format(
         &mut self,
         format: &Format,
-        row_height: u16,
-        col_width: u16,
+        row_height: u32,
+        col_width: u32,
     ) -> Result<&mut Worksheet, XlsxError> {
         if self.xf_formats.len() > 1 {
             return Err(XlsxError::DefaultFormatError(
@@ -8535,11 +8535,11 @@ impl Worksheet {
     pub(crate) fn initialize_default_format(
         &mut self,
         format: &Format,
-        row_height: u16,
-        col_width: u16,
-        max_digit_width: u16,
-        padding: u16,
-        max_col_width: u16,
+        row_height: u32,
+        col_width: u32,
+        max_digit_width: u32,
+        padding: u32,
+        max_col_width: u32,
     ) -> &mut Worksheet {
         self.xf_formats = vec![format.clone()];
         self.xf_indices = HashMap::from([(format.clone(), 0)]);
@@ -14569,7 +14569,7 @@ impl Worksheet {
     ///   autofitting.
     ///
     ///
-    pub fn autofit_to_max_width(&mut self, max_autofit_width: u16) -> &mut Worksheet {
+    pub fn autofit_to_max_width(&mut self, max_autofit_width: u32) -> &mut Worksheet {
         let max_autofit_width = std::cmp::min(max_autofit_width, MAX_AUTOFIT_WIDTH_PIXELS);
         self.autofit_worksheet(max_autofit_width)
     }
@@ -16110,7 +16110,7 @@ impl Worksheet {
     fn set_column_width_internal(
         &mut self,
         col: ColNum,
-        width: u16,
+        width: u32,
         autofit: bool,
     ) -> Result<&mut Worksheet, XlsxError> {
         // If the width is 0 then the Excel treats the column as hidden with
@@ -16132,7 +16132,7 @@ impl Worksheet {
 
     // Store the column width in Excel pixel units. Updates to the width can
     // come from the external user or from the internal autofit() routines.
-    fn store_column_width(&mut self, col: ColNum, width: u16, autofit: bool) {
+    fn store_column_width(&mut self, col: ColNum, width: u32, autofit: bool) {
         // Excel has a maximum limit of 255 units for the column width.
         let mut width = width;
         if width > self.max_col_width {
@@ -16982,13 +16982,13 @@ impl Worksheet {
                 // A hidden column is treated as having a width of zero unless
                 // the "object_movement" is MoveAndSizeWithCellsAfter.
                 if hidden && position != ObjectMovement::MoveAndSizeWithCellsAfter {
-                    0u32
+                    0
                 } else {
-                    u32::from(col_options.width)
+                    col_options.width
                 }
             }
             // If the width hasn't been set we use the default value.
-            None => u32::from(self.default_col_width),
+            None => self.default_col_width,
         }
     }
     // Get the default or user defined column width in pixels.
@@ -17000,12 +17000,12 @@ impl Worksheet {
                 // A hidden row is treated as having a height of zero unless
                 // the "object_movement" is MoveAndSizeWithCellsAfter.
                 if hidden && position != ObjectMovement::MoveAndSizeWithCellsAfter {
-                    0u32
+                    0
                 } else {
-                    u32::from(row_options.height)
+                    row_options.height
                 }
             }
-            None => u32::from(self.user_row_height_in_pixels),
+            None => self.user_row_height_in_pixels,
         }
     }
 
@@ -17212,8 +17212,8 @@ impl Worksheet {
     //
     // This internal function supports autofitting to Excel's maximum cell width
     // or to a user defined value.
-    fn autofit_worksheet(&mut self, max_autofit_width: u16) -> &mut Worksheet {
-        let mut max_widths: HashMap<ColNum, u16> = HashMap::new();
+    fn autofit_worksheet(&mut self, max_autofit_width: u32) -> &mut Worksheet {
+        let mut max_widths: HashMap<ColNum, u32> = HashMap::new();
 
         let (first_row, last_row) = if self.use_constant_memory {
             (self.current_row, self.current_row)
@@ -17251,7 +17251,7 @@ impl Worksheet {
                             // gives a slightly greater width for the decimal
                             // place and minus sign but only by a few pixels and
                             // over-estimation is okay.
-                            CellType::Number { number, .. } => 7 * number.to_string().len() as u16,
+                            CellType::Number { number, .. } => 7 * number.to_string().len() as u32,
 
                             // For Boolean types we use the Excel standard
                             // widths for TRUE and FALSE.
@@ -18083,7 +18083,7 @@ impl Worksheet {
 
     // Write the <sheetFormatPr> element.
     fn write_sheet_format_pr(&mut self) {
-        let height_in_chars = f32::from(self.user_row_height_in_pixels) * 0.75;
+        let height_in_chars = f64::from(self.user_row_height_in_pixels) * 0.75;
         let mut attributes = vec![("defaultRowHeight", height_in_chars.to_string())];
 
         if self.user_row_height_in_pixels != self.default_row_height {
@@ -19140,7 +19140,7 @@ impl Worksheet {
             if row_options.height != self.default_row_height
                 || self.user_row_height_in_pixels != self.default_row_height
             {
-                let height_in_chars = f32::from(row_options.height) * 0.75;
+                let height_in_chars = f64::from(row_options.height) * 0.75;
                 attributes.push(("ht", height_in_chars.to_string()));
             }
 
@@ -19163,7 +19163,7 @@ impl Worksheet {
                 attributes.push(("collapsed", "1".to_string()));
             }
         } else if self.user_row_height_in_pixels != self.default_row_height {
-            let height_in_chars = f32::from(self.user_row_height_in_pixels) * 0.75;
+            let height_in_chars = f64::from(self.user_row_height_in_pixels) * 0.75;
             attributes.push(("ht", height_in_chars.to_string()));
             attributes.push(("customHeight", "1".to_string()));
         }
@@ -19202,7 +19202,7 @@ impl Worksheet {
             if row_options.height != self.default_row_height
                 || self.user_row_height_in_pixels != self.default_row_height
             {
-                let height_in_chars = f32::from(row_options.height) * 0.75;
+                let height_in_chars = f64::from(row_options.height) * 0.75;
                 attributes.push(("ht", height_in_chars.to_string()));
             }
 
@@ -19217,7 +19217,7 @@ impl Worksheet {
                 attributes.push(("customHeight", "1".to_string()));
             }
         } else if self.user_row_height_in_pixels != self.default_row_height {
-            let height_in_chars = f32::from(self.user_row_height_in_pixels) * 0.75;
+            let height_in_chars = f64::from(self.user_row_height_in_pixels) * 0.75;
             attributes.push(("ht", height_in_chars.to_string()));
             attributes.push(("customHeight", "1".to_string()));
         }
@@ -19565,8 +19565,7 @@ impl Worksheet {
         }
 
         // Convert column width from pixels to character width.
-        let char_width =
-            ((f64::from(width) / f64::from(self.max_digit_width)) * 256.0).floor() / 256.0;
+        let char_width = f64::from(width * 256 / self.max_digit_width) / 256.0;
 
         let mut attributes = vec![
             ("min", first_col.to_string()),
@@ -20763,7 +20762,7 @@ impl Default for CellRange {
 
 #[derive(Clone)]
 struct RowOptions {
-    height: u16,
+    height: u32,
     xf_index: u32,
     level: u8,
     hidden: bool,
@@ -20773,7 +20772,7 @@ struct RowOptions {
 
 #[derive(Clone, PartialEq)]
 struct ColOptions {
-    width: u16,
+    width: u32,
     xf_index: u32,
     level: u8,
     hidden: bool,

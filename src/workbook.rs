@@ -353,11 +353,11 @@ pub struct Workbook {
     num_chartsheets: u16,
     use_large_file: bool,
     default_format: Format,
-    default_row_height: u16,
-    default_col_width: u16,
-    max_digit_width: u16,
-    max_col_width: u16,
-    cell_padding: u16,
+    default_row_height: u32,
+    default_col_width: u32,
+    max_digit_width: u32,
+    max_col_width: u32,
+    cell_padding: u32,
     default_theme_version: String,
 
     #[cfg(feature = "constant_memory")]
@@ -1825,8 +1825,8 @@ impl Workbook {
     pub fn set_default_format(
         &mut self,
         format: &Format,
-        row_height: u16,
-        col_width: u16,
+        row_height: u32,
+        col_width: u32,
     ) -> Result<&mut Workbook, XlsxError> {
         if !self.worksheets.is_empty() {
             return Err(XlsxError::DefaultFormatError(

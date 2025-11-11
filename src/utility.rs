@@ -1127,7 +1127,7 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_autofit_width.png">
 ///
-pub fn cell_autofit_width(string: &str) -> u16 {
+pub fn cell_autofit_width(string: &str) -> u32 {
     let cell_padding = 7;
 
     pixel_width(string) + cell_padding
@@ -1136,7 +1136,7 @@ pub fn cell_autofit_width(string: &str) -> u16 {
 // Get the pixel width of a string based on character widths taken from Excel.
 // Non-ascii characters are given a default width of 8 pixels.
 #[allow(clippy::match_same_arms)]
-pub(crate) fn pixel_width(string: &str) -> u16 {
+pub(crate) fn pixel_width(string: &str) -> u32 {
     let mut length = 0;
 
     // Limit the autofit width to Excel's limit of 1790 pixels.
@@ -1220,7 +1220,7 @@ pub(crate) fn formula_to_string(formula: &str) -> String {
 // To add support for additional fonts and sizes please open a GitHub request
 // with an empty sample workbook with one worksheet.
 //
-pub(crate) fn default_column_metrics(width: u16) -> Option<(u16, u16, u16)> {
+pub(crate) fn default_column_metrics(width: u32) -> Option<(u32, u32, u32)> {
     match width {
         56 => Some((6, 5, 1533)),
         64 => Some((7, 5, 1790)),

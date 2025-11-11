@@ -3033,7 +3033,7 @@ pub struct CustomSerializeField {
     pub(crate) skip: bool,
     pub(crate) col: ColNum,
     pub(crate) width: Option<f64>,
-    pub(crate) pixel_width: Option<u16>,
+    pub(crate) pixel_width: Option<u32>,
 }
 
 impl CustomSerializeField {
@@ -3517,7 +3517,7 @@ impl CustomSerializeField {
     ///
     /// - `width`: The row width in character units.
     ///
-    pub fn set_column_width_pixels(mut self, width: u16) -> CustomSerializeField {
+    pub fn set_column_width_pixels(mut self, width: u32) -> CustomSerializeField {
         self.pixel_width = Some(width);
         self
     }
