@@ -5,6 +5,46 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.92.0] - 2025-11-12
+
+### Added
+
+This release adds several features related to setting themes and default fonts.
+
+- Added support for setting a custom theme using a `theme.xml` file extracted from an XLSX file.
+  See [`Workbook::use_custom_theme()`].
+
+  <img src="https://rustxlsxwriter.github.io/images/app_theme_custom.png">
+
+- Added support for setting the Excel 2023/Aptos default theme. See
+  [`Workbook::use_excel_2023_theme()`].
+
+  <img src="https://rustxlsxwriter.github.io/images/app_theme_excel_2023.png">
+
+- Added support for setting a custom default format and font. This allows to
+  user to set a font other than "Calibri 11" as the default. This also takes the
+  associated change in row height and column width into account to ensure that
+  worksheet objects such as images and charts are positioned correctly.
+  See [`Workbook::set_default_format()`].
+
+- Added option to set a "Calibri 11" font that isn't part of the theme.
+
+  [Request #158].
+
+  [Request #158]: https://github.com/jmcnamara/rust_xlsxwriter/issues/158
+  [`Workbook::use_custom_theme()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.use_custom_theme
+  [`Workbook::use_excel_2023_theme()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.use_excel_2023_theme
+  [`Workbook::set_default_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.set_default_format
+
+
+### Fixed
+
+- Fixed issue where setting a custom row height in character units wasn't
+  rounded to the nearest pixel.
+
+  [Request #158].
+
+
 ## [0.91.0] - 2025-10-29
 
 ### Added

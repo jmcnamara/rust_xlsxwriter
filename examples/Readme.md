@@ -254,6 +254,14 @@ documentation and generally show how an individual function works.
 * `app_textbox.rs` - Demonstrate adding a Textbox to a worksheet using the
   `rust_xlsxwriter` library.
 
+* `app_theme_custom.rs` - Example of setting the default theme for a
+  workbook to a user supplied custom theme using the `rust_xlsxwriter`
+  library. The theme xml file is extracted from an Excel xlsx file.
+
+* `app_theme_excel_2023.rs` - Example of changing the default theme for a
+  workbook using the `rust_xlsxwriter` library. The example uses the Excel
+  2023 Office/Aptos theme.
+
 * `app_tutorial1.rs` - A simple program to write some data to an Excel
   spreadsheet using `rust_xlsxwriter`. Part 1 of a tutorial.
 
@@ -1289,8 +1297,21 @@ documentation and generally show how an individual function works.
 * `doc_workbook_save.rs` - Demonstrates creating a simple workbook, with
   one unused worksheet.
 
+* `doc_workbook_set_default_format1.rs` - Demonstrates changing the default
+  format for a workbook.
+
+* `doc_workbook_set_default_format2.rs` - Demonstrates changing the default
+  format for a workbook.
+
 * `doc_workbook_set_tempdir.rs` - Demonstrates setting a custom directory
   for temporary files when creating a file in "constant memory" mode.
+
+* `doc_workbook_use_custom_theme.rs` - Demonstrates changing the default
+  theme for a workbook to a user supplied custom theme.
+
+* `doc_workbook_use_excel_2023_theme.rs` - Demonstrates changing the
+  default theme for a workbook. The example uses the Excel 2023
+  Office/Aptos theme.
 
 * `doc_workbook_worksheet_from_index.rs` - Demonstrates getting worksheet
   reference by index.

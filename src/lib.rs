@@ -35,6 +35,7 @@
 //! - Checkboxes.
 //! - Sparklines.
 //! - Worksheet PNG/JPEG/GIF/BMP images.
+//! - Workbook themes.
 //! - Rich multi-format strings.
 //! - Outline groupings.
 //! - Defined names.

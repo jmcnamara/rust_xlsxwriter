@@ -26,51 +26,53 @@ cargo run --example app_demo  # or any other example
 11. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
 12. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
 13. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
-14. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
-15. [Insert images: Embedding an image in a cell](#insert-images-embedding-an-image-in-a-cell)
-16. [Insert images: Inserting images to fit a cell](#insert-images-inserting-images-to-fit-a-cell)
-17. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
-18. [Adding a watermark: Adding a watermark to a worksheet by adding a background image](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-a-background-image)
-19. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
-20. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
-21. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
-22. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
-23. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
-24. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
-25. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
-26. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
-27. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
-28. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
-29. [Chart: Using a secondary axis](#chart-using-a-secondary-axis)
-30. [Chart: Create a combined chart](#chart-create-a-combined-chart)
-31. [Chart: Create a combined pareto chart](#chart-create-a-combined-pareto-chart)
-32. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
-33. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
-34. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-35. [Chart: Chart data table](#chart-chart-data-table)
-36. [Chart: Chart data tools](#chart-chart-data-tools)
-37. [Chart: Clustered categories](#chart-clustered-categories)
-38. [Chart: Gauge Chart](#chart-gauge-chart)
-39. [Chart: Chartsheet](#chart-chartsheet)
-40. [Grouped Rows: Create a grouped row outline](#grouped-rows-create-a-grouped-row-outline)
-41. [Grouped Columns: Create a grouped column outline](#grouped-columns-create-a-grouped-column-outline)
-42. [Textbox: Inserting Checkboxes in worksheets](#textbox-inserting-checkboxes-in-worksheets)
-43. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
-44. [Textbox: Ignore Excel cell errors](#textbox-ignore-excel-cell-errors)
-45. [Sparklines: simple example](#sparklines-simple-example)
-46. [Sparklines: advanced example](#sparklines-advanced-example)
-47. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
-48. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
-49. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-50. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
-51. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
-52. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-53. [Internal links: Creating a Table of Contents](#internal-links-creating-a-table-of-contents)
-54. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-55. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-56. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-57. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-58. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+14. [Theme: Use a custom workbook theme](#theme-use-a-custom-workbook-theme)
+15. [Theme: Use the Excel 2023/Aptos theme](#theme-use-the-excel-2023/aptos-theme)
+16. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
+17. [Insert images: Embedding an image in a cell](#insert-images-embedding-an-image-in-a-cell)
+18. [Insert images: Inserting images to fit a cell](#insert-images-inserting-images-to-fit-a-cell)
+19. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
+20. [Adding a watermark: Adding a watermark to a worksheet by adding a background image](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-a-background-image)
+21. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
+22. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
+23. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
+24. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
+25. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
+26. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
+27. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
+28. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
+29. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
+30. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
+31. [Chart: Using a secondary axis](#chart-using-a-secondary-axis)
+32. [Chart: Create a combined chart](#chart-create-a-combined-chart)
+33. [Chart: Create a combined pareto chart](#chart-create-a-combined-pareto-chart)
+34. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
+35. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
+36. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
+37. [Chart: Chart data table](#chart-chart-data-table)
+38. [Chart: Chart data tools](#chart-chart-data-tools)
+39. [Chart: Clustered categories](#chart-clustered-categories)
+40. [Chart: Gauge Chart](#chart-gauge-chart)
+41. [Chart: Chartsheet](#chart-chartsheet)
+42. [Grouped Rows: Create a grouped row outline](#grouped-rows-create-a-grouped-row-outline)
+43. [Grouped Columns: Create a grouped column outline](#grouped-columns-create-a-grouped-column-outline)
+44. [Textbox: Inserting Checkboxes in worksheets](#textbox-inserting-checkboxes-in-worksheets)
+45. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
+46. [Textbox: Ignore Excel cell errors](#textbox-ignore-excel-cell-errors)
+47. [Sparklines: simple example](#sparklines-simple-example)
+48. [Sparklines: advanced example](#sparklines-advanced-example)
+49. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
+50. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
+51. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+52. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+53. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+54. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
+55. [Internal links: Creating a Table of Contents](#internal-links-creating-a-table-of-contents)
+56. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+57. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+58. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+59. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+60. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -2391,6 +2393,90 @@ fn main() -> Result<(), XlsxError> {
 
     // Save the file to disk.
     workbook.save("autofit.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Theme: Use a custom workbook theme
+
+An example of setting the default theme for a workbook to a user supplied custom
+theme using the `rust_xlsxwriter` library. The theme xml file is extracted from
+an Excel xlsx file. Note that the default font has changed to "Arial (body) 11".
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_theme_custom.png">
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_theme_custom.rs
+
+use rust_xlsxwriter::{FontScheme, Format, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    // Add a custom theme to the workbook.
+    workbook.use_custom_theme("tests/input/themes/technic.xml")?;
+
+    // Create a new default format to match the custom theme. Note, that the
+    // scheme is set to "Body" to indicate that the font is part of the theme.
+    let format = Format::new()
+        .set_font_name("Arial")
+        .set_font_size(11)
+        .set_font_scheme(FontScheme::Body);
+
+    // Add the default format for the workbook.
+    workbook.set_default_format(&format, 19, 72)?;
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write some text to demonstrate the changed theme.
+    worksheet.write(0, 0, "Hello")?;
+
+    // Save the workbook to disk.
+    workbook.save("theme_custom.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Theme: Use the Excel 2023/Aptos theme
+
+An example of changing the default theme for a workbook using the
+`rust_xlsxwriter` library. The example uses the Excel 2023 Office/Aptos theme.
+Note that the default font has changed to "Aptos Narrow (body) 11".
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_theme_excel_2023.png">
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_theme_excel_2023.rs
+
+use rust_xlsxwriter::{Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    // Use the Excel 2023 Office/Aptos theme in the workbook.
+    workbook.use_excel_2023_theme()?;
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write some text to demonstrate the changed theme.
+    worksheet.write(0, 0, "Hello")?;
+
+    // Save the workbook to disk.
+    workbook.save("theme_excel_2023.xlsx")?;
 
     Ok(())
 }

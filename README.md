@@ -91,6 +91,7 @@ supported features are:
 - Checkboxes.
 - Sparklines.
 - Worksheet PNG/JPEG/GIF/BMP images.
+- Workbook themes.
 - Rich multi-format strings.
 - Outline groupings.
 - Defined names.
@@ -110,7 +111,8 @@ supported features are:
 The `rust_xlsxwriter` crate was designed and implemented based around the
 following design considerations:
 
-- **Fidelity with the Excel file format**.
+- **Fidelity with the Excel file format**. In most cases the output matches the
+  output from Excel exactly.
 - **Performance**. The library is within 10% of the similar C library and it
   also supports a constant memory mode for writing large files.
 - **Comprehensive documentation**. There is extensive API documentation as well
@@ -212,8 +214,8 @@ cargo add rust_xlsxwriter -F constant_memory
 
 Recent changes:
 
+- Added support for workbook themes.
 - Added support for grouped and non-contiguous chart ranges.
-- Added support for `Jiff` date/time civil types.
 
 See the full [Release Notes and Changelog].
 
