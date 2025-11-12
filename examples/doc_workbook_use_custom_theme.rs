@@ -5,7 +5,7 @@
 //! The following example demonstrates changing the default theme for a
 //! workbook to a user supplied custom theme.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{FontScheme, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -13,11 +13,12 @@ fn main() -> Result<(), XlsxError> {
     // Add a custom theme to the workbook.
     workbook.use_custom_theme("tests/input/themes/technic.xml")?;
 
-    // Create a new default format to match the custom theme.
+    // Create a new default format to match the custom theme. Note, that the
+    // scheme is set to "Body" to indicate that the font is part of the theme.
     let format = Format::new()
         .set_font_name("Arial")
         .set_font_size(11)
-        .set_font_scheme("minor");
+        .set_font_scheme(FontScheme::Body);
 
     // Add the default format for the workbook.
     workbook.set_default_format(&format, 19, 72)?;

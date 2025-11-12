@@ -6,7 +6,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{FontScheme, Format, Workbook, XlsxError};
 
 // Create a rust_xlsxwriter file to compare against an Excel file.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -16,7 +16,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let calibri_normal = Format::new()
         .set_font_name("Calibri")
         .set_font_size(11)
-        .set_font_scheme("");
+        .set_font_scheme(FontScheme::None);
 
     let worksheet = workbook.add_worksheet();
 

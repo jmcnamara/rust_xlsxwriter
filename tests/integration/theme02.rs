@@ -6,7 +6,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Chart, ChartSeries, ChartType, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartSeries, ChartType, FontScheme, Format, Workbook, XlsxError};
 
 // Create a rust_xlsxwriter file to compare against an Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format = Format::new()
         .set_font_name("Arial")
         .set_font_size(11)
-        .set_font_scheme("minor");
+        .set_font_scheme(FontScheme::Body);
     workbook.set_default_format(&format, 19, 72)?;
 
     // Add a custom theme to the workbook.

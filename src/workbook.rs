@@ -243,7 +243,7 @@ use crate::worksheet::Worksheet;
 
 use crate::{
     utility, Border, Chart, ChartRange, ChartRangeCacheData, ColNum, Color, DefinedName,
-    DefinedNameType, DocProperties, Fill, Font, FormatPattern, Image, RowNum, Visible,
+    DefinedNameType, DocProperties, Fill, Font, FontScheme, FormatPattern, Image, RowNum, Visible,
     NUM_IMAGE_FORMATS, UNPARSED_SHEET_RANGE,
 };
 
@@ -1923,7 +1923,7 @@ impl Workbook {
         let format = Format::new()
             .set_font_name("Aptos Narrow")
             .set_font_size(11)
-            .set_font_scheme("minor");
+            .set_font_scheme(FontScheme::Body);
 
         // Set the default format and row/column dimensions.
         self.set_default_format(&format, 20, 64)
@@ -1942,7 +1942,9 @@ impl Workbook {
     ///
     /// In addition to supplying the theme XML file it is also necessary to set
     /// the default format to match the theme. This is done via the
-    /// [`Workbook::set_default_format()`] method, see the example below.
+    /// [`Workbook::set_default_format()`] method, see the example below. When
+    /// setting a font that will be used as the default format it is also
+    /// necessary to set the scheme parameter to [`FontScheme::Body`]
     ///
     /// Note, older Excel 2007 style theme files that contain image fills as
     /// part of the theme are not currently supported and will raise an
@@ -1967,7 +1969,7 @@ impl Workbook {
     /// ```
     /// # // This code is available in examples/doc_workbook_use_custom_theme.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{FontScheme, Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -1979,7 +1981,7 @@ impl Workbook {
     ///     let format = Format::new()
     ///         .set_font_name("Arial")
     ///         .set_font_size(11)
-    ///         .set_font_scheme("minor");
+    ///         .set_font_scheme(FontScheme::Body);
     ///
     ///     // Add the default format for the workbook.
     ///     workbook.set_default_format(&format, 19, 72)?;

@@ -1099,9 +1099,7 @@ impl Format {
 
     /// Set the Format font name property.
     ///
-    /// Set the font for a cell format. Excel can only display fonts that are
-    /// installed on the system that it is running on. Therefore it is generally
-    /// best to use standard Excel fonts.
+    /// Set the font for a cell format.
     ///
     /// # Parameters
     ///
@@ -1138,9 +1136,9 @@ impl Format {
     pub fn set_font_name(mut self, font_name: impl Into<String>) -> Format {
         self.font.name = font_name.into();
 
-        if self.font.name != "Calibri" {
-            self.font.scheme = String::new();
-        }
+        // Setting the font name implies a non-theme font event if the font is
+        // "Calibri".
+        self.font.scheme = FontScheme::None;
 
         self
     }
@@ -1195,15 +1193,25 @@ impl Format {
 
     /// Set the Format font scheme property.
     ///
-    /// This function is implemented for completeness but is rarely used in
-    /// practice.
+    /// This method can be used to indicate that a font is part of a theme using
+    /// [`FontScheme::Body`]. The theme must also contain the appropriate font
+    /// for this to work.
+    ///
+    /// This method can also be used to indicate that a font is not part of a
+    /// theme, for example, if you wised to use a "Calibri" font that is not
+    /// connected to the theme and which will not change if the theme is
+    /// changed.
+    ///
+    /// See also
+    /// [`Workbook::use_custom_theme()`](crate::Workbook::use_custom_theme) and
+    /// [`Workbook::set_default_format()`](crate::Workbook::set_default_format).
     ///
     /// # Parameters
     ///
-    /// - `font_scheme`: The font scheme property.
+    /// - `scheme`: The [`FontScheme`] property.
     ///
-    pub fn set_font_scheme(mut self, font_scheme: impl Into<String>) -> Format {
-        self.font.scheme = font_scheme.into();
+    pub fn set_font_scheme(mut self, scheme: FontScheme) -> Format {
+        self.font.scheme = scheme;
         self
     }
 
@@ -2211,7 +2219,7 @@ impl Format {
         self.font.is_hyperlink = true;
         self.font.color = Color::Theme(10, 0);
         self.font.underline = FormatUnderline::Single;
-        self.font.scheme = String::new();
+        self.font.scheme = FontScheme::None;
 
         self
     }
@@ -2730,7 +2738,7 @@ pub(crate) struct Font {
     pub(crate) script: FormatScript,
     pub(crate) family: u8,
     pub(crate) charset: u8,
-    pub(crate) scheme: String,
+    pub(crate) scheme: FontScheme,
     pub(crate) condense: bool,
     pub(crate) extend: bool,
     pub(crate) is_hyperlink: bool,
@@ -2742,7 +2750,7 @@ impl Default for Font {
             name: "Calibri".to_string(),
             size: "11".to_string(),
             family: 2,
-            scheme: "minor".to_string(),
+            scheme: FontScheme::Body,
             bold: Default::default(),
             italic: Default::default(),
             underline: FormatUnderline::default(),
@@ -3108,4 +3116,22 @@ pub enum FormatAlign {
 
     /// Distribute the words in the text evenly from top to bottom in the cell.
     VerticalDistributed,
+}
+
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
+/// The `FontScheme` enum defines the font scheme properties of a [`Format`].
+/// These relate to whether the font is part of the theme or is a custom font.
+pub enum FontScheme {
+    /// This is used to indicate a theme font that is used for body text.
+    #[default]
+    Body,
+
+    /// This is used to indicate a theme font that is used for headings. Note,
+    /// this is rarely, if ever, required when using Excel.
+    Headings,
+
+    /// This is used to indicate a custom font that is not part of the theme.
+    /// For example, this can also be used to create a Calibri 11 font that is
+    /// not part of the default theme.
+    None,
 }

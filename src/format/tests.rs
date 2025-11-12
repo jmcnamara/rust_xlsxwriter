@@ -8,7 +8,7 @@
 mod format_tests {
 
     use crate::{
-        Color, Format, FormatAlign, FormatBorder, FormatDiagonalBorder, FormatPattern,
+        Color, FontScheme, Format, FormatAlign, FormatBorder, FormatDiagonalBorder, FormatPattern,
         FormatUnderline,
     };
     use pretty_assertions::assert_eq;
@@ -99,7 +99,7 @@ mod format_tests {
             .set_font_script(crate::FormatScript::Subscript)
             .set_font_strikethrough()
             .set_font_color(Color::Red)
-            .set_font_scheme("Scheme");
+            .set_font_scheme(FontScheme::Headings);
 
         // Test an overwriting merge.
         let merged = default.merge(&has_value);

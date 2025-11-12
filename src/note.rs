@@ -8,7 +8,7 @@
 
 use crate::drawing::{DrawingObject, DrawingType};
 use crate::vml::VmlInfo;
-use crate::{ColNum, Color, Format, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
+use crate::{ColNum, Color, FontScheme, Format, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
 
 #[derive(Clone)]
 /// The `Note` struct represents a worksheet note object.
@@ -521,7 +521,7 @@ impl Note {
         self.format.font.name = font_name.into();
 
         if self.format.font.name != "Calibri" {
-            self.format.font.scheme = String::new();
+            self.format.font.scheme = FontScheme::None;
         }
 
         self

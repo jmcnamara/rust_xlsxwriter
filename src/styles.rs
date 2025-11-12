@@ -15,8 +15,8 @@ use crate::xmlwriter::{
     xml_start_tag_only,
 };
 use crate::{
-    Alignment, Border, Color, Fill, Font, FormatAlign, FormatBorder, FormatDiagonalBorder,
-    FormatPattern, FormatScript, FormatUnderline,
+    Alignment, Border, Color, Fill, Font, FontScheme, FormatAlign, FormatBorder,
+    FormatDiagonalBorder, FormatPattern, FormatScript, FormatUnderline,
 };
 
 pub struct Styles<'a> {
@@ -273,9 +273,16 @@ impl<'a> Styles<'a> {
     fn write_font_scheme(&mut self, font: &Font) {
         let mut attributes = vec![];
 
-        if !font.scheme.is_empty() {
-            attributes.push(("val", font.scheme.clone()));
-            xml_empty_tag(&mut self.writer, "scheme", &attributes);
+        match font.scheme {
+            FontScheme::Body => {
+                attributes.push(("val", "minor".to_string()));
+                xml_empty_tag(&mut self.writer, "scheme", &attributes);
+            }
+            FontScheme::Headings => {
+                attributes.push(("val", "major".to_string()));
+                xml_empty_tag(&mut self.writer, "scheme", &attributes);
+            }
+            FontScheme::None => {}
         }
     }
 

@@ -6,14 +6,17 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Format, Image, Workbook, XlsxError};
+use rust_xlsxwriter::{FontScheme, Format, Image, Workbook, XlsxError};
 
 // Test to demonstrate adding images to worksheets.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     // Set the default format for the workbook.
-    let format = Format::new().set_font_name("Calibri").set_font_size(11);
+    let format = Format::new()
+        .set_font_name("Calibri")
+        .set_font_size(11)
+        .set_font_scheme(FontScheme::Body);
     workbook.set_default_format(&format, 20, 64)?;
 
     let worksheet = workbook.add_worksheet();
@@ -39,7 +42,10 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     // Set the default format for the workbook.
-    let format = Format::new().set_font_name("Calibri").set_font_size(11);
+    let format = Format::new()
+        .set_font_name("Calibri")
+        .set_font_size(11)
+        .set_font_scheme(FontScheme::Body);
     workbook.set_default_format(&format, 20, 64)?;
 
     let worksheet = workbook.add_worksheet();
@@ -65,7 +71,10 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     // Set the default format for the workbook.
-    let format = Format::new().set_font_name("Calibri").set_font_size(11);
+    let format = Format::new()
+        .set_font_name("Calibri")
+        .set_font_size(11)
+        .set_font_scheme(FontScheme::Body);
     workbook.set_default_format(&format, 20, 64)?;
 
     let worksheet = workbook.add_worksheet();
