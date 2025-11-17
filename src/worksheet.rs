@@ -1613,10 +1613,10 @@ pub struct Worksheet {
     sparklines: Vec<Sparkline>,
     embedded_image_ids: HashMap<String, u32>,
     show_all_notes: bool,
-    default_row_height: u32,
+    original_row_height: u32,
     default_col_width: u32,
     cell_padding: u32,
-    user_row_height_in_pixels: u32,
+    default_row_height: u32,
     max_digit_width: u32,
     max_col_width: u32,
     hide_unused_rows: bool,
@@ -1841,10 +1841,10 @@ impl Worksheet {
             show_all_notes: false,
             vml_data_id: String::new(),
             vml_shape_id: 0,
-            default_row_height: 20,
+            original_row_height: 20,
             default_col_width: 64,
             cell_padding: 5,
-            user_row_height_in_pixels: 20,
+            default_row_height: 20,
             max_digit_width: 7,
             max_col_width: 1790,
             hide_unused_rows: false,
@@ -6708,7 +6708,7 @@ impl Worksheet {
             Some(row_options) => row_options.xf_index = xf_index,
             None => {
                 let row_options = RowOptions {
-                    height: self.user_row_height_in_pixels,
+                    height: self.default_row_height,
                     xf_index,
                     hidden: false,
                     level: 0,
@@ -7731,7 +7731,7 @@ impl Worksheet {
             Some(row_options) => row_options.hidden = true,
             None => {
                 let row_options = RowOptions {
-                    height: self.user_row_height_in_pixels,
+                    height: self.default_row_height,
                     xf_index: 0,
                     hidden: true,
                     level: 0,
@@ -7837,7 +7837,7 @@ impl Worksheet {
 
         let pixel_height = (height * 4.0 / 3.0).round() as u32;
 
-        self.user_row_height_in_pixels = pixel_height;
+        self.default_row_height = pixel_height;
         self
     }
 
@@ -7855,8 +7855,8 @@ impl Worksheet {
     /// - `height`: The row height in pixels.
     ///
     pub fn set_default_row_height_pixels(&mut self, height: u32) -> &mut Worksheet {
-        let height = 0.75 * f64::from(height);
-        self.set_default_row_height(height)
+        self.default_row_height = height;
+        self
     }
 
     /// Hide all unused rows in a worksheet, efficiently.
@@ -8550,7 +8550,7 @@ impl Worksheet {
         self.max_digit_width = max_digit_width;
         self.default_col_width = col_width;
         self.default_row_height = row_height;
-        self.user_row_height_in_pixels = row_height;
+        self.original_row_height = row_height;
 
         self
     }
@@ -17005,7 +17005,7 @@ impl Worksheet {
                     row_options.height
                 }
             }
-            None => self.user_row_height_in_pixels,
+            None => self.default_row_height,
         }
     }
 
@@ -17393,7 +17393,7 @@ impl Worksheet {
             }
             None => {
                 let row_options = RowOptions {
-                    height: self.user_row_height_in_pixels,
+                    height: self.default_row_height,
                     xf_index: 0,
                     hidden: collapsed,
                     level: 1,
@@ -17420,7 +17420,7 @@ impl Worksheet {
             Some(row_options) => row_options.collapsed = true,
             None => {
                 let row_options = RowOptions {
-                    height: self.user_row_height_in_pixels,
+                    height: self.default_row_height,
                     xf_index: 0,
                     hidden: false,
                     level: 0,
@@ -18083,10 +18083,10 @@ impl Worksheet {
 
     // Write the <sheetFormatPr> element.
     fn write_sheet_format_pr(&mut self) {
-        let height_in_chars = f64::from(self.user_row_height_in_pixels) * 0.75;
+        let height_in_chars = f64::from(self.default_row_height) * 0.75;
         let mut attributes = vec![("defaultRowHeight", height_in_chars.to_string())];
 
-        if self.user_row_height_in_pixels != self.default_row_height {
+        if self.default_row_height != self.original_row_height {
             attributes.push(("customHeight", "1".to_string()));
         }
 
@@ -19137,8 +19137,8 @@ impl Worksheet {
             }
 
             // Only add ht parameter if the height is non-default.
-            if row_options.height != self.default_row_height
-                || self.user_row_height_in_pixels != self.default_row_height
+            if row_options.height != self.original_row_height
+                || self.default_row_height != self.original_row_height
             {
                 let height_in_chars = f64::from(row_options.height) * 0.75;
                 attributes.push(("ht", height_in_chars.to_string()));
@@ -19149,8 +19149,8 @@ impl Worksheet {
             }
 
             // Only add customHeight parameter if the height is non-default.
-            if row_options.height != self.default_row_height
-                || self.user_row_height_in_pixels != self.default_row_height
+            if row_options.height != self.original_row_height
+                || self.default_row_height != self.original_row_height
             {
                 attributes.push(("customHeight", "1".to_string()));
             }
@@ -19162,8 +19162,8 @@ impl Worksheet {
             if row_options.collapsed {
                 attributes.push(("collapsed", "1".to_string()));
             }
-        } else if self.user_row_height_in_pixels != self.default_row_height {
-            let height_in_chars = f64::from(self.user_row_height_in_pixels) * 0.75;
+        } else if self.default_row_height != self.original_row_height {
+            let height_in_chars = f64::from(self.default_row_height) * 0.75;
             attributes.push(("ht", height_in_chars.to_string()));
             attributes.push(("customHeight", "1".to_string()));
         }
