@@ -1136,8 +1136,7 @@ impl Format {
     pub fn set_font_name(mut self, font_name: impl Into<String>) -> Format {
         self.font.name = font_name.into();
 
-        // Setting the font name implies a non-theme font event if the font is
-        // "Calibri".
+        // Setting the font name implies a non-theme font.
         self.font.scheme = FontScheme::None;
 
         self
@@ -1198,7 +1197,7 @@ impl Format {
     /// for this to work.
     ///
     /// This method can also be used to indicate that a font is not part of a
-    /// theme, for example, if you wised to use a "Calibri" font that is not
+    /// theme, for example, if you wished to use a "Calibri" font that is not
     /// connected to the theme and which will not change if the theme is
     /// changed.
     ///
