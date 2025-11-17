@@ -22,7 +22,7 @@ jiff = {optional = true, version = "0.2", default-features = false, features = [
 serde = {optional = true, version = "1.0", features = ["derive"]}
 chrono = {optional = true, version = "0.4", default-features = false, features = ["clock", "wasmbind", "serde"]}
 js-sys = {optional = true, version = "0.3"}
-polars = {optional = true, version = "0.51", default-features = false, features = []}
+polars = {optional = true, version = "0.52", default-features = false, features = []}
 tempfile =  {optional = true, version = "3.19"}
 wasm-bindgen = {optional = true, version = "0.2"}
 rust_decimal = {optional = true, version = "1.37"}
