@@ -5,6 +5,15 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.92.1] - 2025-11-17
+
+### Added
+
+- Updated `zip` dependency to v6.0. This requires a MSRV of 1.83.0.
+
+- Updated optional `polars` dependency to v0.52.
+
+
 ## [0.92.0] - 2025-11-12
 
 ### Added
@@ -141,9 +150,9 @@ This release adds several features related to setting themes and default fonts.
 - Added `jiff` feature flag to allow support for [`Jiff`] civil date and time
   types. See [`ExcelDateTime`].
 
-- Update `zip` dependency to v4.0. This requires a MSRV of 1.75.0.
+- Updated `zip` dependency to v4.0. This requires a MSRV of 1.75.0.
 
-- Update polars dependency to v0.48.
+- Updated polars dependency to v0.48.
 
 [`Jiff`]: https://docs.rs/jiff/latest/jiff
 
