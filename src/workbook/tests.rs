@@ -117,4 +117,14 @@ mod workbook_tests {
 
         assert!(matches!(result, Err(XlsxError::ThemeError(_))));
     }
+
+    #[test]
+    fn no_theme_file_in_zip() {
+        let mut workbook = Workbook::default();
+        let theme_file = "tests/input/themes/no_theme.zip";
+
+        let result = workbook.use_custom_theme(theme_file);
+
+        assert!(matches!(result, Err(XlsxError::ThemeError(_))));
+    }
 }

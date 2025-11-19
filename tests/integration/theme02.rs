@@ -9,7 +9,7 @@ use crate::common;
 use rust_xlsxwriter::{Chart, ChartSeries, ChartType, FontScheme, Format, Workbook, XlsxError};
 
 // Create a rust_xlsxwriter file to compare against an Excel file.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     // Set the default format for the workbook.
@@ -48,11 +48,116 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Same test with a .thmx file.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    // Set the default format for the workbook.
+    let format = Format::new()
+        .set_font_name("Arial")
+        .set_font_size(11)
+        .set_font_scheme(FontScheme::Body);
+    workbook.set_default_format(&format, 19, 72)?;
+
+    // Add a custom theme to the workbook.
+    workbook.use_custom_theme("tests/input/themes/Technic.thmx")?;
+
+    let worksheet = workbook.add_worksheet();
+
+    // Add some test data for the chart(s).
+    let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
+    for (row_num, row_data) in data.iter().enumerate() {
+        for (col_num, col_data) in row_data.iter().enumerate() {
+            worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+        }
+    }
+
+    let mut chart = Chart::new(ChartType::Line);
+    chart
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 0, 4, 0)))
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 1, 4, 1)))
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 2, 4, 2)));
+
+    // Set the chart axis ids to match the random values in the Excel file.
+    chart.set_axis_ids(85211776, 85262720);
+
+    worksheet.insert_chart(8, 4, &chart)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Same test with a .xlsx file.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    // Set the default format for the workbook.
+    let format = Format::new()
+        .set_font_name("Arial")
+        .set_font_size(11)
+        .set_font_scheme(FontScheme::Body);
+    workbook.set_default_format(&format, 19, 72)?;
+
+    // Add a custom theme to the workbook.
+    workbook.use_custom_theme("tests/input/themes/technic.xlsx")?;
+
+    let worksheet = workbook.add_worksheet();
+
+    // Add some test data for the chart(s).
+    let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
+    for (row_num, row_data) in data.iter().enumerate() {
+        for (col_num, col_data) in row_data.iter().enumerate() {
+            worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+        }
+    }
+
+    let mut chart = Chart::new(ChartType::Line);
+    chart
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 0, 4, 0)))
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 1, 4, 1)))
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 2, 4, 2)));
+
+    // Set the chart axis ids to match the random values in the Excel file.
+    chart.set_axis_ids(85211776, 85262720);
+
+    worksheet.insert_chart(8, 4, &chart)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_theme02() {
+fn test_theme02_1() {
     let test_runner = common::TestRunner::new()
         .set_name("theme02")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_theme02_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("theme02")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_theme02_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("theme02")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

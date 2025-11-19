@@ -222,6 +222,7 @@ use std::fs::{read_to_string, File};
 use std::io::{BufReader, Cursor, Read, Seek, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
+use zip::ZipArchive;
 
 #[cfg(feature = "constant_memory")]
 use tempfile::tempfile_in;
@@ -1936,9 +1937,9 @@ impl Workbook {
     /// 11 as the default font but, if required, `use_custom_theme()` can be
     /// used to change to a custom, user-supplied, theme.
     ///
-    /// The theme file must be a valid Excel theme XML file extracted from an
-    /// unzipped Excel xlsx file. This theme file is typically located at
-    /// `xl/theme/theme1.xml`.
+    /// The theme file can be an Excel `.thmx` file or `.xlsx` file. It can also
+    /// be a `theme1.xml` file extracted from an unzipped Excel xlsx file, where
+    /// it is typically located at `xl/theme/theme1.xml`.
     ///
     /// In addition to supplying the theme XML file it is also necessary to set
     /// the default format to match the theme. This is done via the
@@ -1958,13 +1959,15 @@ impl Workbook {
     ///
     /// - [`XlsxError::IoError`] - I/O errors if the path doesn't exist or is
     ///   restricted.
-    /// - [`XlsxError::ThemeError`] - File isn't XML or it contains unsupported
-    ///   image fills.
+    /// - [`XlsxError::ThemeError`] - File doesn't contain a `theme` xml file,
+    ///   it isn't XML, or it contains unsupported image fills.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates changing the default theme for a
-    /// workbook to a user supplied custom theme.
+    /// The following example demonstrates changing the default theme for a workbook
+    /// to a user supplied custom theme. The example uses an Excel `.thmx` file but
+    /// it can also be an `.xlsx` file or a theme xml file extracted from an Excel
+    /// xlsx file.
     ///
     /// ```
     /// # // This code is available in examples/doc_workbook_use_custom_theme.rs
@@ -1975,9 +1978,10 @@ impl Workbook {
     /// #     let mut workbook = Workbook::new();
     /// #
     ///     // Add a custom theme to the workbook.
-    ///     workbook.use_custom_theme("tests/input/themes/technic.xml")?;
+    ///     workbook.use_custom_theme("tests/input/themes/Technic.thmx")?;
     ///
-    ///     // Create a new default format to match the custom theme.
+    ///     // Create a new default format to match the custom theme. Note, that the
+    ///     // scheme is set to "Body" to indicate that the font is part of the theme.
     ///     let format = Format::new()
     ///         .set_font_name("Arial")
     ///         .set_font_size(11)
@@ -1991,8 +1995,8 @@ impl Workbook {
     ///
     ///     // Write some text to demonstrate the changed theme.
     ///     worksheet.write(0, 0, "Hello")?;
-    ///
-    ///     // Save the workbook to disk.
+    /// #
+    /// #     // Save the workbook to disk.
     /// #     workbook.save("workbook.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2008,7 +2012,7 @@ impl Workbook {
         &mut self,
         path: P,
     ) -> Result<&mut Workbook, XlsxError> {
-        let theme_xml = read_to_string(&path)?;
+        let theme_xml = Self::read_theme_from_path(&path)?;
 
         // Simple check to see if the file is text/XML.
         if !theme_xml.starts_with("<?xml") {
@@ -2400,6 +2404,38 @@ impl Workbook {
             self.cell_padding,
             self.max_col_width,
         );
+    }
+
+    // Read theme XML from either a zip file (thmx/xlsx) or a text file.
+    fn read_theme_from_path<P: AsRef<Path>>(path: P) -> Result<String, XlsxError> {
+        let file = File::open(&path)?;
+        let reader = BufReader::new(file);
+
+        // Try to read as a thmx/xlsx zip file first.
+        if let Ok(mut archive) = ZipArchive::new(reader) {
+            let possible_paths = [
+                // Path in .thmx file.
+                "theme/theme/theme1.xml",
+                // Path in .xlsx file.
+                "xl/theme/theme1.xml",
+            ];
+
+            for theme_path in &possible_paths {
+                if let Ok(mut theme_file) = archive.by_name(theme_path) {
+                    let mut theme_xml = String::new();
+                    theme_file.read_to_string(&mut theme_xml)?;
+                    return Ok(theme_xml);
+                }
+            }
+
+            return Err(XlsxError::ThemeError(format!(
+                "No theme1.xml found in file: '{}'",
+                path.as_ref().display()
+            )));
+        }
+
+        // Try reading as a text file.
+        read_to_string(&path).map_err(XlsxError::IoError)
     }
 
     // Internal function to prepare the workbook and other component files for

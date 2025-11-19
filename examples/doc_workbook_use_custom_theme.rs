@@ -2,8 +2,10 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates changing the default theme for a
-//! workbook to a user supplied custom theme.
+//! The following example demonstrates changing the default theme for a workbook
+//! to a user supplied custom theme. The example uses an Excel `.thmx` file but
+//! it can also be an `.xlsx` file or a theme xml file extracted from an Excel
+//! xlsx file.
 
 use rust_xlsxwriter::{FontScheme, Format, Workbook, XlsxError};
 
@@ -11,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     // Add a custom theme to the workbook.
-    workbook.use_custom_theme("tests/input/themes/technic.xml")?;
+    workbook.use_custom_theme("tests/input/themes/Technic.thmx")?;
 
     // Create a new default format to match the custom theme. Note, that the
     // scheme is set to "Body" to indicate that the font is part of the theme.

@@ -7,6 +7,7 @@
 tests/input/~*
 !tests/input/*.xlsx
 !tests/input/*.xlsm
+!tests/input/themes/*.xlsx
 tests/input/~*
 *.bak
 
