@@ -8,7 +8,7 @@ keywords = ["excel", "xlsx"]
 exclude = ["tests/**/*"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.92.1"
+version = "0.92.2"
 edition = "2021"
 rust-version = "1.83.0" # For zip.rs compatibility.
 

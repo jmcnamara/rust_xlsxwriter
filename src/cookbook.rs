@@ -2402,8 +2402,11 @@ fn main() -> Result<(), XlsxError> {
 # Theme: Use a custom workbook theme
 
 An example of setting the default theme for a workbook to a user supplied custom
-theme using the `rust_xlsxwriter` library. The theme xml file is extracted from
-an Excel xlsx file. Note that the default font has changed to "Arial (body) 11".
+theme using the `rust_xlsxwriter` library. This example uses an Excel `.thmx`
+file but it can also be an `.xlsx` file or a theme xml file extracted from an
+Excel xlsx file.
+
+Note that the default font has changed to "Arial (body) 11".
 
 **Image of the output file:**
 
@@ -2420,7 +2423,7 @@ fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     // Add a custom theme to the workbook.
-    workbook.use_custom_theme("tests/input/themes/technic.xml")?;
+    workbook.use_custom_theme("tests/input/themes/Technic.thmx")?;
 
     // Create a new default format to match the custom theme. Note, that the
     // scheme is set to "Body" to indicate that the font is part of the theme.

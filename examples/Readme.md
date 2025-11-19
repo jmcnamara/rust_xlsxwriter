@@ -256,7 +256,8 @@ documentation and generally show how an individual function works.
 
 * `app_theme_custom.rs` - Example of setting the default theme for a
   workbook to a user supplied custom theme using the `rust_xlsxwriter`
-  library. The theme xml file is extracted from an Excel xlsx file.
+  library. This example uses an Excel `.thmx` file but it can also be an
+  `.xlsx` file or a theme xml file extracted from an Excel xlsx file.
 
 * `app_theme_excel_2023.rs` - Example of changing the default theme for a
   workbook using the `rust_xlsxwriter` library. The example uses the Excel
@@ -1307,7 +1308,9 @@ documentation and generally show how an individual function works.
   for temporary files when creating a file in "constant memory" mode.
 
 * `doc_workbook_use_custom_theme.rs` - Demonstrates changing the default
-  theme for a workbook to a user supplied custom theme.
+  theme for a workbook to a user supplied custom theme. The example uses an
+  Excel `.thmx` file but it can also be an `.xlsx` file or a theme xml file
+  extracted from an Excel xlsx file.
 
 * `doc_workbook_use_excel_2023_theme.rs` - Demonstrates changing the
   default theme for a workbook. The example uses the Excel 2023

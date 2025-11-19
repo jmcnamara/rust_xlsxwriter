@@ -5,6 +5,14 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.92.2] - 2025-11-19
+
+### Added
+
+- Added support for custom theme files using `.thmx` and `.xlsx` files as well
+  as the previously supported `theme.xml` file. See [`Workbook::use_custom_theme()`].
+
+
 ## [0.92.1] - 2025-11-17
 
 ### Added
