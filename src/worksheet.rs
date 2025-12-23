@@ -5534,8 +5534,8 @@ impl Worksheet {
         let mut x_offset = 0;
         let mut y_offset = 0;
 
-        let image_width = image.scaled_width() as u32;
-        let image_height = image.scaled_height() as u32;
+        let image_width = image.scaled_width().round() as u32;
+        let image_height = image.scaled_height().round() as u32;
 
         if image_height == row_height {
             x_offset = (column_width - image_width) / 2;
