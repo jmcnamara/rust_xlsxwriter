@@ -11,9 +11,9 @@ mod xmlwriter_tests {
     use std::io::Cursor;
 
     use crate::xmlwriter::{
-        self, escape_xml_escapes, xml_data_element, xml_data_element_only, xml_declaration,
-        xml_empty_tag, xml_empty_tag_only, xml_end_tag, xml_si_element, xml_start_tag,
-        xml_start_tag_only,
+        self, escape_xml_data, escape_xml_escapes, xml_data_element, xml_data_element_only,
+        xml_declaration, xml_empty_tag, xml_empty_tag_only, xml_end_tag, xml_si_element,
+        xml_start_tag, xml_start_tag_only,
     };
 
     use pretty_assertions::assert_eq;
@@ -300,5 +300,20 @@ mod xmlwriter_tests {
         // Two patterns right next to each other
         let input = "_x0000__x0001_";
         assert_eq!(escape_xml_escapes(input), "_x005F_x0000__x005F_x0001_");
+    }
+
+    #[test]
+    fn test_escape_xml_data_fffe_and_ffff() {
+        // U+FFFE and U+FFFF are Unicode non-characters that should be escaped
+        // These are invalid in XML and Excel escapes them with _xHHHH_ format
+        let input_fffe = "test\u{FFFE}end";
+        assert_eq!(escape_xml_data(input_fffe), "test_xFFFE_end");
+
+        let input_ffff = "test\u{FFFF}end";
+        assert_eq!(escape_xml_data(input_ffff), "test_xFFFF_end");
+
+        // Both in the same string
+        let input_both = "start\u{FFFE}middle\u{FFFF}end";
+        assert_eq!(escape_xml_data(input_both), "start_xFFFE_middle_xFFFF_end");
     }
 }

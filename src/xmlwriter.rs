@@ -220,6 +220,9 @@ fn match_xml_char(ch: char) -> Option<&'static str> {
         '\x1D' => Some("_x001D_"),
         '\x1E' => Some("_x001E_"),
         '\x1F' => Some("_x001F_"),
+        // Escapes non characters in strings
+        '\u{FFFE}' => Some("_xFFFE_"),
+        '\u{FFFF}' => Some("_xFFFF_"),
 
         _ => None,
     }
