@@ -11,8 +11,9 @@ mod xmlwriter_tests {
     use std::io::Cursor;
 
     use crate::xmlwriter::{
-        self, xml_data_element, xml_data_element_only, xml_declaration, xml_empty_tag,
-        xml_empty_tag_only, xml_end_tag, xml_si_element, xml_start_tag, xml_start_tag_only,
+        self, escape_xml_escapes, xml_data_element, xml_data_element_only, xml_declaration,
+        xml_empty_tag, xml_empty_tag_only, xml_end_tag, xml_si_element, xml_start_tag,
+        xml_start_tag_only,
     };
 
     use pretty_assertions::assert_eq;
@@ -188,5 +189,116 @@ mod xmlwriter_tests {
 
         let got = xmlwriter::cursor_to_str(&writer);
         assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_no_escape_needed() {
+        // Strings without _x should pass through unchanged
+        assert_eq!(escape_xml_escapes("hello world"), "hello world");
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_incomplete_pattern_no_trailing_underscore() {
+        // _x followed by 4 hex digits but no trailing underscore should not be escaped
+        let input = "/path/to/kernel32_x64d8.pyd";
+        assert_eq!(escape_xml_escapes(input), input);
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_insufficient_length() {
+        // _x at end of string with insufficient characters
+        let input = "test_x";
+        assert_eq!(escape_xml_escapes(input), input);
+
+        let input = "test_x00";
+        assert_eq!(escape_xml_escapes(input), input);
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_complete_pattern() {
+        // _xHHHH_ pattern should be escaped
+        let input = "test_x0000_end";
+        assert_eq!(escape_xml_escapes(input), "test_x005F_x0000_end");
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_valid_hex_required() {
+        // _xGGGG_ with non-hex characters should not be escaped
+        let input = "test_xGGGG_end";
+        assert_eq!(escape_xml_escapes(input), input);
+
+        // Mixed valid/invalid hex
+        let input = "test_x00GG_end";
+        assert_eq!(escape_xml_escapes(input), input);
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_case_insensitive_hex() {
+        // Both uppercase and lowercase hex should be escaped
+        let input = "test_xABCD_end";
+        assert_eq!(escape_xml_escapes(input), "test_x005F_xABCD_end");
+
+        let input = "test_xabcd_end";
+        assert_eq!(escape_xml_escapes(input), "test_x005F_xabcd_end");
+
+        let input = "test_xAbCd_end";
+        assert_eq!(escape_xml_escapes(input), "test_x005F_xAbCd_end");
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_multiple_patterns() {
+        // Multiple _xHHHH_ patterns should all be escaped
+        let input = "_x0000_middle_x0001_";
+        assert_eq!(
+            escape_xml_escapes(input),
+            "_x005F_x0000_middle_x005F_x0001_"
+        );
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_real_world_path_no_escape() {
+        // Real-world path that should not be escaped (no trailing underscore)
+        let input = "/path/file_x64d8f123xc8c311aa.pyd";
+        assert_eq!(escape_xml_escapes(input), input);
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_real_world_path_with_escape() {
+        // Real-world path that should be escaped (has _xHHHH_ pattern)
+        let input = "/path/file_x64d8_name.pyd";
+        assert_eq!(escape_xml_escapes(input), "/path/file_x005F_x64d8_name.pyd");
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_at_string_boundaries() {
+        // Pattern at start
+        let input = "_x0000_rest";
+        assert_eq!(escape_xml_escapes(input), "_x005F_x0000_rest");
+
+        // Pattern at end
+        let input = "start_x0000_";
+        assert_eq!(escape_xml_escapes(input), "start_x005F_x0000_");
+
+        // Pattern is entire string
+        let input = "_x0000_";
+        assert_eq!(escape_xml_escapes(input), "_x005F_x0000_");
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_multibyte_characters() {
+        // Ensure multibyte UTF-8 characters don't break the logic
+        let input = "日本語_x0000_テスト";
+        assert_eq!(escape_xml_escapes(input), "日本語_x005F_x0000_テスト");
+
+        // Multibyte chars that might look like hex bytes
+        let input = "test_xäöüü_end"; // Not valid hex
+        assert_eq!(escape_xml_escapes(input), input);
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_adjacent_patterns() {
+        // Two patterns right next to each other
+        let input = "_x0000__x0001_";
+        assert_eq!(escape_xml_escapes(input), "_x005F_x0000__x005F_x0001_");
     }
 }

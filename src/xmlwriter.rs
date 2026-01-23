@@ -292,6 +292,11 @@ pub(crate) fn escape_xml_escapes(original: &str) -> Cow<'_, str> {
             continue;
         }
 
+        // Check that the pattern ends with an underscore to form a complete escape sequence.
+        if !original[index + UNICODE_ESCAPE_LENGTH - 1..].starts_with('_') {
+            continue;
+        }
+
         // Check that the digits in _xABCD_ are a valid hex code.
         if original[index + 2..index + (UNICODE_ESCAPE_LENGTH - 1)]
             .chars()
