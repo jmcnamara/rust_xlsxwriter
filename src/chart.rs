@@ -8425,9 +8425,8 @@ impl ChartRange {
 
         // Allow `=(Sheet1!$A$1:$A$2,Sheet1!$A$4:$A$5)` style non-contiguous
         // ranges and `=Table1[Column1]` Table ranges but don't try to parse.
-        if range_string.starts_with("=(")
-            || range_string.starts_with('(')
-            || range_string.contains('[')
+        if range_string.starts_with('=')
+            && (range_string.starts_with("=(") || range_string.contains('['))
         {
             let mut range_string = range_string;
 

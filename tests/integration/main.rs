@@ -512,6 +512,7 @@ mod chart_theme12;
 mod chart_title01;
 mod chart_title02;
 mod chart_title03;
+mod chart_title04;
 mod chart_up_down_bars01;
 mod chart_up_down_bars02;
 mod chart_up_down_bars03;
