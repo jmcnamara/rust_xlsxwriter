@@ -65,10 +65,10 @@ use crate::XlsxError;
 pub fn column_number_to_name(col_num: ColNum) -> String {
     let mut col_name = String::new();
 
-    let mut col_num = col_num + 1;
+    let mut col_num = u32::from(col_num + 1);
 
     while col_num > 0 {
-        // Set remainder from 1 .. 26
+        // Set remainder from 1 .. 26.
         let mut remainder = col_num % 26;
 
         if remainder == 0 {
@@ -76,7 +76,7 @@ pub fn column_number_to_name(col_num: ColNum) -> String {
         }
 
         // Convert the remainder to a character.
-        let col_letter = char::from_u32(64u32 + u32::from(remainder)).unwrap();
+        let col_letter = char::from_u32(64 + remainder).unwrap();
 
         // Accumulate the column letters, right to left.
         col_name = format!("{col_letter}{col_name}");
