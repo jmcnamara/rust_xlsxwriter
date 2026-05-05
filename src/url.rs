@@ -6,6 +6,8 @@
 
 #![warn(missing_docs)]
 
+mod tests;
+
 use crate::{XlsxError, MAX_PARAMETER_LEN};
 
 const MAX_URL_LEN: usize = 2_080;
@@ -533,17 +535,17 @@ impl Url {
         url.as_bytes().windows(3).any(|w| {
             matches!(
                 w,
-                b"%25"
-                    | b"%22"
-                    | b"%20"
-                    | b"%3c"
-                    | b"%3e"
-                    | b"%5b"
-                    | b"%5d"
-                    | b"%5e"
-                    | b"%60"
-                    | b"%7b"
-                    | b"%7d"
+                b"%20" // Space
+                    | b"%25" // Percent sign %
+                    | b"%22" // Double quote "
+                    | b"%60" // Backtick `
+                    | b"%3c" | b"%3C" // Less than <
+                    | b"%3e" | b"%3E" // Greater than >
+                    | b"%5b" | b"%5B" // Left bracket [
+                    | b"%5d" | b"%5D" // Right bracket ]
+                    | b"%5e" | b"%5E" // Caret ^
+                    | b"%7b" | b"%7B" // Left brace {
+                    | b"%7d" | b"%7D" // Right brace }
             )
         })
     }
