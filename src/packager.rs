@@ -606,11 +606,9 @@ impl<W: Write + Seek + Send> Packager<W> {
     ) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
-        let mut index = 1;
-        for image in &workbook.embedded_images {
+        for (index, image) in (1..).zip(workbook.embedded_images.iter()) {
             let target = format!("../media/image{index}.{}", image.image_type.extension());
             rels.add_document_relationship("image", &target, "");
-            index += 1;
         }
 
         let filename = "xl/richData/_rels/richValueRel.xml.rels";

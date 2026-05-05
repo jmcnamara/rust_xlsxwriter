@@ -1160,7 +1160,7 @@ impl ExcelDateTime {
         let (year, month, day, hour, min, sec) = Self::unix_time_to_date_parts(timestamp);
 
         // Return the ISO 8601 date.
-        format!("{year}-{month:02}-{day:02}T{hour:02}:{min:02}:{sec:02}Z",)
+        format!("{year}-{month:02}-{day:02}T{hour:02}:{min:02}:{sec:02}Z")
     }
 
     // Convert a Unix time to it date components.

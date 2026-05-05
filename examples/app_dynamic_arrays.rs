@@ -259,13 +259,11 @@ fn write_worksheet_data(worksheet: &mut Worksheet, header: &Format) -> Result<()
     worksheet.write_string_with_format(0, 2, "Product", header)?;
     worksheet.write_string_with_format(0, 3, "Units", header)?;
 
-    let mut row = 1;
-    for data in worksheet_data.iter() {
+    for (row, data) in (1..).zip(worksheet_data.iter()) {
         worksheet.write_string(row, 0, data.0)?;
         worksheet.write_string(row, 1, data.1)?;
         worksheet.write_string(row, 2, data.2)?;
         worksheet.write_number(row, 3, data.3)?;
-        row += 1;
     }
 
     Ok(())

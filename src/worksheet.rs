@@ -2347,10 +2347,8 @@ impl Worksheet {
         I: IntoIterator,
         I::Item: IntoExcelData,
     {
-        let mut col = col;
-        for item in data {
+        for (col, item) in (col..).zip(data) {
             self.write(row, col, item)?;
-            col += 1;
         }
 
         Ok(self)
@@ -2391,10 +2389,8 @@ impl Worksheet {
         I: IntoIterator,
         I::Item: IntoExcelData,
     {
-        let mut col = col;
-        for item in data {
+        for (col, item) in (col..).zip(data) {
             self.write_with_format(row, col, item, format)?;
-            col += 1;
         }
 
         Ok(self)
@@ -2471,10 +2467,8 @@ impl Worksheet {
         I: IntoIterator,
         I::Item: IntoExcelData,
     {
-        let mut row = row;
-        for item in data {
+        for (row, item) in (row..).zip(data) {
             self.write(row, col, item)?;
-            row += 1;
         }
 
         Ok(self)
@@ -2515,10 +2509,8 @@ impl Worksheet {
         I: IntoIterator,
         I::Item: IntoExcelData,
     {
-        let mut row = row;
-        for item in data {
+        for (row, item) in (row..).zip(data) {
             self.write_with_format(row, col, item, format)?;
-            row += 1;
         }
 
         Ok(self)
@@ -2600,10 +2592,8 @@ impl Worksheet {
         I::Item: IntoIterator<Item = II>,
         II: IntoExcelData,
     {
-        let mut row = row;
-        for item in data {
+        for (row, item) in (row..).zip(data) {
             self.write_row(row, col, item)?;
-            row += 1;
         }
 
         Ok(self)
@@ -2685,10 +2675,8 @@ impl Worksheet {
         I::Item: IntoIterator<Item = II>,
         II: IntoExcelData,
     {
-        let mut col = col;
-        for item in data {
+        for (col, item) in (col..).zip(data) {
             self.write_column(row, col, item)?;
-            col += 1;
         }
 
         Ok(self)
@@ -15136,10 +15124,8 @@ impl Worksheet {
                             }
                         }
                     }
-                    CellType::Blank { .. } => {
-                        if filter_condition.should_match_blanks {
-                            return true;
-                        }
+                    CellType::Blank { .. } if filter_condition.should_match_blanks => {
+                        return true;
                     }
                     // We don't currently try to handle matching any other data types.
                     _ => {}
@@ -16594,9 +16580,7 @@ impl Worksheet {
     // Convert the shape dimensions into drawing dimensions and add them to
     // the Drawing object. Also set the rel linkages between the files.
     pub(crate) fn prepare_worksheet_shapes(&mut self, shape_id: u32, drawing_id: u32) {
-        let mut shape_id = shape_id;
-
-        for (cell, shape) in &self.shapes.clone() {
+        for (shape_id, (cell, shape)) in (shape_id..).zip(self.shapes.clone().iter()) {
             let row = cell.0;
             let col = cell.1;
             let mut drawing_hyperlink = None;
@@ -16637,8 +16621,6 @@ impl Worksheet {
             drawing_info.url.clone_from(&drawing_hyperlink);
             self.drawing.drawings.push(drawing_info);
             self.drawing.shapes.push(shape.clone());
-
-            shape_id += 1;
         }
 
         // Store the linkage to the worksheets rels file.
@@ -16812,11 +16794,9 @@ impl Worksheet {
     // Convert the chart dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
     pub(crate) fn prepare_worksheet_charts(&mut self, chart_id: u32, drawing_id: u32) {
-        let mut chart_id = chart_id;
-        for chart in self.charts.values_mut() {
+        for (chart_id, chart) in (chart_id..).zip(self.charts.values_mut()) {
             chart.id = chart_id;
             chart.add_axis_ids(chart_id);
-            chart_id += 1;
         }
 
         let mut rel_id = self.drawing_relationships.len() as u32;
@@ -18842,11 +18822,9 @@ impl Worksheet {
                     }
                     | CellType::RichString {
                         string, string_id, ..
-                    } => {
-                        if string_id.is_none() {
-                            let string_index = string_table.shared_string_index(Arc::clone(string));
-                            *string_id = Some(string_index);
-                        }
+                    } if string_id.is_none() => {
+                        let string_index = string_table.shared_string_index(Arc::clone(string));
+                        *string_id = Some(string_index);
                     }
                     _ => {}
                 }
@@ -19458,8 +19436,7 @@ impl Worksheet {
             )
             .expect(XML_WRITE_ERROR);
         } else {
-            write!(writer, r#"<c r="{col_name}{row}"><v>{number}</v></c>"#,)
-                .expect(XML_WRITE_ERROR);
+            write!(writer, r#"<c r="{col_name}{row}"><v>{number}</v></c>"#).expect(XML_WRITE_ERROR);
         }
     }
 
