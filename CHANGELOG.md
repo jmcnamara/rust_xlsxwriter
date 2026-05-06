@@ -5,6 +5,24 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.94.1] - 2026-05-06
+
+### Fixed
+
+- Fixed issue where escaped URLs were double escaped due to case-sensitivity.
+
+  [Issue #175].
+
+  [Issue #175]: https://github.com/jmcnamara/rust_xlsxwriter/issues/175
+
+- Fixed issue where chart titles containing brackets were ignored and not added.
+
+  [Issue #174].
+
+  [Issue #174]: https://github.com/jmcnamara/rust_xlsxwriter/issues/174
+
+
 ## [0.94.0] - 2026-02-28
 
 ### Added
