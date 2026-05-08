@@ -33,6 +33,7 @@ rust_xlsxwriter_derive = {optional = true, version = "0.2"}
 [dev-dependencies]
 regex = "1.12"
 pretty_assertions = "1.4"
+criterion = "0.5"
 
 [features]
 # `default`: Includes all the standard functionality.
@@ -403,6 +404,13 @@ required-features = ["constant_memory"]
 name = "doc_workbook_set_tempdir"
 path = "examples/doc_workbook_set_tempdir.rs"
 required-features = ["constant_memory"]
+
+#
+# Benchmarks
+#
+[[bench]]
+name = "number_formatting"
+harness = false
 
 
 # Workaround to display feature specific docs.
