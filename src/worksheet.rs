@@ -19420,13 +19420,17 @@ impl Worksheet {
         number: f64,
         xf_index: u32,
     ) {
-        // Use the optional `ryu` crate to format f64 cell number data as a
-        // string. Note, the the slightly faster `format_finite()` buffer
-        // function is safe to use here since nan/inf numbers are filtered out
-        // at the `store_number()` level and written as strings.
-        #[cfg(feature = "ryu")]
+        // Use the optional `zmij` or `ryu` crates to format f64 cell number
+        // data as a string. Note, the the slightly faster `format_finite()`
+        // buffer function is safe to use here since nan/inf numbers are
+        // filtered out at the `store_number()` level and written as strings.
+        #[cfg(feature = "zmij")]
+        let mut buffer = zmij::Buffer::new();
+
+        #[cfg(all(feature = "ryu", not(feature = "zmij")))]
         let mut buffer = ryu::Buffer::new();
-        #[cfg(feature = "ryu")]
+
+        #[cfg(any(feature = "ryu", feature = "zmij"))]
         let number = buffer.format_finite(number);
 
         if xf_index > 0 {
