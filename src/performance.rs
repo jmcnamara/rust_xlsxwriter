@@ -11,7 +11,7 @@ Contents:
 - [Constant memory mode](#constant-memory-mode)
   - [Enabling "constant memory" mode](#enabling-constant-memory-mode)
   - [Restrictions when using "constant memory" mode](#restrictions-when-using-constant-memory-mode)
-- [RYU - faster floating-point conversion](#ryu---faster-floating-point-conversion)
+- [ZMIJ - faster floating-point conversion](#zmij---faster-floating-point-conversion)
 - [Performance testing](#performance-testing)
 - [Programs used to generate the test results](#programs-used-to-generate-the-test-results)
   - [Rust performance test program](#rust-performance-test-program)
@@ -215,21 +215,17 @@ There are some limitations and restrictions when using "constant memory" mode.
 [tempfile]: https://crates.io/crates/tempfile
 
 
-## RYU - faster floating-point conversion
+## ZMIJ - faster floating-point conversion
 
-The `rust_xlsxwriter` `ryu` feature flag enables the [ryu] crate, which provides
-a "pure Rust implementation of Ryū, an algorithm to quickly convert
+The `rust_xlsxwriter` `zmij` feature flag enables the [zmij] crate, which provides
+a "pure Rust implementation of Żmij, an algorithm to quickly convert
 floating-point numbers to decimal strings".
 
-This speeds up writing numeric worksheet cells for large data files. It gives a
-performance boost above 300,000 numeric cells and can be up to 20% faster than
-the default number formatting for 1,000,000 numeric cells:
+This speeds up writing numeric worksheet by about 10%.
 
-<img src="https://rustxlsxwriter.github.io/images/performance_speed3.png">
+<img src="https://rustxlsxwriter.github.io/images/performance_speed4.png">
 
-
-
-[ryu]: https://crates.io/crates/ryu/
+[zmij]: https://crates.io/crates/zmij/
 
 ## Performance testing
 

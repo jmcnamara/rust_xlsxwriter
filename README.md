@@ -200,8 +200,8 @@ These are all off by default.
   [wasm-xlsxwriter](https://github.com/estie-inc/wasm-xlsxwriter).
 - `rust_decimal`: Adds support for writing the
   [`rust_decimal`](https://crates.io/crates/rust_decimal) `Decimal`.
-- `ryu`: Adds a dependency on `ryu`. This speeds up writing numeric
-  worksheet cells for large data files. See the [Performance] documentation.
+- `zmij`: Adds a dependency on `zmij`. This speeds up writing numeric
+  worksheet cells by around 10%. See the [Performance] documentation.
 
 A `rust_xlsxwriter` feature can be enabled in your `Cargo.toml` file as
 follows:
