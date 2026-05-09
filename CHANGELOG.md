@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.95.0] - 2026-05-09
+
+### Added
+
+  - Added an optional dependency on the [zmij] crate to speed up writing numeric
+    worksheet data. The feature flag is `zmij`.
+
+    This feature gives an appoximate 10% performance increase in writing numeric
+    data to a worksheet. See the performance analysis in [Issue #170]. The
+    performance is better than the [ryu] crate, which is by the same author and
+    has the same interface. As such, the `ryu` feature/crate is deprecated in
+    favour of the `zmij` feature/crate.
+
+    [Issue #170]: https://github.com/jmcnamara/rust_xlsxwriter/issues/170
+
+    [zmij]: https://docs.rs/zmij/latest/zmij/index.html
+
+
 ## [0.94.1] - 2026-05-06
 
 ### Fixed
@@ -18,9 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed issue where chart titles containing brackets were ignored and not added.
 
-  [Issue #174].
+  [Issue #173].
 
-  [Issue #174]: https://github.com/jmcnamara/rust_xlsxwriter/issues/174
+  [Issue #173]: https://github.com/jmcnamara/rust_xlsxwriter/issues/173
 
 
 ## [0.94.0] - 2026-02-28
