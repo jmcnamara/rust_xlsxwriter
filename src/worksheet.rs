@@ -12209,10 +12209,13 @@ impl Worksheet {
             return Err(XlsxError::RowColumnLimitError);
         }
 
-        // Check for empty struct name.
+        // Check for empty struct name. This happens when the type isn't a
+        // struct, or when it uses `#[serde(flatten)]`.
         if header_options.struct_name.is_empty() {
             return Err(XlsxError::ParameterError(
-                "Struct not found or serialized/deserialized.".to_string(),
+                "Serialization headers couldn't be determined, or a struct with `#[serde(flatten)]` was used. \
+                See the limitations section in the `rust_xlsxwriter::serializer` documentation."
+                    .to_string(),
             ));
         }
 
