@@ -1402,11 +1402,10 @@ impl Workbook {
     ///
     /// ```
     /// # // This code is available in examples/doc_workbook_save_to_writer.rs
-    /// #
-    /// # use std::fs::File;
-    /// # use std::io::{Cursor, Write};
-    /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// use std::fs::File;
+    /// use std::io::Write;
+    ///
+    /// use rust_xlsxwriter::{Workbook, XlsxError};
     ///
     /// fn main() -> Result<(), XlsxError> {
     ///     let mut workbook = Workbook::new();
@@ -1414,22 +1413,21 @@ impl Workbook {
     ///     let worksheet = workbook.add_worksheet();
     ///     worksheet.write_string(0, 0, "Hello")?;
     ///
-    ///     // Save the file to a File object.
+    ///     // 1. Save the file to a File object.
     ///     let file = File::create("workbook1.xlsx")?;
     ///     workbook.save_to_writer(file)?;
     ///
-    ///     // Save the file to a buffer. It is wrapped in a Cursor because it need to
-    ///     // implement the `Seek` trait.
-    ///     let mut cursor = Cursor::new(Vec::new());
-    ///     workbook.save_to_writer(&mut cursor)?;
+    ///     // 2. Save the file to a buffer.
+    ///     let mut buf = Vec::new();
+    ///     workbook.save_to_writer(&mut buf)?;
     ///
     ///     // Write the buffer to a file for the sake of the example.
-    ///     let buf = cursor.into_inner();
     ///     let mut file = File::create("workbook2.xlsx")?;
     ///     Write::write_all(&mut file, &buf)?;
     ///
     ///     Ok(())
     /// }
+    /// ```
     ///
     pub fn save_to_writer<W>(&mut self, writer: W) -> Result<(), XlsxError>
     where

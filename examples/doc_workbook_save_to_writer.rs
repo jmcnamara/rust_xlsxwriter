@@ -6,7 +6,7 @@
 //! that implement the `Write` trait like a file and a buffer.
 
 use std::fs::File;
-use std::io::{Cursor, Write};
+use std::io::Write;
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 
@@ -16,18 +16,15 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     worksheet.write_string(0, 0, "Hello")?;
 
-    // Save the file to a File object.
+    // 1. Save the file to a File object.
     let file = File::create("workbook1.xlsx")?;
     workbook.save_to_writer(file)?;
 
-    // Save the file to a buffer. It is wrapped in a Cursor because it need to
-    // implement the `Seek` trait. See also the `workbook.save_to_buffer()`
-    // method for an alternative approach.
-    let mut cursor = Cursor::new(Vec::new());
-    workbook.save_to_writer(&mut cursor)?;
+    // 2. Save the file to a buffer.
+    let mut buf = Vec::new();
+    workbook.save_to_writer(&mut buf)?;
 
     // Write the buffer to a file for the sake of the example.
-    let buf = cursor.into_inner();
     let mut file = File::create("workbook2.xlsx")?;
     Write::write_all(&mut file, &buf)?;
 
