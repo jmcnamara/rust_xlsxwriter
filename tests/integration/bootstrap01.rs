@@ -94,15 +94,14 @@ fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
 
 // Test case to demonstrate creating a basic file from a buffer<W>.
 fn create_new_xlsx_file_8(filename: &str) -> Result<(), XlsxError> {
-    let mut cursor = std::io::Cursor::new(Vec::new());
+    let mut buf = Vec::new();
 
     let mut workbook = Workbook::new();
     let _worksheet = workbook.add_worksheet();
 
-    workbook.save_to_writer(&mut cursor)?;
+    workbook.save_to_writer(&mut buf)?;
 
     // Write the buffer out to a file.
-    let buf = cursor.into_inner();
     let mut file = std::fs::File::create(filename)?;
     std::io::Write::write_all(&mut file, &buf)?;
 
