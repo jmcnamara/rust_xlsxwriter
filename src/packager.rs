@@ -41,16 +41,16 @@
 // the package and writes them into the xlsx file.
 
 use std::collections::HashSet;
-use std::io::{Seek, Write};
+use std::io::Write;
 
 #[cfg(feature = "constant_memory")]
-use std::io::BufReader;
+use std::io::{BufReader, Seek};
 
 use std::sync::{Arc, Mutex};
 #[cfg(not(target_arch = "wasm32"))]
 use std::thread;
 
-use zip::write::SimpleFileOptions;
+use zip::write::{SimpleFileOptions, StreamWriter};
 use zip::{DateTime, ZipWriter};
 
 use crate::app::App;
@@ -75,20 +75,20 @@ use crate::worksheet::Worksheet;
 use crate::{xmlwriter, Comment, DocProperties, Visible, NUM_IMAGE_FORMATS};
 
 // Packager struct to assemble the xlsx file.
-pub struct Packager<W: Write + Seek> {
-    zip: ZipWriter<W>,
+pub struct Packager<W: Write> {
+    zip: ZipWriter<StreamWriter<W>>,
     zip_options: SimpleFileOptions,
     zip_options_for_binary_files: SimpleFileOptions,
 }
 
-impl<W: Write + Seek + Send> Packager<W> {
+impl<W: Write + Send> Packager<W> {
     // -----------------------------------------------------------------------
     // Crate public methods.
     // -----------------------------------------------------------------------
 
     // Create a new Packager struct.
     pub(crate) fn new(writer: W, use_large_file: bool) -> Packager<W> {
-        let zip = zip::ZipWriter::new(writer);
+        let zip = zip::ZipWriter::new_stream(writer);
 
         let zip_options = SimpleFileOptions::default()
             .compression_method(zip::CompressionMethod::Deflated)

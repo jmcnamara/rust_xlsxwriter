@@ -219,7 +219,7 @@ mod tests;
 
 use std::collections::{HashMap, HashSet};
 use std::fs::{read_to_string, File};
-use std::io::{BufReader, Cursor, Read, Seek, Write};
+use std::io::{BufReader, Cursor, Read, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
 use zip::ZipArchive;
@@ -1433,7 +1433,7 @@ impl Workbook {
     ///
     pub fn save_to_writer<W>(&mut self, writer: W) -> Result<(), XlsxError>
     where
-        W: Write + Seek + Send,
+        W: Write + Send,
     {
         self.save_internal(writer)?;
         Ok(())
@@ -2442,7 +2442,7 @@ impl Workbook {
     // writing to the xlsx file.
     #[allow(clippy::similar_names)]
     #[allow(clippy::too_many_lines)]
-    fn save_internal<W: Write + Seek + Send>(&mut self, writer: W) -> Result<(), XlsxError> {
+    fn save_internal<W: Write + Send>(&mut self, writer: W) -> Result<(), XlsxError> {
         // Reset workbook and worksheet state data between saves.
         self.reset();
 
