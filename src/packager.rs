@@ -44,7 +44,7 @@ use std::collections::HashSet;
 use std::io::{Seek, Write};
 
 #[cfg(feature = "constant_memory")]
-use std::io::{BufRead, BufReader};
+use std::io::BufReader;
 
 use std::sync::{Arc, Mutex};
 #[cfg(not(target_arch = "wasm32"))]
@@ -459,15 +459,7 @@ impl<W: Write + Seek + Send> Packager<W> {
 
                 worksheet.file_writer.rewind().unwrap();
                 let mut reader = BufReader::new(worksheet.file_writer.get_ref());
-                loop {
-                    let buffer = reader.fill_buf().unwrap();
-                    let length = buffer.len();
-                    if length == 0 {
-                        break;
-                    }
-                    self.zip.write_all(buffer).unwrap();
-                    reader.consume(length);
-                }
+                std::io::copy(&mut reader, &mut self.zip)?;
             }
 
             // Section 3. In memory metadata at end of the file.
