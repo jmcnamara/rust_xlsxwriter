@@ -1379,8 +1379,9 @@ impl Workbook {
     ///
     /// The workbook `save_to_writer()` method is similar to the
     /// [`Workbook::save()`] method except that it writes the xlsx file to types
-    /// that implement the [`Write`] trait such as the [`std::fs::File`] type or
-    /// buffers.
+    /// that implement the [`Write`] trait such as the [`std::fs::File`] type.
+    /// The interface doesn't require `Seek` (since version 0.96) so it is also
+    /// possible to write directly to STDOUT or to a [`u8`] buffer.
     ///
     /// # Parameters
     ///

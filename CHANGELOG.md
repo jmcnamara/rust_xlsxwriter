@@ -5,6 +5,22 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.96.0] - 2026-07-01
+
+### Added
+
+  - Dropped the `Seek` trait requirement from the [`Workbook::save_to_writer()`]
+    API which allows it to write to STDOUT, to buffers (without Cursor), and to
+    other `Write` interfaces that don't support seek. This was achieved by
+    moving internally to the [`zip.rs`] stream API. See the discussion at
+    [Feature Request #179].
+
+    [Feature Request #179]: https://github.com/jmcnamara/rust_xlsxwriter/issues/179
+    [`zip.rs`]: https://crates.io/crates/zip
+
+  - Updated optional `polars` dependency to v0.54 to allow a similar update in
+    the [`polars_excel_writer`] crate.
+
 
 ## [0.95.0] - 2026-05-09
 
