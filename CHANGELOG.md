@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added an optional dependency on the [zmij] crate to speed up writing numeric
     worksheet data. The feature flag is `zmij`.
 
-    This feature gives an appoximate 10% performance increase in writing numeric
+    This feature gives an approximate 10% performance increase in writing numeric
     data to a worksheet. See the performance analysis in [Issue #170]. The
     performance is better than the [ryu] crate, which is by the same author and
     has the same interface. As such, the `ryu` feature/crate is deprecated in

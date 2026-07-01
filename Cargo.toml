@@ -33,6 +33,15 @@ rust_xlsxwriter_derive = {optional = true, version = "0.2"}
 [dev-dependencies]
 regex = "1.12"
 pretty_assertions = "1.4"
+criterion = "0.5"
+
+[[bench]]
+name = "float_formatting"
+harness = false
+
+[[bench]]
+name = "write_performance"
+harness = false
 
 [features]
 # `default`: Includes all the standard functionality.
