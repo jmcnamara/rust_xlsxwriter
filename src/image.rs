@@ -1058,8 +1058,10 @@ impl Image {
         let width_dpi: f64 = 96.0;
         let height_dpi: f64 = 96.0;
 
-        let width = unpack_u32_from_le_bytes(data, 18);
-        let height = unpack_u32_from_le_bytes(data, 22);
+        // The height can be stored as negative for a top-down DIB so we need to
+        // take the absolute value.
+        let height = unpack_i32_from_le_bytes(data, 22).abs();
+        let width = unpack_i32_from_le_bytes(data, 18);
 
         self.width = f64::from(width);
         self.height = f64::from(height);
@@ -1207,6 +1209,6 @@ fn unpack_u32_from_be_bytes(data: &[u8], offset: usize) -> u32 {
     u32::from_be_bytes(data[offset..offset + 4].try_into().unwrap())
 }
 
-fn unpack_u32_from_le_bytes(data: &[u8], offset: usize) -> u32 {
-    u32::from_le_bytes(data[offset..offset + 4].try_into().unwrap())
+fn unpack_i32_from_le_bytes(data: &[u8], offset: usize) -> i32 {
+    i32::from_le_bytes(data[offset..offset + 4].try_into().unwrap())
 }
