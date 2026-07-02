@@ -9,35 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-  - Dropped the `Seek` trait requirement from the [`Workbook::save_to_writer()`]
-    API which allows it to write to STDOUT, to buffers (without Cursor), and to
-    other `Write` interfaces that don't support seek. This was achieved by
-    moving internally to the [`zip.rs`] stream API. See the discussion at
-    [Feature Request #179].
+- Dropped the `Seek` trait requirement from the [`Workbook::save_to_writer()`]
+  API which allows it to write to STDOUT, to buffers (without Cursor), and to
+  other `Write` interfaces that don't support seek. This was achieved by
+  moving to the [`zip.rs`] stream API internally. See the discussion at
+  [Feature Request #179].
 
-    [Feature Request #179]: https://github.com/jmcnamara/rust_xlsxwriter/issues/179
-    [`zip.rs`]: https://crates.io/crates/zip
+  [Feature Request #179]: https://github.com/jmcnamara/rust_xlsxwriter/issues/179
+  [`zip.rs`]: https://crates.io/crates/zip
 
-  - Updated optional `polars` dependency to v0.54 to allow a similar update in
-    the [`polars_excel_writer`] crate.
+- Updated optional `polars` dependency to v0.54 to allow a similar update in
+  the [`polars_excel_writer`] crate.
 
 
 ## [0.95.0] - 2026-05-09
 
 ### Added
 
-  - Added an optional dependency on the [zmij] crate to speed up writing numeric
-    worksheet data. The feature flag is `zmij`.
+- Added an optional dependency on the [zmij] crate to speed up writing numeric
+  worksheet data. The feature flag is `zmij`.
 
-    This feature gives an approximate 10% performance increase in writing numeric
-    data to a worksheet. See the performance analysis in [Issue #170]. The
-    performance is better than the [ryu] crate, which is by the same author and
-    has the same interface. As such, the `ryu` feature/crate is deprecated in
-    favour of the `zmij` feature/crate.
+  This feature gives an approximate 10% performance increase in writing numeric
+  data to a worksheet. See the performance analysis in [Issue #170]. The
+  performance is better than the [ryu] crate, which is by the same author and
+  has the same interface. As such, the `ryu` feature/crate is deprecated in
+  favour of the `zmij` feature/crate.
 
-    [Issue #170]: https://github.com/jmcnamara/rust_xlsxwriter/issues/170
+  [Issue #170]: https://github.com/jmcnamara/rust_xlsxwriter/issues/170
 
-    [zmij]: https://docs.rs/zmij/latest/zmij/index.html
+  [zmij]: https://docs.rs/zmij/latest/zmij/index.html
 
 
 ## [0.94.1] - 2026-05-06
