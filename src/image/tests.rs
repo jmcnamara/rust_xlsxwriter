@@ -96,4 +96,21 @@ mod image_tests {
         let image = Image::new(filename);
         assert!(matches!(image, Err(XlsxError::ImageDimensionError)));
     }
+
+    #[test]
+    fn truncated_image_data() {
+        // Truncated or tiny buffers should return an error rather than panic on
+        // the fixed-offset header reads.
+        let cases: Vec<Vec<u8>> = vec![
+            vec![],                                               // Empty.
+            vec![0x42, 0x4D, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],      // "BM" + junk.
+            vec![0u8; 25],                                        // Below the guard.
+            vec![0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A], // PNG sig only.
+        ];
+
+        for data in cases {
+            let image = Image::new_from_buffer(&data);
+            assert!(matches!(image, Err(XlsxError::UnknownImageType)));
+        }
+    }
 }

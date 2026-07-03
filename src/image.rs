@@ -906,6 +906,12 @@ impl Image {
     fn process_image(&mut self) -> Result<(), XlsxError> {
         let data = self.data.clone();
 
+        // Ensure the data is large enough to read the format markers below. The
+        // minimum size is to cover the largest initial offset, which is BMP.
+        if data.len() < 26 {
+            return Err(XlsxError::UnknownImageType);
+        }
+
         let png_marker = &data[1..4];
         let jpg_marker = unpack_u16_from_be_bytes(&data, 0);
         let bmp_marker = &data[0..2];
@@ -926,8 +932,8 @@ impl Image {
             return Err(XlsxError::UnknownImageType);
         }
 
-        // Check that we read a the image dimensions.
-        if self.width == 0.0 || self.height == 0.0 {
+        // Check that we read valid image dimensions.
+        if self.width <= 0.0 || self.height <= 0.0 {
             return Err(XlsxError::ImageDimensionError);
         }
 
