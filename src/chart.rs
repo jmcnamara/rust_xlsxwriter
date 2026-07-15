@@ -254,15 +254,16 @@
 //! The `rust_xlsxwriter` library supports the main original Excel chart types
 //! such as:
 //!
-//! - Area
-//! - Bar
-//! - Column
+//! - Area (2D and 3D)
+//! - Bar (2D and 3D)
+//! - Column (2D and 3D)
 //! - Doughnut
-//! - Line
-//! - Pie
+//! - Line (2D and 3D)
+//! - Pie (2D and 3D)
 //! - Radar
 //! - Stock
 //! - Scatter
+//! - Surface and Contour
 //!
 //! See [`ChartType`] for the full list and examples.
 //!
@@ -829,6 +830,7 @@ pub struct Chart {
     scale_height: f64,
     axis_ids: (u32, u32),
     axis2_ids: (u32, u32),
+    axis3_id: u32,
     category_has_num_format: bool,
     chart_type: ChartType,
     chart_group_type: ChartType,
@@ -866,6 +868,14 @@ pub struct Chart {
     series_index: usize,
     has_secondary_axis: bool,
     has_crosses: bool,
+    is_3d: bool,
+    gap_depth: u16,
+    view_3d_rot_x: i8,
+    view_3d_rot_y: u16,
+    view_3d_perspective: u8,
+    view_3d_depth_percent: u16,
+    view_3d_height_percent: Option<u16>,
+    view_3d_right_angle_axes: bool,
 }
 
 impl Chart {
@@ -932,6 +942,25 @@ impl Chart {
     pub fn new(chart_type: ChartType) -> Chart {
         let writer = Cursor::new(Vec::with_capacity(2048));
 
+        let is_3d = matches!(
+            chart_type,
+            ChartType::Area3D
+                | ChartType::Area3DStacked
+                | ChartType::Area3DPercentStacked
+                | ChartType::Bar3D
+                | ChartType::Bar3DStacked
+                | ChartType::Bar3DPercentStacked
+                | ChartType::Column3D
+                | ChartType::Column3DStacked
+                | ChartType::Column3DPercentStacked
+                | ChartType::Line3D
+                | ChartType::Pie3D
+                | ChartType::Surface3D
+                | ChartType::Surface3DWireframe
+                | ChartType::Contour
+                | ChartType::ContourWireframe
+        );
+
         let chart = Chart {
             writer,
             id: 0,
@@ -949,6 +978,7 @@ impl Chart {
 
             axis_ids: (0, 0),
             axis2_ids: (0, 0),
+            axis3_id: 0,
             series: vec![],
             category_has_num_format: false,
             chart_type,
@@ -986,28 +1016,51 @@ impl Chart {
             has_crosses: true,
             is_chartsheet: false,
             protection_on: false,
+            is_3d,
+            gap_depth: 150,
+            view_3d_rot_x: 15,
+            view_3d_rot_y: 20,
+            view_3d_perspective: 15,
+            view_3d_depth_percent: 100,
+            view_3d_height_percent: None,
+            view_3d_right_angle_axes: true,
         };
 
         match chart_type {
-            ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
-                Self::initialize_area_chart(chart)
-            }
+            ChartType::Area
+            | ChartType::AreaStacked
+            | ChartType::AreaPercentStacked
+            | ChartType::Area3D
+            | ChartType::Area3DStacked
+            | ChartType::Area3DPercentStacked => Self::initialize_area_chart(chart),
 
-            ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
-                Self::initialize_bar_chart(chart)
-            }
+            ChartType::Bar
+            | ChartType::BarStacked
+            | ChartType::BarPercentStacked
+            | ChartType::Bar3D
+            | ChartType::Bar3DStacked
+            | ChartType::Bar3DPercentStacked => Self::initialize_bar_chart(chart),
 
-            ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
-                Self::initialize_column_chart(chart)
-            }
+            ChartType::Column
+            | ChartType::ColumnStacked
+            | ChartType::ColumnPercentStacked
+            | ChartType::Column3D
+            | ChartType::Column3DStacked
+            | ChartType::Column3DPercentStacked => Self::initialize_column_chart(chart),
 
             ChartType::Doughnut => Self::initialize_doughnut_chart(chart),
 
-            ChartType::Line | ChartType::LineStacked | ChartType::LinePercentStacked => {
-                Self::initialize_line_chart(chart)
-            }
+            ChartType::Line
+            | ChartType::LineStacked
+            | ChartType::LinePercentStacked
+            | ChartType::Line3D => Self::initialize_line_chart(chart),
 
-            ChartType::Pie => Self::initialize_pie_chart(chart),
+            ChartType::Pie | ChartType::Pie3D => Self::initialize_pie_chart(chart),
+
+            ChartType::Surface3D
+            | ChartType::Surface3DWireframe
+            | ChartType::Contour
+            | ChartType::ContourWireframe => Self::initialize_surface_chart(chart),
 
             ChartType::Radar | ChartType::RadarWithMarkers | ChartType::RadarFilled => {
                 Self::initialize_radar_chart(chart)
@@ -1078,6 +1131,17 @@ impl Chart {
         Self::new(ChartType::Line)
     }
 
+    /// Create a new 3D Line `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Line3D)` to
+    /// create a default 3D Line chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_line_3d() -> Chart {
+        Self::new(ChartType::Line3D)
+    }
+
     /// Create a new Pie `Chart`.
     ///
     /// This is a syntactic shortcut for `Chart::new(ChartType::Pie)` to
@@ -1087,6 +1151,17 @@ impl Chart {
     ///
     pub fn new_pie() -> Chart {
         Self::new(ChartType::Pie)
+    }
+
+    /// Create a new 3D Pie `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Pie3D)` to
+    /// create a default 3D Pie chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_pie_3d() -> Chart {
+        Self::new(ChartType::Pie3D)
     }
 
     /// Create a new Radar `Chart`.
@@ -1951,6 +2026,147 @@ impl Chart {
         self
     }
 
+    /// Set the X rotation of the 3D view for a 3D chart.
+    ///
+    /// Set the rotation around the horizontal (X) axis of the 3D view. This
+    /// corresponds to the "Y Rotation" setting in the Excel "3-D Rotation"
+    /// dialog.
+    ///
+    /// This property is only applicable to 3D charts such as
+    /// [`ChartType::Column3D`], see [`ChartType`].
+    ///
+    /// # Parameters
+    ///
+    /// - `rotation`: The rotation angle in degrees. The range is -90 <=
+    ///   `rotation` <= 90. The Excel default is 15 (30 for 3D Pie charts).
+    ///
+    pub fn set_view_3d_x_rotation(&mut self, rotation: i8) -> &mut Chart {
+        if (-90..=90).contains(&rotation) {
+            self.view_3d_rot_x = rotation;
+        }
+        self
+    }
+
+    /// Set the Y rotation of the 3D view for a 3D chart.
+    ///
+    /// Set the rotation around the vertical (Y) axis of the 3D view. This
+    /// corresponds to the "X Rotation" setting in the Excel "3-D Rotation"
+    /// dialog.
+    ///
+    /// This property is only applicable to 3D charts such as
+    /// [`ChartType::Column3D`], see [`ChartType`].
+    ///
+    /// # Parameters
+    ///
+    /// - `rotation`: The rotation angle in degrees. The range is 0 <=
+    ///   `rotation` <= 360. The Excel default is 20 (0 for 3D Pie charts).
+    ///
+    pub fn set_view_3d_y_rotation(&mut self, rotation: u16) -> &mut Chart {
+        if (0..=360).contains(&rotation) {
+            self.view_3d_rot_y = rotation;
+        }
+        self
+    }
+
+    /// Set the perspective of the 3D view for a 3D chart.
+    ///
+    /// The perspective is only used when the "right angle axes" property is
+    /// off, see [`Chart::set_view_3d_right_angle_axes()`]. It is always used
+    /// for 3D Pie charts.
+    ///
+    /// This property is only applicable to 3D charts such as
+    /// [`ChartType::Column3D`], see [`ChartType`].
+    ///
+    /// # Parameters
+    ///
+    /// - `perspective`: The perspective angle in degrees. The range is 0 <=
+    ///   `perspective` <= 120. The Excel default is 15.
+    ///
+    pub fn set_view_3d_perspective(&mut self, perspective: u8) -> &mut Chart {
+        if (0..=120).contains(&perspective) {
+            self.view_3d_perspective = perspective;
+        }
+        self
+    }
+
+    /// Set the depth of a 3D chart as a percentage of the chart width.
+    ///
+    /// This property is only applicable to 3D charts such as
+    /// [`ChartType::Column3D`], see [`ChartType`]. It doesn't apply to 3D Pie
+    /// charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `percent`: The depth percentage. The range is 20 <= `percent` <=
+    ///   2000 and the default is 100.
+    ///
+    pub fn set_view_3d_depth_percent(&mut self, percent: u16) -> &mut Chart {
+        if (20..=2000).contains(&percent) {
+            self.view_3d_depth_percent = percent;
+        }
+        self
+    }
+
+    /// Set the height of a 3D chart as a percentage of the chart width.
+    ///
+    /// By default Excel autoscales the height of the 3D view. Setting this
+    /// property turns autoscaling off and uses an explicit height instead.
+    ///
+    /// This property is only applicable to 3D charts such as
+    /// [`ChartType::Column3D`], see [`ChartType`].
+    ///
+    /// # Parameters
+    ///
+    /// - `percent`: The height percentage. The range is 5 <= `percent` <=
+    ///   500.
+    ///
+    pub fn set_view_3d_height_percent(&mut self, percent: u16) -> &mut Chart {
+        if (5..=500).contains(&percent) {
+            self.view_3d_height_percent = Some(percent);
+        }
+        self
+    }
+
+    /// Set the "right angle axes" property of the 3D view for a 3D chart.
+    ///
+    /// When this property is on (the Excel default for most 3D charts) the
+    /// axes of the chart are drawn at right angles and the perspective
+    /// setting is ignored. Turn it off to view the chart in perspective, see
+    /// [`Chart::set_view_3d_perspective()`].
+    ///
+    /// This property is only applicable to 3D charts such as
+    /// [`ChartType::Column3D`], see [`ChartType`].
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is on by default except for
+    ///   3D Pie, Surface and Contour charts.
+    ///
+    pub fn set_view_3d_right_angle_axes(&mut self, enable: bool) -> &mut Chart {
+        self.view_3d_right_angle_axes = enable;
+        self
+    }
+
+    /// Set the gap between series planes of a 3D chart.
+    ///
+    /// Set the gap, along the depth/series axis, between the series of a 3D
+    /// chart as a percentage of the plane depth.
+    ///
+    /// This property is only applicable to 3D Area, Bar, Column and Line
+    /// charts, see [`ChartType`].
+    ///
+    /// # Parameters
+    ///
+    /// - `gap`: The gap depth percentage. The range is 0 <= `gap` <= 500 and
+    ///   the default is 150.
+    ///
+    pub fn set_gap_depth(&mut self, gap: u16) -> &mut Chart {
+        if (0..=500).contains(&gap) {
+            self.gap_depth = gap;
+        }
+        self
+    }
+
     /// Set Up-Down bar indicators for a Line chart.
     ///
     /// Set Up-Down bar indicator to indicate change between two or more series.
@@ -2799,6 +3015,20 @@ impl Chart {
         self.axis_ids = (axis_id1, axis_id2);
     }
 
+    /// Set a default value for the series (depth) axis id of a 3D chart.
+    ///
+    /// This is mainly used to ensure that the axis ids used in testing match
+    /// the semi-randomized values in the target Excel file.
+    ///
+    /// # Parameters
+    ///
+    /// - `axis_id`: Series/depth axis id.
+    ///
+    #[doc(hidden)]
+    pub fn set_axis3_id(&mut self, axis_id: u32) {
+        self.axis3_id = axis_id;
+    }
+
     /// Set default values for the secondary chart axis ids.
     ///
     /// This is mainly used to ensure that the secondary axis ids used in
@@ -2831,6 +3061,10 @@ impl Chart {
             self.axis2_ids = (axis_id + 2, axis_id + 3);
         } else {
             self.axis2_ids = (axis_id + 10_000_000, axis_id + 10_000_001);
+        }
+
+        if self.axis3_id == 0 {
+            self.axis3_id = axis_id + 4;
         }
     }
 
@@ -2919,13 +3153,18 @@ impl Chart {
 
         self.chart_group_type = ChartType::Area;
 
-        if self.chart_type == ChartType::Area {
-            self.grouping = ChartGrouping::Standard;
-        } else if self.chart_type == ChartType::AreaStacked {
-            self.grouping = ChartGrouping::Stacked;
-        } else if self.chart_type == ChartType::AreaPercentStacked {
-            self.grouping = ChartGrouping::PercentStacked;
-            self.default_num_format = "0%".to_string();
+        match self.chart_type {
+            ChartType::Area | ChartType::Area3D => {
+                self.grouping = ChartGrouping::Standard;
+            }
+            ChartType::AreaStacked | ChartType::Area3DStacked => {
+                self.grouping = ChartGrouping::Stacked;
+            }
+            ChartType::AreaPercentStacked | ChartType::Area3DPercentStacked => {
+                self.grouping = ChartGrouping::PercentStacked;
+                self.default_num_format = "0%".to_string();
+            }
+            _ => {}
         }
 
         self.default_label_position = ChartDataLabelPosition::Center;
@@ -2958,15 +3197,20 @@ impl Chart {
 
         self.chart_group_type = ChartType::Bar;
 
-        if self.chart_type == ChartType::Bar {
-            self.grouping = ChartGrouping::Clustered;
-        } else if self.chart_type == ChartType::BarStacked {
-            self.grouping = ChartGrouping::Stacked;
-            self.overlap = Some(100);
-        } else if self.chart_type == ChartType::BarPercentStacked {
-            self.grouping = ChartGrouping::PercentStacked;
-            self.default_num_format = "0%".to_string();
-            self.overlap = Some(100);
+        match self.chart_type {
+            ChartType::Bar | ChartType::Bar3D => {
+                self.grouping = ChartGrouping::Clustered;
+            }
+            ChartType::BarStacked | ChartType::Bar3DStacked => {
+                self.grouping = ChartGrouping::Stacked;
+                self.overlap = Some(100);
+            }
+            ChartType::BarPercentStacked | ChartType::Bar3DPercentStacked => {
+                self.grouping = ChartGrouping::PercentStacked;
+                self.default_num_format = "0%".to_string();
+                self.overlap = Some(100);
+            }
+            _ => {}
         }
 
         self.default_label_position = ChartDataLabelPosition::OutsideEnd;
@@ -2993,15 +3237,20 @@ impl Chart {
 
         self.chart_group_type = ChartType::Column;
 
-        if self.chart_type == ChartType::Column {
-            self.grouping = ChartGrouping::Clustered;
-        } else if self.chart_type == ChartType::ColumnStacked {
-            self.grouping = ChartGrouping::Stacked;
-            self.overlap = Some(100);
-        } else if self.chart_type == ChartType::ColumnPercentStacked {
-            self.grouping = ChartGrouping::PercentStacked;
-            self.default_num_format = "0%".to_string();
-            self.overlap = Some(100);
+        match self.chart_type {
+            ChartType::Column | ChartType::Column3D => {
+                self.grouping = ChartGrouping::Clustered;
+            }
+            ChartType::ColumnStacked | ChartType::Column3DStacked => {
+                self.grouping = ChartGrouping::Stacked;
+                self.overlap = Some(100);
+            }
+            ChartType::ColumnPercentStacked | ChartType::Column3DPercentStacked => {
+                self.grouping = ChartGrouping::PercentStacked;
+                self.default_num_format = "0%".to_string();
+                self.overlap = Some(100);
+            }
+            _ => {}
         }
 
         self.default_label_position = ChartDataLabelPosition::OutsideEnd;
@@ -3038,13 +3287,18 @@ impl Chart {
 
         self.chart_group_type = ChartType::Line;
 
-        if self.chart_type == ChartType::Line {
-            self.grouping = ChartGrouping::Standard;
-        } else if self.chart_type == ChartType::LineStacked {
-            self.grouping = ChartGrouping::Stacked;
-        } else if self.chart_type == ChartType::LinePercentStacked {
-            self.grouping = ChartGrouping::PercentStacked;
-            self.default_num_format = "0%".to_string();
+        match self.chart_type {
+            ChartType::Line | ChartType::Line3D => {
+                self.grouping = ChartGrouping::Standard;
+            }
+            ChartType::LineStacked => {
+                self.grouping = ChartGrouping::Stacked;
+            }
+            ChartType::LinePercentStacked => {
+                self.grouping = ChartGrouping::PercentStacked;
+                self.default_num_format = "0%".to_string();
+            }
+            _ => {}
         }
 
         self.default_label_position = ChartDataLabelPosition::Right;
@@ -3056,7 +3310,41 @@ impl Chart {
     fn initialize_pie_chart(mut self) -> Chart {
         self.chart_group_type = ChartType::Pie;
 
+        // Set the Excel default 3D view for Pie 3D charts.
+        if self.chart_type == ChartType::Pie3D {
+            self.view_3d_rot_x = 30;
+            self.view_3d_rot_y = 0;
+            self.view_3d_right_angle_axes = false;
+        }
+
         self.default_label_position = ChartDataLabelPosition::BestFit;
+
+        self
+    }
+
+    // Initialize surface charts.
+    fn initialize_surface_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Category;
+        self.x_axis.axis_position = ChartAxisPosition::Bottom;
+
+        self.y_axis.axis_type = ChartAxisType::Value;
+        self.y_axis.axis_position = ChartAxisPosition::Left;
+        self.y_axis.title.is_horizontal = true;
+        self.y_axis.major_gridlines = true;
+
+        self.chart_group_type = self.chart_type;
+        self.grouping = ChartGrouping::Standard;
+
+        // Set the Excel default 3D view. Contour charts are Surface charts
+        // viewed from directly above.
+        if self.chart_type == ChartType::Contour || self.chart_type == ChartType::ContourWireframe {
+            self.view_3d_rot_x = 90;
+            self.view_3d_rot_y = 0;
+            self.view_3d_perspective = 0;
+        }
+        self.view_3d_right_angle_axes = false;
+
+        self.default_label_position = ChartDataLabelPosition::Center;
 
         self
     }
@@ -3144,7 +3432,13 @@ impl Chart {
             return;
         }
 
-        xml_start_tag_only(&mut self.writer, "c:areaChart");
+        let tag = if self.is_3d {
+            "c:area3DChart"
+        } else {
+            "c:areaChart"
+        };
+
+        xml_start_tag_only(&mut self.writer, tag);
 
         // Write the c:grouping element.
         self.write_grouping();
@@ -3157,10 +3451,15 @@ impl Chart {
             self.write_drop_lines();
         }
 
+        // Write the c:gapDepth element.
+        if self.is_3d && self.gap_depth != 150 {
+            self.write_gap_depth();
+        }
+
         // Write the c:axId elements.
         self.write_ax_ids(primary_axis);
 
-        xml_end_tag(&mut self.writer, "c:areaChart");
+        xml_end_tag(&mut self.writer, tag);
     }
 
     // Write the <c:barChart> element for Bar charts.
@@ -3171,7 +3470,13 @@ impl Chart {
             return;
         }
 
-        xml_start_tag_only(&mut self.writer, "c:barChart");
+        let tag = if self.is_3d {
+            "c:bar3DChart"
+        } else {
+            "c:barChart"
+        };
+
+        xml_start_tag_only(&mut self.writer, tag);
 
         // Write the c:barDir element.
         self.write_bar_dir("bar");
@@ -3187,13 +3492,24 @@ impl Chart {
             self.write_gap_width(self.gap);
         }
 
-        // Write the c:overlap element.
-        self.write_overlap();
+        if self.is_3d {
+            // Write the c:gapDepth element.
+            if self.gap_depth != 150 {
+                self.write_gap_depth();
+            }
+
+            // Write the c:shape element. Note, 3D Bar charts don't support
+            // the c:overlap element.
+            self.write_shape();
+        } else {
+            // Write the c:overlap element.
+            self.write_overlap();
+        }
 
         // Write the c:axId elements.
         self.write_ax_ids(primary_axis);
 
-        xml_end_tag(&mut self.writer, "c:barChart");
+        xml_end_tag(&mut self.writer, tag);
     }
 
     // Write the <c:barChart> element for Column charts.
@@ -3204,7 +3520,13 @@ impl Chart {
             return;
         }
 
-        xml_start_tag_only(&mut self.writer, "c:barChart");
+        let tag = if self.is_3d {
+            "c:bar3DChart"
+        } else {
+            "c:barChart"
+        };
+
+        xml_start_tag_only(&mut self.writer, tag);
 
         // Write the c:barDir element.
         self.write_bar_dir("col");
@@ -3220,13 +3542,24 @@ impl Chart {
             self.write_gap_width(self.gap);
         }
 
-        // Write the c:overlap element.
-        self.write_overlap();
+        if self.is_3d {
+            // Write the c:gapDepth element.
+            if self.gap_depth != 150 {
+                self.write_gap_depth();
+            }
+
+            // Write the c:shape element. Note, 3D Column charts don't
+            // support the c:overlap element.
+            self.write_shape();
+        } else {
+            // Write the c:overlap element.
+            self.write_overlap();
+        }
 
         // Write the c:axId elements.
         self.write_ax_ids(primary_axis);
 
-        xml_end_tag(&mut self.writer, "c:barChart");
+        xml_end_tag(&mut self.writer, tag);
     }
 
     // Write the <c:doughnutChart> element for Column charts.
@@ -3262,7 +3595,13 @@ impl Chart {
             return;
         }
 
-        xml_start_tag_only(&mut self.writer, "c:lineChart");
+        let tag = if self.is_3d {
+            "c:line3DChart"
+        } else {
+            "c:lineChart"
+        };
+
+        xml_start_tag_only(&mut self.writer, tag);
 
         // Write the c:grouping element.
         self.write_grouping();
@@ -3275,23 +3614,31 @@ impl Chart {
             self.write_drop_lines();
         }
 
-        if self.has_high_low_lines {
-            // Write the c:hiLowLines element.
-            self.write_hi_low_lines();
-        }
+        if self.is_3d {
+            // Write the c:gapDepth element. Note, 3D Line charts don't
+            // support the high-low lines, up-down bars or marker elements.
+            if self.gap_depth != 150 {
+                self.write_gap_depth();
+            }
+        } else {
+            if self.has_high_low_lines {
+                // Write the c:hiLowLines element.
+                self.write_hi_low_lines();
+            }
 
-        // Write the c:upDownBars element.
-        if self.has_up_down_bars {
-            self.write_up_down_bars();
-        }
+            // Write the c:upDownBars element.
+            if self.has_up_down_bars {
+                self.write_up_down_bars();
+            }
 
-        // Write the c:marker element.
-        self.write_marker_value();
+            // Write the c:marker element.
+            self.write_marker_value();
+        }
 
         // Write the c:axId elements.
         self.write_ax_ids(primary_axis);
 
-        xml_end_tag(&mut self.writer, "c:lineChart");
+        xml_end_tag(&mut self.writer, tag);
     }
 
     // Write the <c:pieChart> element for Column charts.
@@ -3302,7 +3649,13 @@ impl Chart {
             return;
         }
 
-        xml_start_tag_only(&mut self.writer, "c:pieChart");
+        let tag = if self.is_3d {
+            "c:pie3DChart"
+        } else {
+            "c:pieChart"
+        };
+
+        xml_start_tag_only(&mut self.writer, tag);
 
         // Write the c:varyColors element.
         self.write_vary_colors();
@@ -3310,10 +3663,13 @@ impl Chart {
         // Write the c:ser elements.
         self.write_series(&series);
 
-        // Write the c:firstSliceAng element.
-        self.write_first_slice_ang();
+        // Write the c:firstSliceAng element. Note, it isn't supported by 3D
+        // Pie charts which are rotated via the 3D view Y rotation instead.
+        if !self.is_3d {
+            self.write_first_slice_ang();
+        }
 
-        xml_end_tag(&mut self.writer, "c:pieChart");
+        xml_end_tag(&mut self.writer, tag);
     }
 
     // Write the <c:radarChart>element.
@@ -3394,6 +3750,34 @@ impl Chart {
         xml_end_tag(&mut self.writer, "c:stockChart");
     }
 
+    // Write the <c:surfaceChart>/<c:surface3DChart> element.
+    fn write_surface_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
+        // Contour charts are Surface charts viewed from above.
+        let tag = match self.chart_type {
+            ChartType::Contour | ChartType::ContourWireframe => "c:surfaceChart",
+            _ => "c:surface3DChart",
+        };
+
+        xml_start_tag_only(&mut self.writer, tag);
+
+        // Write the c:wireframe element.
+        self.write_wireframe();
+
+        // Write the c:ser elements.
+        self.write_series(&series);
+
+        // Write the c:axId elements.
+        self.write_ax_ids(primary_axis);
+
+        xml_end_tag(&mut self.writer, tag);
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -3471,6 +3855,11 @@ impl Chart {
             self.write_chart_title(&self.title.clone());
         }
 
+        // Write the c:view3D element.
+        if self.is_3d {
+            self.write_view_3d();
+        }
+
         // Write the c:plotArea element.
         self.write_plot_area();
 
@@ -3491,6 +3880,44 @@ impl Chart {
         }
 
         xml_end_tag(&mut self.writer, "c:chart");
+    }
+
+    // Write the <c:view3D> element.
+    fn write_view_3d(&mut self) {
+        xml_start_tag_only(&mut self.writer, "c:view3D");
+
+        // Write the c:rotX element.
+        let attributes = [("val", self.view_3d_rot_x.to_string())];
+        xml_empty_tag(&mut self.writer, "c:rotX", &attributes);
+
+        // Write the c:hPercent element.
+        if let Some(percent) = self.view_3d_height_percent {
+            let attributes = [("val", percent.to_string())];
+            xml_empty_tag(&mut self.writer, "c:hPercent", &attributes);
+        }
+
+        // Write the c:rotY element.
+        let attributes = [("val", self.view_3d_rot_y.to_string())];
+        xml_empty_tag(&mut self.writer, "c:rotY", &attributes);
+
+        // Write the c:depthPercent element. It doesn't apply to Pie charts.
+        if self.chart_group_type != ChartType::Pie && self.view_3d_depth_percent != 100 {
+            let attributes = [("val", self.view_3d_depth_percent.to_string())];
+            xml_empty_tag(&mut self.writer, "c:depthPercent", &attributes);
+        }
+
+        // Write the c:rAngAx element.
+        let attributes = [("val", i32::from(self.view_3d_right_angle_axes).to_string())];
+        xml_empty_tag(&mut self.writer, "c:rAngAx", &attributes);
+
+        // Write the c:perspective element. It is only used when the "right
+        // angle axes" property is off. The value is in half-degree units.
+        if !self.view_3d_right_angle_axes {
+            let attributes = [("val", (2 * u16::from(self.view_3d_perspective)).to_string())];
+            xml_empty_tag(&mut self.writer, "c:perspective", &attributes);
+        }
+
+        xml_end_tag(&mut self.writer, "c:view3D");
     }
 
     // Write the <c:title> element.
@@ -3567,6 +3994,11 @@ impl Chart {
             }
         }
 
+        // Write the c:serAx element for 3D charts with a series (depth) axis.
+        if self.is_3d && self.chart_has_series_axis() {
+            self.write_ser_ax(self.axis_ids);
+        }
+
         // Handle any secondary axes due to secondary data series.
         self.check_for_secondary_axis();
         if self.has_secondary_axis {
@@ -3627,17 +4059,32 @@ impl Chart {
     // Write the <c:xxxChart> element.
     fn write_chart_type(&mut self) {
         match self.chart_type {
-            ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
+            ChartType::Area
+            | ChartType::AreaStacked
+            | ChartType::AreaPercentStacked
+            | ChartType::Area3D
+            | ChartType::Area3DStacked
+            | ChartType::Area3DPercentStacked => {
                 self.write_area_chart(true);
                 self.write_area_chart(false);
             }
 
-            ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
+            ChartType::Bar
+            | ChartType::BarStacked
+            | ChartType::BarPercentStacked
+            | ChartType::Bar3D
+            | ChartType::Bar3DStacked
+            | ChartType::Bar3DPercentStacked => {
                 self.write_bar_chart(true);
                 self.write_bar_chart(false);
             }
 
-            ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
+            ChartType::Column
+            | ChartType::ColumnStacked
+            | ChartType::ColumnPercentStacked
+            | ChartType::Column3D
+            | ChartType::Column3DStacked
+            | ChartType::Column3DPercentStacked => {
                 self.write_column_chart(true);
                 self.write_column_chart(false);
             }
@@ -3647,14 +4094,25 @@ impl Chart {
                 self.write_doughnut_chart(false);
             }
 
-            ChartType::Line | ChartType::LineStacked | ChartType::LinePercentStacked => {
+            ChartType::Line
+            | ChartType::LineStacked
+            | ChartType::LinePercentStacked
+            | ChartType::Line3D => {
                 self.write_line_chart(true);
                 self.write_line_chart(false);
             }
 
-            ChartType::Pie => {
+            ChartType::Pie | ChartType::Pie3D => {
                 self.write_pie_chart(true);
                 self.write_pie_chart(false);
+            }
+
+            ChartType::Surface3D
+            | ChartType::Surface3DWireframe
+            | ChartType::Contour
+            | ChartType::ContourWireframe => {
+                self.write_surface_chart(true);
+                self.write_surface_chart(false);
             }
 
             ChartType::Radar | ChartType::RadarWithMarkers | ChartType::RadarFilled => {
@@ -4235,6 +4693,30 @@ impl Chart {
             self.write_ax_id(self.axis2_ids.0);
             self.write_ax_id(self.axis2_ids.1);
         }
+
+        // 3D charts require a third axis id. Chart types without a series
+        // (depth) axis use a zero id.
+        if self.is_3d {
+            if self.chart_has_series_axis() {
+                self.write_ax_id(self.axis3_id);
+            } else {
+                self.write_ax_id(0);
+            }
+        }
+    }
+
+    // Check if the chart type has a third series (depth) axis. This applies
+    // to 3D chart types where the series are plotted along the depth axis.
+    fn chart_has_series_axis(&self) -> bool {
+        matches!(
+            self.chart_type,
+            ChartType::Area3D
+                | ChartType::Line3D
+                | ChartType::Surface3D
+                | ChartType::Surface3DWireframe
+                | ChartType::Contour
+                | ChartType::ContourWireframe
+        )
     }
 
     // Write the <c:axId> element.
@@ -4547,6 +5029,35 @@ impl Chart {
         }
 
         xml_end_tag(&mut self.writer, "c:valAx");
+    }
+
+    // -----------------------------------------------------------------------
+    // Series Axis. Only for 3D charts with a depth axis.
+    // -----------------------------------------------------------------------
+
+    // Write the <c:serAx> element.
+    fn write_ser_ax(&mut self, axis_ids: (u32, u32)) {
+        xml_start_tag_only(&mut self.writer, "c:serAx");
+
+        self.write_ax_id(self.axis3_id);
+
+        // Write the c:scaling element.
+        xml_start_tag_only(&mut self.writer, "c:scaling");
+        self.write_orientation(false);
+        xml_end_tag(&mut self.writer, "c:scaling");
+
+        // Write the c:axPos element.
+        let attributes = [("val", "b")];
+        xml_empty_tag(&mut self.writer, "c:axPos", &attributes);
+
+        // Write the c:tickLblPos element.
+        self.write_tick_label_position(ChartAxisLabelPosition::NextTo);
+
+        // Write the c:crossAx element. The series axis crosses the value
+        // axis.
+        self.write_cross_ax(axis_ids.1);
+
+        xml_end_tag(&mut self.writer, "c:serAx");
     }
 
     // -----------------------------------------------------------------------
@@ -6237,6 +6748,31 @@ impl Chart {
         let attributes = [("val", gap.to_string())];
 
         xml_empty_tag(&mut self.writer, "c:gapWidth", &attributes);
+    }
+
+    // Write the <c:gapDepth> element.
+    fn write_gap_depth(&mut self) {
+        let attributes = [("val", self.gap_depth.to_string())];
+
+        xml_empty_tag(&mut self.writer, "c:gapDepth", &attributes);
+    }
+
+    // Write the <c:shape> element.
+    fn write_shape(&mut self) {
+        let attributes = [("val", "box")];
+
+        xml_empty_tag(&mut self.writer, "c:shape", &attributes);
+    }
+
+    // Write the <c:wireframe> element.
+    fn write_wireframe(&mut self) {
+        let is_wireframe = matches!(
+            self.chart_type,
+            ChartType::Surface3DWireframe | ChartType::ContourWireframe
+        );
+        let attributes = [("val", i32::from(is_wireframe).to_string())];
+
+        xml_empty_tag(&mut self.writer, "c:wireframe", &attributes);
     }
 
     // Write the <c:overlap> element.
@@ -8741,6 +9277,16 @@ pub enum ChartType {
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_area_percent_stacked.png">
     AreaPercentStacked,
 
+    /// A 3D Area chart type. Each series is plotted in its own plane on the
+    /// chart depth/series axis.
+    Area3D,
+
+    /// A 3D stacked Area chart type.
+    Area3DStacked,
+
+    /// A 3D percent stacked Area chart type.
+    Area3DPercentStacked,
+
     /// A Bar (horizontal histogram) chart type.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_bar.png">
@@ -8756,6 +9302,15 @@ pub enum ChartType {
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_bar_percent_stacked.png">
     BarPercentStacked,
 
+    /// A 3D clustered Bar (horizontal histogram) chart type.
+    Bar3D,
+
+    /// A 3D stacked Bar chart type.
+    Bar3DStacked,
+
+    /// A 3D percent stacked Bar chart type.
+    Bar3DPercentStacked,
+
     /// A Column (vertical histogram) chart type.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_column.png">
@@ -8770,6 +9325,15 @@ pub enum ChartType {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_column_percent_stacked.png">
     ColumnPercentStacked,
+
+    /// A 3D clustered Column (vertical histogram) chart type.
+    Column3D,
+
+    /// A 3D stacked Column chart type.
+    Column3DStacked,
+
+    /// A 3D percent stacked Column chart type.
+    Column3DPercentStacked,
 
     /// A Doughnut chart type.
     ///
@@ -8791,10 +9355,17 @@ pub enum ChartType {
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_line_percent_stacked.png">
     LinePercentStacked,
 
+    /// A 3D Line chart type. Each series is plotted in its own plane on the
+    /// chart depth/series axis.
+    Line3D,
+
     /// A Pie chart type.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_pie.png">
     Pie,
+
+    /// A 3D Pie chart type.
+    Pie3D,
 
     /// A Radar chart type.
     ///
@@ -8849,6 +9420,21 @@ pub enum ChartType {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_stock.png">
     Stock,
+
+    /// A 3D Surface chart type. The chart data is plotted as a 3D surface
+    /// where colored bands indicate value ranges.
+    Surface3D,
+
+    /// A 3D Surface chart type shown as a wireframe outline without color
+    /// fills.
+    Surface3DWireframe,
+
+    /// A Contour chart type. This is a Surface chart viewed from above where
+    /// colored bands indicate value ranges.
+    Contour,
+
+    /// A Contour chart type shown as a wireframe outline without color fills.
+    ContourWireframe,
 }
 
 // -----------------------------------------------------------------------

@@ -134,6 +134,7 @@ mod button10;
 mod button11;
 mod button12;
 mod button15;
+mod chart_3d01;
 mod chart_area01;
 mod chart_area02;
 mod chart_area03;
