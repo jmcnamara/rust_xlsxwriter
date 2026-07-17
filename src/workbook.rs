@@ -2695,6 +2695,7 @@ impl Workbook {
     // Convert the images in the workbooks into drawing files and rel links.
     fn prepare_drawings(&mut self) {
         let mut chart_id = 1;
+        let mut chartex_id = 1;
         let mut drawing_id = 1;
         let mut shape_id = 1;
         let mut image_id = self.embedded_images.len() as u32;
@@ -2729,8 +2730,16 @@ impl Workbook {
             }
 
             if !worksheet.charts.is_empty() {
-                worksheet.prepare_worksheet_charts(chart_id, drawing_id);
-                chart_id += worksheet.charts.len() as u32;
+                worksheet.prepare_worksheet_charts(chart_id, chartex_id, drawing_id);
+
+                let chartex_count = worksheet
+                    .charts
+                    .values()
+                    .filter(|chart| chart.is_chartex())
+                    .count() as u32;
+
+                chart_id += worksheet.charts.len() as u32 - chartex_count;
+                chartex_id += chartex_count;
             }
 
             if !worksheet.shapes.is_empty() {
@@ -2850,6 +2859,7 @@ impl Workbook {
             Self::insert_to_chart_cache(&series.title.range, chart_caches);
             Self::insert_to_chart_cache(&series.value_range, chart_caches);
             Self::insert_to_chart_cache(&series.category_range, chart_caches);
+            Self::insert_to_chart_cache(&series.bubble_size_range, chart_caches);
 
             for data_label in &series.custom_data_labels {
                 Self::insert_to_chart_cache(&data_label.title.range, chart_caches);
@@ -2880,6 +2890,7 @@ impl Workbook {
             Self::update_range_cache(&mut series.title.range, chart_caches);
             Self::update_range_cache(&mut series.value_range, chart_caches);
             Self::update_range_cache(&mut series.category_range, chart_caches);
+            Self::update_range_cache(&mut series.bubble_size_range, chart_caches);
 
             for data_label in &mut series.custom_data_labels {
                 if let Some(cache) = chart_caches.get(&data_label.title.range.key()) {
@@ -3194,7 +3205,14 @@ impl Workbook {
             }
 
             if !worksheet.charts.is_empty() {
-                package_options.num_charts += worksheet.charts.len() as u16;
+                let chartex_count = worksheet
+                    .charts
+                    .values()
+                    .filter(|chart| chart.is_chartex())
+                    .count() as u16;
+
+                package_options.num_charts += worksheet.charts.len() as u16 - chartex_count;
+                package_options.num_chartex_charts += chartex_count;
             }
 
             if !worksheet.tables.is_empty() {

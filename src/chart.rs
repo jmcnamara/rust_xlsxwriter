@@ -739,6 +739,7 @@
 //!
 #![warn(missing_docs)]
 
+pub(crate) mod chartex_styles;
 mod tests;
 
 use std::io::Cursor;
@@ -747,8 +748,8 @@ use std::{fmt, mem, sync::OnceLock};
 use crate::drawing::{DrawingObject, DrawingType};
 use crate::utility::{self, ToXmlBoolean};
 use crate::xmlwriter::{
-    xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only, xml_end_tag,
-    xml_start_tag, xml_start_tag_only,
+    xml_data_element, xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only,
+    xml_end_tag, xml_start_tag, xml_start_tag_only,
 };
 
 use crate::{
@@ -876,6 +877,22 @@ pub struct Chart {
     view_3d_depth_percent: u16,
     view_3d_height_percent: Option<u16>,
     view_3d_right_angle_axes: bool,
+
+    // ChartEx (Excel 2016+) chart type specific properties.
+    waterfall_subtotals: Vec<u32>,
+    waterfall_connector_lines: bool,
+    histogram_bin_width: Option<f64>,
+    histogram_bin_count: Option<u32>,
+    histogram_overflow: Option<f64>,
+    histogram_underflow: Option<f64>,
+    box_whisker_quartile_method: ChartQuartileMethod,
+    box_whisker_mean_marker: bool,
+    box_whisker_mean_line: bool,
+    box_whisker_outliers: bool,
+    box_whisker_inner_points: bool,
+    treemap_parent_labels: ChartParentLabelLayout,
+    region_map_projection: Option<ChartMapProjection>,
+    region_map_labels: Option<ChartRegionLabelLayout>,
 }
 
 impl Chart {
@@ -1024,6 +1041,21 @@ impl Chart {
             view_3d_depth_percent: 100,
             view_3d_height_percent: None,
             view_3d_right_angle_axes: true,
+
+            waterfall_subtotals: vec![],
+            waterfall_connector_lines: true,
+            histogram_bin_width: None,
+            histogram_bin_count: None,
+            histogram_overflow: None,
+            histogram_underflow: None,
+            box_whisker_quartile_method: ChartQuartileMethod::Exclusive,
+            box_whisker_mean_marker: true,
+            box_whisker_mean_line: false,
+            box_whisker_outliers: true,
+            box_whisker_inner_points: false,
+            treemap_parent_labels: ChartParentLabelLayout::Overlapping,
+            region_map_projection: None,
+            region_map_labels: None,
         };
 
         match chart_type {
@@ -1055,7 +1087,13 @@ impl Chart {
             | ChartType::LinePercentStacked
             | ChartType::Line3D => Self::initialize_line_chart(chart),
 
-            ChartType::Pie | ChartType::Pie3D => Self::initialize_pie_chart(chart),
+            ChartType::Pie | ChartType::Pie3D | ChartType::PieOfPie | ChartType::BarOfPie => {
+                Self::initialize_pie_chart(chart)
+            }
+
+            // Bubble charts are a variant of Scatter charts with X and Y
+            // value axes.
+            ChartType::Bubble => Self::initialize_scatter_chart(chart),
 
             ChartType::Surface3D
             | ChartType::Surface3DWireframe
@@ -1073,6 +1111,15 @@ impl Chart {
             | ChartType::ScatterSmoothWithMarkers => Self::initialize_scatter_chart(chart),
 
             ChartType::Stock => Self::initialize_stock_chart(chart),
+
+            ChartType::Waterfall
+            | ChartType::Funnel
+            | ChartType::Histogram
+            | ChartType::Pareto
+            | ChartType::BoxWhisker
+            | ChartType::Treemap
+            | ChartType::Sunburst
+            | ChartType::RegionMap => Self::initialize_chartex_chart(chart),
         }
     }
 
@@ -1195,6 +1242,127 @@ impl Chart {
     ///
     pub fn new_stock() -> Chart {
         Self::new(ChartType::Stock)
+    }
+
+    /// Create a new Bubble `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Bubble)` to
+    /// create a default Bubble chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_bubble() -> Chart {
+        Self::new(ChartType::Bubble)
+    }
+
+    /// Create a new Pie-of-Pie `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::PieOfPie)` to
+    /// create a default Pie-of-Pie chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_pie_of_pie() -> Chart {
+        Self::new(ChartType::PieOfPie)
+    }
+
+    /// Create a new Bar-of-Pie `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::BarOfPie)` to
+    /// create a default Bar-of-Pie chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_bar_of_pie() -> Chart {
+        Self::new(ChartType::BarOfPie)
+    }
+
+    /// Create a new Waterfall `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Waterfall)` to
+    /// create a default Waterfall chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_waterfall() -> Chart {
+        Self::new(ChartType::Waterfall)
+    }
+
+    /// Create a new Funnel `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Funnel)` to
+    /// create a default Funnel chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_funnel() -> Chart {
+        Self::new(ChartType::Funnel)
+    }
+
+    /// Create a new Histogram `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Histogram)` to
+    /// create a default statistical Histogram chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_histogram() -> Chart {
+        Self::new(ChartType::Histogram)
+    }
+
+    /// Create a new Pareto `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Pareto)` to
+    /// create a default Pareto chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_pareto() -> Chart {
+        Self::new(ChartType::Pareto)
+    }
+
+    /// Create a new Box and Whisker `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::BoxWhisker)`
+    /// to create a default Box and Whisker chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_box_whisker() -> Chart {
+        Self::new(ChartType::BoxWhisker)
+    }
+
+    /// Create a new Treemap `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Treemap)` to
+    /// create a default Treemap chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_treemap() -> Chart {
+        Self::new(ChartType::Treemap)
+    }
+
+    /// Create a new Sunburst `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Sunburst)` to
+    /// create a default Sunburst chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_sunburst() -> Chart {
+        Self::new(ChartType::Sunburst)
+    }
+
+    /// Create a new Region Map `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::RegionMap)` to
+    /// create a default Region Map chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_region_map() -> Chart {
+        Self::new(ChartType::RegionMap)
     }
 
     /// Create and add a new chart series to a chart.
@@ -2916,6 +3084,14 @@ impl Chart {
             ));
         }
 
+        // ChartEx charts can't be added to chartsheets.
+        if self.is_chartsheet && self.is_chartex() {
+            return Err(XlsxError::ChartError(
+                "ChartEx chart types such as Waterfall or Treemap cannot be added to a Chartsheet"
+                    .to_string(),
+            ));
+        }
+
         for series in &self.series {
             // Check for a series without a values range.
             if !series.value_range.has_data() {
@@ -2938,6 +3114,11 @@ impl Chart {
             // Validate the series category range.
             if series.category_range.has_data() {
                 series.category_range.validate()?;
+            }
+
+            // Validate the series bubble sizes range.
+            if series.bubble_size_range.has_data() {
+                series.bubble_size_range.validate()?;
             }
 
             // Validate Polynomial trendline range.
@@ -3000,6 +3181,250 @@ impl Chart {
         self
     }
 
+    // -----------------------------------------------------------------------
+    // ChartEx (Excel 2016+) chart type specific methods.
+    // -----------------------------------------------------------------------
+
+    /// Set the data points of a Waterfall chart that are subtotals/totals.
+    ///
+    /// Data points marked as subtotals start at the horizontal axis instead
+    /// of "floating" from the previous running total. This is typically used
+    /// for "Start", intermediate total and "End" columns.
+    ///
+    /// This option is only used with [`ChartType::Waterfall`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `indices`: The zero indexed positions of the data points that should
+    ///   be treated as subtotals/totals.
+    ///
+    pub fn set_waterfall_subtotals(&mut self, indices: &[u32]) -> &mut Chart {
+        self.waterfall_subtotals = indices.to_vec();
+
+        self
+    }
+
+    /// Turn on/off the connector lines of a Waterfall chart.
+    ///
+    /// Connector lines connect the end of each column to the beginning of the
+    /// next column. They are on by default.
+    ///
+    /// This option is only used with [`ChartType::Waterfall`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is on by default.
+    ///
+    pub fn set_waterfall_connector_lines(&mut self, enable: bool) -> &mut Chart {
+        self.waterfall_connector_lines = enable;
+
+        self
+    }
+
+    /// Set the bin width of a Histogram or Pareto chart.
+    ///
+    /// Set the width of the bins that the numeric source data is grouped
+    /// into. This option overrides [`Chart::set_histogram_bin_count()`] if
+    /// both are set. If neither is set, Excel uses automatic binning.
+    ///
+    /// This option is only used with [`ChartType::Histogram`] and
+    /// [`ChartType::Pareto`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `width`: The width of each bin, in the units of the source data.
+    ///
+    pub fn set_histogram_bin_width(&mut self, width: f64) -> &mut Chart {
+        self.histogram_bin_width = Some(width);
+
+        self
+    }
+
+    /// Set the number of bins of a Histogram or Pareto chart.
+    ///
+    /// Set the number of equal width bins that the numeric source data is
+    /// grouped into. This option is ignored if
+    /// [`Chart::set_histogram_bin_width()`] is also set. If neither is set,
+    /// Excel uses automatic binning.
+    ///
+    /// This option is only used with [`ChartType::Histogram`] and
+    /// [`ChartType::Pareto`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `count`: The number of bins.
+    ///
+    pub fn set_histogram_bin_count(&mut self, count: u32) -> &mut Chart {
+        self.histogram_bin_count = Some(count);
+
+        self
+    }
+
+    /// Set the overflow bin limit of a Histogram or Pareto chart.
+    ///
+    /// Values greater than the overflow limit are grouped into a single
+    /// "greater than" bin at the right of the chart.
+    ///
+    /// This option is only used with [`ChartType::Histogram`] and
+    /// [`ChartType::Pareto`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `limit`: The overflow bin limit.
+    ///
+    pub fn set_histogram_overflow(&mut self, limit: f64) -> &mut Chart {
+        self.histogram_overflow = Some(limit);
+
+        self
+    }
+
+    /// Set the underflow bin limit of a Histogram or Pareto chart.
+    ///
+    /// Values less than the underflow limit are grouped into a single "less
+    /// than" bin at the left of the chart.
+    ///
+    /// This option is only used with [`ChartType::Histogram`] and
+    /// [`ChartType::Pareto`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `limit`: The underflow bin limit.
+    ///
+    pub fn set_histogram_underflow(&mut self, limit: f64) -> &mut Chart {
+        self.histogram_underflow = Some(limit);
+
+        self
+    }
+
+    /// Set the quartile calculation method of a Box and Whisker chart.
+    ///
+    /// The default is [`ChartQuartileMethod::Exclusive`], the same as Excel.
+    ///
+    /// This option is only used with [`ChartType::BoxWhisker`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `method`: A [`ChartQuartileMethod`] enum value.
+    ///
+    pub fn set_box_whisker_quartile_method(&mut self, method: ChartQuartileMethod) -> &mut Chart {
+        self.box_whisker_quartile_method = method;
+
+        self
+    }
+
+    /// Turn on/off the mean marker of a Box and Whisker chart.
+    ///
+    /// Show a marker at the position of the mean of each data set. It is on
+    /// by default.
+    ///
+    /// This option is only used with [`ChartType::BoxWhisker`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is on by default.
+    ///
+    pub fn set_box_whisker_mean_marker(&mut self, enable: bool) -> &mut Chart {
+        self.box_whisker_mean_marker = enable;
+
+        self
+    }
+
+    /// Turn on/off the mean line of a Box and Whisker chart.
+    ///
+    /// Show a line connecting the means of the data sets. It is off by
+    /// default.
+    ///
+    /// This option is only used with [`ChartType::BoxWhisker`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
+    pub fn set_box_whisker_mean_line(&mut self, enable: bool) -> &mut Chart {
+        self.box_whisker_mean_line = enable;
+
+        self
+    }
+
+    /// Turn on/off the outlier points of a Box and Whisker chart.
+    ///
+    /// Show the data points that are outliers, i.e., outside the whiskers.
+    /// It is on by default.
+    ///
+    /// This option is only used with [`ChartType::BoxWhisker`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is on by default.
+    ///
+    pub fn set_box_whisker_outliers(&mut self, enable: bool) -> &mut Chart {
+        self.box_whisker_outliers = enable;
+
+        self
+    }
+
+    /// Turn on/off the inner data points of a Box and Whisker chart.
+    ///
+    /// Show all the non-outlier data points as markers within the boxes. It
+    /// is off by default.
+    ///
+    /// This option is only used with [`ChartType::BoxWhisker`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
+    pub fn set_box_whisker_inner_points(&mut self, enable: bool) -> &mut Chart {
+        self.box_whisker_inner_points = enable;
+
+        self
+    }
+
+    /// Set how parent category labels are displayed in a Treemap chart.
+    ///
+    /// The default is [`ChartParentLabelLayout::Overlapping`], the same as
+    /// Excel.
+    ///
+    /// This option is only used with [`ChartType::Treemap`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `layout`: A [`ChartParentLabelLayout`] enum value.
+    ///
+    pub fn set_treemap_parent_labels(&mut self, layout: ChartParentLabelLayout) -> &mut Chart {
+        self.treemap_parent_labels = layout;
+
+        self
+    }
+
+    /// Set the map projection of a Region Map chart.
+    ///
+    /// This option is only used with [`ChartType::RegionMap`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `projection`: A [`ChartMapProjection`] enum value.
+    ///
+    pub fn set_region_map_projection(&mut self, projection: ChartMapProjection) -> &mut Chart {
+        self.region_map_projection = Some(projection);
+
+        self
+    }
+
+    /// Set how region labels are displayed in a Region Map chart.
+    ///
+    /// This option is only used with [`ChartType::RegionMap`] charts.
+    ///
+    /// # Parameters
+    ///
+    /// - `layout`: A [`ChartRegionLabelLayout`] enum value.
+    ///
+    pub fn set_region_map_labels(&mut self, layout: ChartRegionLabelLayout) -> &mut Chart {
+        self.region_map_labels = Some(layout);
+
+        self
+    }
+
     /// Set default values for the primary chart axis ids.
     ///
     /// This is mainly used to ensure that the primary axis ids used in testing
@@ -3047,6 +3472,24 @@ impl Chart {
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
+
+    // Check if the chart is an Excel 2016+ "ChartEx" chart. These are written
+    // to "xl/charts/chartExN.xml" files with a "cx:" namespace instead of the
+    // classic ChartML "xl/charts/chartN.xml" files.
+    pub(crate) fn is_chartex(&self) -> bool {
+        self.chart_type.is_chartex()
+    }
+
+    // Get the Markup Compatibility namespace required for the chartEx type in
+    // the drawing "mc:Choice" element. This matches the namespace versions
+    // that Excel writes for each chart type.
+    pub(crate) fn chartex_choice_namespace(&self) -> &'static str {
+        match self.chart_type {
+            ChartType::Funnel => "http://schemas.microsoft.com/office/drawing/2015/10/21/chartex",
+            ChartType::RegionMap => "http://schemas.microsoft.com/office/drawing/2016/5/10/chartex",
+            _ => "http://schemas.microsoft.com/office/drawing/2015/9/8/chartex",
+        }
+    }
 
     // Set chart unique axis ids.
     pub(crate) fn add_axis_ids(&mut self, chart_id: u32) {
@@ -3396,6 +3839,15 @@ impl Chart {
         self
     }
 
+    // Initialize ChartEx (Excel 2016+) charts such as Waterfall, Funnel,
+    // Histogram, Pareto, Box and Whisker, Treemap, Sunburst and Region Map.
+    fn initialize_chartex_chart(mut self) -> Chart {
+        self.chart_group_type = self.chart_type;
+        self.drawing_type = DrawingType::ChartEx;
+
+        self
+    }
+
     // Initialize stock charts.
     fn initialize_stock_chart(mut self) -> Chart {
         self.has_crosses = false;
@@ -3672,6 +4124,78 @@ impl Chart {
         xml_end_tag(&mut self.writer, tag);
     }
 
+    // Write the <c:ofPieChart> element for Pie-of-Pie and Bar-of-Pie charts.
+    fn write_of_pie_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
+        xml_start_tag_only(&mut self.writer, "c:ofPieChart");
+
+        // Write the c:ofPieType element.
+        let of_pie_type = if self.chart_type == ChartType::BarOfPie {
+            "bar"
+        } else {
+            "pie"
+        };
+        let attributes = [("val", of_pie_type)];
+        xml_empty_tag(&mut self.writer, "c:ofPieType", &attributes);
+
+        // Write the c:varyColors element.
+        self.write_vary_colors();
+
+        // Write the c:ser elements.
+        self.write_series(&series);
+
+        // Write the c:gapWidth element. The Excel default for Of-Pie charts
+        // is 100 rather than the standard 150.
+        if self.gap == 150 {
+            self.write_gap_width(100);
+        } else {
+            self.write_gap_width(self.gap);
+        }
+
+        // Write the c:serLines element for the default series lines between
+        // the pie and the secondary chart.
+        xml_empty_tag_only(&mut self.writer, "c:serLines");
+
+        xml_end_tag(&mut self.writer, "c:ofPieChart");
+    }
+
+    // Write the <c:bubbleChart> element.
+    fn write_bubble_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
+        xml_start_tag_only(&mut self.writer, "c:bubbleChart");
+
+        // Write the c:varyColors element. Unlike Pie charts the colors don't
+        // vary by point for Bubble charts.
+        let attributes = [("val", "0")];
+        xml_empty_tag(&mut self.writer, "c:varyColors", &attributes);
+
+        // Write the c:ser elements.
+        self.write_bubble_series(&series);
+
+        // Write the c:bubbleScale element.
+        let attributes = [("val", "100")];
+        xml_empty_tag(&mut self.writer, "c:bubbleScale", &attributes);
+
+        // Write the c:showNegBubbles element.
+        let attributes = [("val", "0")];
+        xml_empty_tag(&mut self.writer, "c:showNegBubbles", &attributes);
+
+        // Write the c:axId elements.
+        self.write_ax_ids(primary_axis);
+
+        xml_end_tag(&mut self.writer, "c:bubbleChart");
+    }
+
     // Write the <c:radarChart>element.
     fn write_radar_chart(&mut self, primary_axis: bool) {
         let series = self.get_series(primary_axis);
@@ -3784,6 +4308,13 @@ impl Chart {
 
     // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
+        // ChartEx (Excel 2016+) charts are written in a different format from
+        // classic ChartML charts.
+        if self.is_chartex() {
+            self.assemble_chartex_xml_file();
+            return;
+        }
+
         xml_declaration(&mut self.writer);
 
         // Write the c:chartSpace element.
@@ -4107,6 +4638,16 @@ impl Chart {
                 self.write_pie_chart(false);
             }
 
+            ChartType::PieOfPie | ChartType::BarOfPie => {
+                self.write_of_pie_chart(true);
+                self.write_of_pie_chart(false);
+            }
+
+            ChartType::Bubble => {
+                self.write_bubble_chart(true);
+                self.write_bubble_chart(false);
+            }
+
             ChartType::Surface3D
             | ChartType::Surface3DWireframe
             | ChartType::Contour
@@ -4133,6 +4674,17 @@ impl Chart {
                 self.write_stock_chart(true);
                 self.write_stock_chart(false);
             }
+
+            // ChartEx chart types are written via a separate xml assembly in
+            // assemble_chartex_xml_file() and don't use ChartML plot groups.
+            ChartType::Waterfall
+            | ChartType::Funnel
+            | ChartType::Histogram
+            | ChartType::Pareto
+            | ChartType::BoxWhisker
+            | ChartType::Treemap
+            | ChartType::Sunburst
+            | ChartType::RegionMap => {}
         }
     }
 
@@ -4408,6 +4960,77 @@ impl Chart {
                     self.write_smooth();
                 }
             }
+
+            self.series_index += 1;
+
+            xml_end_tag(&mut self.writer, "c:ser");
+        }
+    }
+
+    // Write the <c:ser> element for bubble charts.
+    fn write_bubble_series(&mut self, series: &[ChartSeries]) {
+        for series in series {
+            let max_points = series.value_range.number_of_points();
+
+            xml_start_tag_only(&mut self.writer, "c:ser");
+
+            // Write the c:idx element.
+            self.write_idx(self.series_index);
+
+            // Write the c:order element.
+            self.write_order(self.series_index);
+
+            self.write_series_title(&series.title);
+
+            // Write the c:spPr formatting element.
+            self.write_sp_pr(&series.format);
+
+            // Write the c:invertIfNegative element.
+            if series.invert_if_negative {
+                self.write_invert_if_negative();
+            }
+
+            // Write the point formatting for the series.
+            if !series.points.is_empty() {
+                self.write_d_pt(&series.points, max_points);
+            }
+
+            // Write the c:dLbls element.
+            if let Some(data_label) = &series.data_label {
+                self.write_data_labels(data_label, &series.custom_data_labels, max_points);
+            }
+
+            // Write the c:trendline element.
+            if series.trendline.trend_type != ChartTrendlineType::None {
+                self.write_trendline(&series.trendline);
+            }
+
+            // Write the X-Axis c:errBars element.
+            if let Some(error_bars) = &series.x_error_bars {
+                self.write_error_bar("x", error_bars);
+            }
+
+            // Write the Y-Axis the c:errBars element.
+            if let Some(error_bars) = &series.y_error_bars {
+                self.write_error_bar("y", error_bars);
+            }
+
+            // Write the c:xVal element.
+            self.write_x_val(&series.category_range);
+
+            // Write the c:yVal element.
+            self.write_y_val(&series.value_range);
+
+            // Write the c:bubbleSize element.
+            if series.bubble_size_range.has_data() {
+                xml_start_tag_only(&mut self.writer, "c:bubbleSize");
+                self.write_cache_ref(&series.bubble_size_range, true);
+                xml_end_tag(&mut self.writer, "c:bubbleSize");
+            }
+
+            // Write the c:bubble3D element.
+            let attributes = [("val", "0")];
+            xml_empty_tag(&mut self.writer, "c:bubble3D", &attributes);
 
             self.series_index += 1;
 
@@ -6397,11 +7020,17 @@ impl Chart {
 
     // Write the <c:spPr> element.
     fn write_sp_pr(&mut self, format: &ChartFormat) {
+        self.write_sp_pr_with_tag("c:spPr", format);
+    }
+
+    // Write a <c:spPr> style element with a user supplied tag name, to allow
+    // reuse for the chartEx <cx:spPr> element.
+    fn write_sp_pr_with_tag(&mut self, tag: &str, format: &ChartFormat) {
         if !format.has_formatting() {
             return;
         }
 
-        xml_start_tag_only(&mut self.writer, "c:spPr");
+        xml_start_tag_only(&mut self.writer, tag);
 
         if format.no_fill {
             xml_empty_tag_only(&mut self.writer, "a:noFill");
@@ -6423,7 +7052,7 @@ impl Chart {
             self.write_a_ln(line);
         }
 
-        xml_end_tag(&mut self.writer, "c:spPr");
+        xml_end_tag(&mut self.writer, tag);
     }
 
     // Write the <a:ln> element.
@@ -7161,6 +7790,657 @@ impl IntoChartFormat for &mut ChartGradientFill {
 }
 
 // Trait for objects that have a component stored in the drawing.xml file.
+impl Chart {
+    // -----------------------------------------------------------------------
+    // ChartEx XML assembly methods.
+    //
+    // ChartEx (Excel 2016+) charts such as Waterfall, Funnel, Histogram,
+    // Pareto, Box and Whisker, Treemap, Sunburst and Region Map are stored in
+    // "xl/charts/chartExN.xml" parts using the "cx:" chartex namespace
+    // instead of the classic "c:" ChartML namespace.
+    // -----------------------------------------------------------------------
+
+    // Assemble and generate the chartEx XML file.
+    fn assemble_chartex_xml_file(&mut self) {
+        xml_declaration(&mut self.writer);
+
+        // Write the cx:chartSpace element.
+        self.write_cx_chart_space();
+
+        // Write the cx:chartData element.
+        self.write_cx_chart_data();
+
+        // Write the cx:chart element.
+        self.write_cx_chart();
+
+        // Close the cx:chartSpace tag.
+        xml_end_tag(&mut self.writer, "cx:chartSpace");
+    }
+
+    // Get the chartEx series layoutId for the chart type.
+    fn chartex_layout_id(&self) -> &'static str {
+        match self.chart_type {
+            ChartType::Funnel => "funnel",
+            ChartType::Histogram | ChartType::Pareto => "clusteredColumn",
+            ChartType::BoxWhisker => "boxWhisker",
+            ChartType::Treemap => "treemap",
+            ChartType::Sunburst => "sunburst",
+            ChartType::RegionMap => "regionMap",
+            _ => "waterfall",
+        }
+    }
+
+    // Get the chartEx numeric dimension type for the chart type.
+    fn chartex_num_dim_type(&self) -> &'static str {
+        match self.chart_type {
+            ChartType::Treemap | ChartType::Sunburst => "size",
+            ChartType::RegionMap => "colorVal",
+            _ => "val",
+        }
+    }
+
+    // Generate a deterministic series uniqueId GUID.
+    fn chartex_unique_id(index: usize) -> String {
+        format!("{{00000000-0000-0000-0000-{:012}}}", index + 1)
+    }
+
+    // Write the <cx:chartSpace> element.
+    fn write_cx_chart_space(&mut self) {
+        let attributes = [
+            (
+                "xmlns:cx",
+                "http://schemas.microsoft.com/office/drawing/2014/chartex",
+            ),
+            (
+                "xmlns:a",
+                "http://schemas.openxmlformats.org/drawingml/2006/main",
+            ),
+            (
+                "xmlns:r",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+            ),
+        ];
+
+        xml_start_tag(&mut self.writer, "cx:chartSpace", &attributes);
+    }
+
+    // Write the <cx:chartData> element.
+    fn write_cx_chart_data(&mut self) {
+        xml_start_tag_only(&mut self.writer, "cx:chartData");
+
+        let series = self.series.clone();
+        for (index, series) in series.iter().enumerate() {
+            // Write the cx:data element.
+            self.write_cx_data(index, series);
+        }
+
+        xml_end_tag(&mut self.writer, "cx:chartData");
+    }
+
+    // Write the <cx:data> element.
+    fn write_cx_data(&mut self, index: usize, series: &ChartSeries) {
+        let attributes = [("id", index.to_string())];
+
+        xml_start_tag(&mut self.writer, "cx:data", &attributes);
+
+        // Write the cx:strDim element for the category data.
+        if series.category_range.has_data() {
+            self.write_cx_str_dim(&series.category_range);
+        }
+
+        // Write the cx:numDim element for the value data.
+        self.write_cx_num_dim(&series.value_range);
+
+        xml_end_tag(&mut self.writer, "cx:data");
+    }
+
+    // Write the <cx:strDim> element.
+    fn write_cx_str_dim(&mut self, range: &ChartRange) {
+        let attributes = [("type", "cat")];
+
+        xml_start_tag(&mut self.writer, "cx:strDim", &attributes);
+
+        // Write the cx:f element.
+        self.write_cx_f(range);
+
+        let cache = &range.cache;
+        if cache.has_data() {
+            if cache.cache_type == ChartRangeCacheDataType::MultiLevelString && cache.minor_dim > 1
+            {
+                // Write the levels of multi-level category hierarchies (used
+                // by Treemap and Sunburst charts) with the leaf level first.
+                for depth in (0..cache.minor_dim).rev() {
+                    let attributes = [("ptCount", cache.major_dim.to_string())];
+                    xml_start_tag(&mut self.writer, "cx:lvl", &attributes);
+
+                    for index in 0..cache.major_dim {
+                        let offset = depth + cache.minor_dim * index;
+                        let value = &cache.data[offset];
+
+                        if !value.is_empty() {
+                            self.write_cx_pt(index, value);
+                        }
+                    }
+
+                    xml_end_tag(&mut self.writer, "cx:lvl");
+                }
+            } else {
+                let attributes = [("ptCount", cache.data.len().to_string())];
+                xml_start_tag(&mut self.writer, "cx:lvl", &attributes);
+
+                for (index, value) in cache.data.iter().enumerate() {
+                    if !value.is_empty() {
+                        self.write_cx_pt(index, value);
+                    }
+                }
+
+                xml_end_tag(&mut self.writer, "cx:lvl");
+            }
+        }
+
+        xml_end_tag(&mut self.writer, "cx:strDim");
+    }
+
+    // Write the <cx:numDim> element.
+    fn write_cx_num_dim(&mut self, range: &ChartRange) {
+        let attributes = [("type", self.chartex_num_dim_type())];
+
+        xml_start_tag(&mut self.writer, "cx:numDim", &attributes);
+
+        // Write the cx:f element.
+        self.write_cx_f(range);
+
+        let cache = &range.cache;
+        if cache.has_data() {
+            let attributes = [
+                ("ptCount", cache.data.len().to_string()),
+                ("formatCode", "General".to_string()),
+            ];
+            xml_start_tag(&mut self.writer, "cx:lvl", &attributes);
+
+            for (index, value) in cache.data.iter().enumerate() {
+                if !value.is_empty() {
+                    // Non numeric values in value/number caches are treated
+                    // as zero by Excel.
+                    if value.parse::<f64>().is_err() {
+                        self.write_cx_pt(index, "0");
+                    } else {
+                        self.write_cx_pt(index, value);
+                    }
+                }
+            }
+
+            xml_end_tag(&mut self.writer, "cx:lvl");
+        }
+
+        xml_end_tag(&mut self.writer, "cx:numDim");
+    }
+
+    // Write the <cx:f> element.
+    fn write_cx_f(&mut self, range: &ChartRange) {
+        let formula = range.formula_string();
+
+        // Add the direction for row based ranges (the default is "col").
+        if !range.is_formula_string_only
+            && range.first_row == range.last_row
+            && range.first_col < range.last_col
+        {
+            xml_data_element(&mut self.writer, "cx:f", &formula, &[("dir", "row")]);
+        } else {
+            xml_data_element_only(&mut self.writer, "cx:f", &formula);
+        }
+    }
+
+    // Write the <cx:pt> element.
+    fn write_cx_pt(&mut self, index: usize, value: &str) {
+        let attributes = [("idx", index.to_string())];
+
+        xml_data_element(&mut self.writer, "cx:pt", value, &attributes);
+    }
+
+    // Write the <cx:chart> element.
+    fn write_cx_chart(&mut self) {
+        xml_start_tag_only(&mut self.writer, "cx:chart");
+
+        // Write the cx:title element.
+        if !self.title.hidden && (!self.title.name.is_empty() || self.title.range.has_data()) {
+            self.write_cx_title();
+        }
+
+        // Write the cx:plotArea element.
+        self.write_cx_plot_area();
+
+        // Write the cx:legend element.
+        if !self.legend.hidden {
+            self.write_cx_legend();
+        }
+
+        xml_end_tag(&mut self.writer, "cx:chart");
+    }
+
+    // Write the <cx:title> element.
+    fn write_cx_title(&mut self) {
+        let attributes = [("pos", "t"), ("align", "ctr"), ("overlay", "0")];
+
+        xml_start_tag(&mut self.writer, "cx:title", &attributes);
+
+        // Write the cx:tx element.
+        let title = self.title.clone();
+        self.write_cx_tx(&title);
+
+        xml_end_tag(&mut self.writer, "cx:title");
+    }
+
+    // Write the <cx:tx> element.
+    fn write_cx_tx(&mut self, title: &ChartTitle) {
+        xml_start_tag_only(&mut self.writer, "cx:tx");
+        xml_start_tag_only(&mut self.writer, "cx:txData");
+
+        if title.range.has_data() {
+            // Write the cx:f element.
+            self.write_cx_f(&title.range);
+
+            // Write the cached string as the cx:v element.
+            if let Some(value) = title.range.cache.data.first() {
+                if !value.is_empty() {
+                    xml_data_element_only(&mut self.writer, "cx:v", value);
+                }
+            }
+        } else {
+            // Write the cx:v element.
+            xml_data_element_only(&mut self.writer, "cx:v", &title.name);
+        }
+
+        xml_end_tag(&mut self.writer, "cx:txData");
+        xml_end_tag(&mut self.writer, "cx:tx");
+    }
+
+    // Write the <cx:plotArea> element.
+    fn write_cx_plot_area(&mut self) {
+        xml_start_tag_only(&mut self.writer, "cx:plotArea");
+        xml_start_tag_only(&mut self.writer, "cx:plotAreaRegion");
+
+        let series = self.series.clone();
+        for (index, series) in series.iter().enumerate() {
+            // Write the cx:series element.
+            self.write_cx_series(index, series);
+        }
+
+        // For Pareto charts add the cumulative percentage line series.
+        if self.chart_type == ChartType::Pareto {
+            let series_count = self.series.len();
+            for index in 0..series_count {
+                self.write_cx_pareto_line_series(index, series_count);
+            }
+        }
+
+        xml_end_tag(&mut self.writer, "cx:plotAreaRegion");
+
+        // Write the cx:axis elements. Treemap, Sunburst and Region Map charts
+        // don't have axes.
+        match self.chart_type {
+            ChartType::Waterfall
+            | ChartType::Histogram
+            | ChartType::Pareto
+            | ChartType::BoxWhisker => {
+                self.write_cx_cat_axis(0);
+                self.write_cx_val_axis(1);
+
+                if self.chart_type == ChartType::Pareto {
+                    self.write_cx_pareto_percent_axis(2);
+                }
+            }
+            ChartType::Funnel => {
+                self.write_cx_cat_axis(0);
+            }
+            _ => {}
+        }
+
+        xml_end_tag(&mut self.writer, "cx:plotArea");
+    }
+
+    // Write a <cx:series> element.
+    fn write_cx_series(&mut self, index: usize, series: &ChartSeries) {
+        let attributes = [
+            ("layoutId", self.chartex_layout_id().to_string()),
+            ("uniqueId", Self::chartex_unique_id(index)),
+            ("formatIdx", index.to_string()),
+        ];
+
+        xml_start_tag(&mut self.writer, "cx:series", &attributes);
+
+        // Write the cx:tx series name element.
+        if series.title.range.has_data() || !series.title.name.is_empty() {
+            self.write_cx_tx(&series.title);
+        }
+
+        // Write the cx:spPr formatting element.
+        self.write_sp_pr_with_tag("cx:spPr", &series.format);
+
+        // Write the cx:dataPt elements.
+        for (point_index, point) in series.points.iter().enumerate() {
+            if point.format.has_formatting() {
+                let attributes = [("idx", point_index.to_string())];
+                xml_start_tag(&mut self.writer, "cx:dataPt", &attributes);
+                self.write_sp_pr_with_tag("cx:spPr", &point.format.clone());
+                xml_end_tag(&mut self.writer, "cx:dataPt");
+            }
+        }
+
+        // Write the cx:dataLabels element.
+        if let Some(data_label) = &series.data_label {
+            self.write_cx_data_labels(data_label);
+        }
+
+        // Write the cx:dataId element.
+        let attributes = [("val", index.to_string())];
+        xml_empty_tag(&mut self.writer, "cx:dataId", &attributes);
+
+        // Write the cx:layoutPr element.
+        self.write_cx_layout_pr();
+
+        // For Pareto charts the column series is associated with the primary
+        // value axis.
+        if self.chart_type == ChartType::Pareto {
+            xml_empty_tag(&mut self.writer, "cx:axisId", &[("val", "1")]);
+        }
+
+        xml_end_tag(&mut self.writer, "cx:series");
+    }
+
+    // Write the <cx:series> element for the cumulative percentage line of a
+    // Pareto chart.
+    fn write_cx_pareto_line_series(&mut self, index: usize, series_count: usize) {
+        let attributes = [
+            ("layoutId", "paretoLine".to_string()),
+            ("ownerIdx", index.to_string()),
+            ("uniqueId", Self::chartex_unique_id(series_count + index)),
+            ("formatIdx", (series_count + index).to_string()),
+        ];
+
+        xml_start_tag(&mut self.writer, "cx:series", &attributes);
+
+        // The pareto line is plotted against the secondary percentage axis.
+        xml_empty_tag(&mut self.writer, "cx:axisId", &[("val", "2")]);
+
+        xml_end_tag(&mut self.writer, "cx:series");
+    }
+
+    // Write the <cx:dataLabels> element.
+    fn write_cx_data_labels(&mut self, data_label: &ChartDataLabel) {
+        let mut attributes = vec![];
+
+        if data_label.position != ChartDataLabelPosition::Default {
+            attributes.push(("pos", data_label.position.to_string()));
+        }
+
+        xml_start_tag(&mut self.writer, "cx:dataLabels", &attributes);
+
+        // Write the cx:numFmt element.
+        if !data_label.num_format.is_empty() {
+            let attributes = [
+                ("formatCode", data_label.num_format.clone()),
+                ("sourceLinked", "0".to_string()),
+            ];
+            xml_empty_tag(&mut self.writer, "cx:numFmt", &attributes);
+        }
+
+        // Excel defaults to showing the value if no other option is set.
+        let show_value = data_label.show_value
+            || (!data_label.show_category_name && !data_label.show_series_name);
+
+        // Write the cx:visibility element.
+        let attributes = [
+            (
+                "seriesName",
+                i32::from(data_label.show_series_name).to_string(),
+            ),
+            (
+                "categoryName",
+                i32::from(data_label.show_category_name).to_string(),
+            ),
+            ("value", i32::from(show_value).to_string()),
+        ];
+        xml_empty_tag(&mut self.writer, "cx:visibility", &attributes);
+
+        xml_end_tag(&mut self.writer, "cx:dataLabels");
+    }
+
+    // Write the <cx:layoutPr> element with the chart type specific layout
+    // properties.
+    fn write_cx_layout_pr(&mut self) {
+        match self.chart_type {
+            ChartType::Waterfall => self.write_cx_waterfall_layout_pr(),
+            ChartType::Histogram | ChartType::Pareto => self.write_cx_binning_layout_pr(),
+            ChartType::BoxWhisker => self.write_cx_box_whisker_layout_pr(),
+            ChartType::Treemap => self.write_cx_treemap_layout_pr(),
+            ChartType::RegionMap => self.write_cx_region_map_layout_pr(),
+            _ => {}
+        }
+    }
+
+    // Write the <cx:layoutPr> element for Waterfall charts.
+    fn write_cx_waterfall_layout_pr(&mut self) {
+        xml_start_tag_only(&mut self.writer, "cx:layoutPr");
+
+        // Write the cx:visibility element.
+        let attributes = [(
+            "connectorLines",
+            i32::from(self.waterfall_connector_lines).to_string(),
+        )];
+        xml_empty_tag(&mut self.writer, "cx:visibility", &attributes);
+
+        // Write the cx:subtotals element.
+        if !self.waterfall_subtotals.is_empty() {
+            xml_start_tag_only(&mut self.writer, "cx:subtotals");
+
+            for index in self.waterfall_subtotals.clone() {
+                let attributes = [("val", index.to_string())];
+                xml_empty_tag(&mut self.writer, "cx:idx", &attributes);
+            }
+
+            xml_end_tag(&mut self.writer, "cx:subtotals");
+        }
+
+        xml_end_tag(&mut self.writer, "cx:layoutPr");
+    }
+
+    // Write the <cx:layoutPr> element for Histogram and Pareto charts.
+    fn write_cx_binning_layout_pr(&mut self) {
+        xml_start_tag_only(&mut self.writer, "cx:layoutPr");
+
+        let mut attributes = vec![("intervalClosed", "r".to_string())];
+
+        if let Some(underflow) = self.histogram_underflow {
+            attributes.push(("underflow", underflow.to_string()));
+        }
+
+        if let Some(overflow) = self.histogram_overflow {
+            attributes.push(("overflow", overflow.to_string()));
+        }
+
+        // Write the cx:binning element.
+        if self.histogram_bin_width.is_some() || self.histogram_bin_count.is_some() {
+            xml_start_tag(&mut self.writer, "cx:binning", &attributes);
+
+            // Note, Excel expects the attribute form of these elements rather
+            // than the text content form given in the chartex schema.
+            if let Some(width) = self.histogram_bin_width {
+                let attributes = [("val", width.to_string())];
+                xml_empty_tag(&mut self.writer, "cx:binSize", &attributes);
+            } else if let Some(count) = self.histogram_bin_count {
+                let attributes = [("val", count.to_string())];
+                xml_empty_tag(&mut self.writer, "cx:binCount", &attributes);
+            }
+
+            xml_end_tag(&mut self.writer, "cx:binning");
+        } else {
+            xml_empty_tag(&mut self.writer, "cx:binning", &attributes);
+        }
+
+        xml_end_tag(&mut self.writer, "cx:layoutPr");
+    }
+
+    // Write the <cx:layoutPr> element for Box and Whisker charts.
+    fn write_cx_box_whisker_layout_pr(&mut self) {
+        xml_start_tag_only(&mut self.writer, "cx:layoutPr");
+
+        // Write the cx:parentLabelLayout element.
+        let attributes = [("val", "banner")];
+        xml_empty_tag(&mut self.writer, "cx:parentLabelLayout", &attributes);
+
+        // Write the cx:visibility element.
+        let attributes = [
+            (
+                "meanLine",
+                i32::from(self.box_whisker_mean_line).to_string(),
+            ),
+            (
+                "meanMarker",
+                i32::from(self.box_whisker_mean_marker).to_string(),
+            ),
+            (
+                "nonoutliers",
+                i32::from(self.box_whisker_inner_points).to_string(),
+            ),
+            ("outliers", i32::from(self.box_whisker_outliers).to_string()),
+        ];
+        xml_empty_tag(&mut self.writer, "cx:visibility", &attributes);
+
+        // Write the cx:statistics element.
+        let attributes = [(
+            "quartileMethod",
+            self.box_whisker_quartile_method.to_string(),
+        )];
+        xml_empty_tag(&mut self.writer, "cx:statistics", &attributes);
+
+        xml_end_tag(&mut self.writer, "cx:layoutPr");
+    }
+
+    // Write the <cx:layoutPr> element for Treemap charts.
+    fn write_cx_treemap_layout_pr(&mut self) {
+        xml_start_tag_only(&mut self.writer, "cx:layoutPr");
+
+        // Write the cx:parentLabelLayout element.
+        let attributes = [("val", self.treemap_parent_labels.to_string())];
+        xml_empty_tag(&mut self.writer, "cx:parentLabelLayout", &attributes);
+
+        xml_end_tag(&mut self.writer, "cx:layoutPr");
+    }
+
+    // Write the <cx:layoutPr> element for Region Map charts.
+    fn write_cx_region_map_layout_pr(&mut self) {
+        if self.region_map_labels.is_none() && self.region_map_projection.is_none() {
+            return;
+        }
+
+        xml_start_tag_only(&mut self.writer, "cx:layoutPr");
+
+        // Write the cx:regionLabelLayout element.
+        if let Some(layout) = self.region_map_labels {
+            let attributes = [("val", layout.to_string())];
+            xml_empty_tag(&mut self.writer, "cx:regionLabelLayout", &attributes);
+        }
+
+        // Write the cx:geography element.
+        if let Some(projection) = self.region_map_projection {
+            let attributes = [
+                ("projectionType", projection.to_string()),
+                ("cultureLanguage", "en-US".to_string()),
+                ("cultureRegion", "US".to_string()),
+                ("attribution", "Powered by Bing".to_string()),
+            ];
+            xml_empty_tag(&mut self.writer, "cx:geography", &attributes);
+        }
+
+        xml_end_tag(&mut self.writer, "cx:layoutPr");
+    }
+
+    // Write the category <cx:axis> element.
+    fn write_cx_cat_axis(&mut self, axis_id: u32) {
+        let attributes = [("id", axis_id.to_string())];
+
+        xml_start_tag(&mut self.writer, "cx:axis", &attributes);
+
+        // Write the cx:catScaling element with the Excel default gap widths.
+        let gap_width = match self.chart_type {
+            ChartType::Waterfall => Some("0.5"),
+            ChartType::Funnel => Some("0.06"),
+            ChartType::Histogram | ChartType::Pareto => Some("0"),
+            _ => None,
+        };
+
+        match gap_width {
+            Some(gap_width) => {
+                let attributes = [("gapWidth", gap_width)];
+                xml_empty_tag(&mut self.writer, "cx:catScaling", &attributes);
+            }
+            None => xml_empty_tag_only(&mut self.writer, "cx:catScaling"),
+        }
+
+        // Write the cx:tickLabels element.
+        xml_empty_tag_only(&mut self.writer, "cx:tickLabels");
+
+        xml_end_tag(&mut self.writer, "cx:axis");
+    }
+
+    // Write the value <cx:axis> element.
+    fn write_cx_val_axis(&mut self, axis_id: u32) {
+        let attributes = [("id", axis_id.to_string())];
+
+        xml_start_tag(&mut self.writer, "cx:axis", &attributes);
+
+        // Write the cx:valScaling element.
+        xml_empty_tag_only(&mut self.writer, "cx:valScaling");
+
+        // Write the cx:majorGridlines element.
+        xml_empty_tag_only(&mut self.writer, "cx:majorGridlines");
+
+        // Write the cx:tickLabels element.
+        xml_empty_tag_only(&mut self.writer, "cx:tickLabels");
+
+        xml_end_tag(&mut self.writer, "cx:axis");
+    }
+
+    // Write the secondary percentage <cx:axis> element for Pareto charts.
+    fn write_cx_pareto_percent_axis(&mut self, axis_id: u32) {
+        let attributes = [("id", axis_id.to_string())];
+
+        xml_start_tag(&mut self.writer, "cx:axis", &attributes);
+
+        // Write the cx:valScaling element.
+        let attributes = [("max", "1"), ("min", "0")];
+        xml_empty_tag(&mut self.writer, "cx:valScaling", &attributes);
+
+        // Write the cx:units element.
+        let attributes = [("unit", "percentage")];
+        xml_empty_tag(&mut self.writer, "cx:units", &attributes);
+
+        // Write the cx:tickLabels element.
+        xml_empty_tag_only(&mut self.writer, "cx:tickLabels");
+
+        xml_end_tag(&mut self.writer, "cx:axis");
+    }
+
+    // Write the <cx:legend> element.
+    fn write_cx_legend(&mut self) {
+        let position = match self.legend.position {
+            ChartLegendPosition::Left => "l",
+            ChartLegendPosition::Top => "t",
+            ChartLegendPosition::Bottom => "b",
+            ChartLegendPosition::Right | ChartLegendPosition::TopRight => "r",
+        };
+
+        let attributes = [
+            ("pos", position.to_string()),
+            ("align", "ctr".to_string()),
+            ("overlay", i32::from(self.legend.has_overlay).to_string()),
+        ];
+
+        xml_empty_tag(&mut self.writer, "cx:legend", &attributes);
+    }
+}
+
 impl DrawingObject for Chart {
     fn x_offset(&self) -> u32 {
         self.x_offset
@@ -7257,6 +8537,7 @@ impl DrawingObject for Chart {
 pub struct ChartSeries {
     pub(crate) value_range: ChartRange,
     pub(crate) category_range: ChartRange,
+    pub(crate) bubble_size_range: ChartRange,
     pub(crate) title: ChartTitle,
     pub(crate) format: ChartFormat,
     pub(crate) marker: Option<ChartMarker>,
@@ -7369,6 +8650,7 @@ impl ChartSeries {
         ChartSeries {
             value_range: ChartRange::default(),
             category_range: ChartRange::default(),
+            bubble_size_range: ChartRange::default(),
             title: ChartTitle::new(),
             format: ChartFormat::default(),
             marker: None,
@@ -7548,6 +8830,73 @@ impl ChartSeries {
         T: IntoChartRange,
     {
         self.category_range = range.new_chart_range();
+        self
+    }
+
+    /// Add a bubble sizes range to a chart series.
+    ///
+    /// Set the range of values that control the size of the bubbles in a
+    /// [`ChartType::Bubble`] chart series. The categories range is used for
+    /// the X values and the values range for the Y values.
+    ///
+    /// This option is only used with [`ChartType::Bubble`] charts. If it
+    /// isn't set, the bubbles are plotted with a uniform default size.
+    ///
+    /// # Parameters
+    ///
+    /// - `range`: The range property which can be one of the following
+    ///   generic types:
+    ///    - A string with an Excel like range formula such as
+    ///      `"Sheet1!$C$1:$C$3"`.
+    ///    - A tuple that can be used to create the range programmatically
+    ///      using a sheet name and zero indexed row and column values like:
+    ///      `("Sheet1", 0, 2, 2, 2)` (this gives the same range as the
+    ///      previous string value).
+    ///    - A [`ChartRange`] object.
+    ///
+    /// # Examples
+    ///
+    /// An example of creating a Bubble chart with bubble sizes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_series_set_bubble_sizes.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write_column(0, 0, [1, 2, 3])?;
+    /// #     worksheet.write_column(0, 1, [10, 40, 30])?;
+    /// #     worksheet.write_column(0, 2, [5, 12, 8])?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Bubble);
+    ///
+    ///     // Add a data series with the X values, Y values and bubble sizes.
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories("Sheet1!$A$1:$A$3")
+    ///         .set_values("Sheet1!$B$1:$B$3")
+    ///         .set_bubble_sizes("Sheet1!$C$1:$C$3");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 4, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn set_bubble_sizes<T>(&mut self, range: T) -> &mut ChartSeries
+    where
+        T: IntoChartRange,
+    {
+        self.bubble_size_range = range.new_chart_range();
         self
     }
 
@@ -9256,10 +10605,14 @@ pub(crate) enum ChartRangeCacheDataType {
 ///
 /// The main original chart types are supported, see below.
 ///
-/// Support for newer Excel chart types such as Treemap, Sunburst, Box and
-/// Whisker, Statistical Histogram, Waterfall, Funnel and Maps is not currently
-/// planned since the underlying structure is substantially different from the
-/// implemented chart types.
+/// The newer Excel 2016+ "ChartEx" chart types are also supported: Waterfall,
+/// Funnel, Histogram, Pareto, Box and Whisker, Treemap, Sunburst and Region
+/// Map. These are stored by Excel in a different format (`cx:` chartEx parts
+/// rather than classic `c:` ChartML) and only support a subset of the classic
+/// chart options: series values/categories/name/fill, chart title and legend
+/// position, and the chart type specific options such as
+/// [`Chart::set_waterfall_subtotals()`] or
+/// [`Chart::set_histogram_bin_width()`].
 ///
 pub enum ChartType {
     /// An Area chart type.
@@ -9435,6 +10788,221 @@ pub enum ChartType {
 
     /// A Contour chart type shown as a wireframe outline without color fills.
     ContourWireframe,
+
+    /// A Bubble chart type.
+    ///
+    /// Bubble charts are a variant of Scatter charts where a third data range
+    /// controls the size of each plotted bubble. The categories range is used
+    /// for the X values, the values range for the Y values and the bubble
+    /// sizes are set via [`ChartSeries::set_bubble_sizes()`].
+    Bubble,
+
+    /// A Pie-of-Pie chart type.
+    ///
+    /// A Pie chart where the last few values are grouped into an "Other"
+    /// slice which is expanded into a secondary pie chart.
+    PieOfPie,
+
+    /// A Bar-of-Pie chart type.
+    ///
+    /// A Pie chart where the last few values are grouped into an "Other"
+    /// slice which is expanded into a secondary bar/column chart.
+    BarOfPie,
+
+    /// A Waterfall chart type (Excel 2016+ "ChartEx" chart).
+    ///
+    /// Waterfall charts show a running total as values are added or
+    /// subtracted. Data points can be marked as subtotals/totals via
+    /// [`Chart::set_waterfall_subtotals()`] and the connector lines between
+    /// columns can be turned off with
+    /// [`Chart::set_waterfall_connector_lines()`].
+    Waterfall,
+
+    /// A Funnel chart type (Excel 2016+ "ChartEx" chart).
+    ///
+    /// Funnel charts show values as progressively narrowing centered bars,
+    /// typically for stages in a process such as a sales pipeline.
+    Funnel,
+
+    /// A statistical Histogram chart type (Excel 2016+ "ChartEx" chart).
+    ///
+    /// Histogram charts group numeric values into bins. The binning can be
+    /// controlled with [`Chart::set_histogram_bin_width()`],
+    /// [`Chart::set_histogram_bin_count()`],
+    /// [`Chart::set_histogram_overflow()`] and
+    /// [`Chart::set_histogram_underflow()`]. If no binning option is set,
+    /// Excel uses automatic binning.
+    Histogram,
+
+    /// A Pareto chart type (Excel 2016+ "ChartEx" chart).
+    ///
+    /// A Pareto chart is a Histogram with bins sorted in descending order and
+    /// a line showing the cumulative percentage. It supports the same binning
+    /// options as [`ChartType::Histogram`].
+    Pareto,
+
+    /// A Box and Whisker chart type (Excel 2016+ "ChartEx" chart).
+    ///
+    /// Box and Whisker charts show the statistical distribution of a data
+    /// set: quartiles, mean, outliers etc. The statistical options can be set
+    /// via [`Chart::set_box_whisker_quartile_method()`] and the
+    /// `Chart::set_box_whisker_*()` display methods.
+    BoxWhisker,
+
+    /// A Treemap chart type (Excel 2016+ "ChartEx" chart).
+    ///
+    /// Treemap charts show hierarchical data as nested rectangles. The
+    /// hierarchy is defined via multi-level category ranges. The display of
+    /// parent category labels can be controlled with
+    /// [`Chart::set_treemap_parent_labels()`].
+    Treemap,
+
+    /// A Sunburst chart type (Excel 2016+ "ChartEx" chart).
+    ///
+    /// Sunburst charts show hierarchical data as concentric rings. The
+    /// hierarchy is defined via multi-level category ranges, the same as
+    /// [`ChartType::Treemap`].
+    Sunburst,
+
+    /// A Region Map chart type (Excel 2016+ "ChartEx" chart).
+    ///
+    /// Region Map (also known as "Filled Map" or choropleth) charts color
+    /// geographic regions based on values. The map projection can be set via
+    /// [`Chart::set_region_map_projection()`] and region labels via
+    /// [`Chart::set_region_map_labels()`].
+    ///
+    /// Note: Excel populates the map geometry via an online service when the
+    /// file is opened, so an internet connection may be required to render
+    /// the map.
+    RegionMap,
+}
+
+impl ChartType {
+    // Check if the chart type is an Excel 2016+ "ChartEx" chart type. These
+    // are stored in a "cx:" chartEx xml part instead of classic ChartML.
+    pub(crate) fn is_chartex(self) -> bool {
+        matches!(
+            self,
+            ChartType::Waterfall
+                | ChartType::Funnel
+                | ChartType::Histogram
+                | ChartType::Pareto
+                | ChartType::BoxWhisker
+                | ChartType::Treemap
+                | ChartType::Sunburst
+                | ChartType::RegionMap
+        )
+    }
+}
+
+/// The `ChartQuartileMethod` enum defines the quartile calculation method for
+/// [`ChartType::BoxWhisker`] charts.
+///
+/// It is used with the [`Chart::set_box_whisker_quartile_method()`] method.
+///
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ChartQuartileMethod {
+    /// Exclusive median quartile calculation. The Excel default.
+    Exclusive,
+
+    /// Inclusive median quartile calculation.
+    Inclusive,
+}
+
+impl fmt::Display for ChartQuartileMethod {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Exclusive => write!(f, "exclusive"),
+            Self::Inclusive => write!(f, "inclusive"),
+        }
+    }
+}
+
+/// The `ChartParentLabelLayout` enum defines how parent category labels are
+/// displayed in [`ChartType::Treemap`] charts.
+///
+/// It is used with the [`Chart::set_treemap_parent_labels()`] method.
+///
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ChartParentLabelLayout {
+    /// The parent category labels aren't displayed.
+    None,
+
+    /// The parent category labels are displayed in a banner above their
+    /// rectangles.
+    Banner,
+
+    /// The parent category labels are displayed overlapping their
+    /// rectangles. The Excel default.
+    Overlapping,
+}
+
+impl fmt::Display for ChartParentLabelLayout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::None => write!(f, "none"),
+            Self::Banner => write!(f, "banner"),
+            Self::Overlapping => write!(f, "overlapping"),
+        }
+    }
+}
+
+/// The `ChartRegionLabelLayout` enum defines how region labels are displayed
+/// in [`ChartType::RegionMap`] charts.
+///
+/// It is used with the [`Chart::set_region_map_labels()`] method.
+///
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ChartRegionLabelLayout {
+    /// The region labels aren't displayed.
+    None,
+
+    /// The region labels are only displayed where they fit.
+    BestFitOnly,
+
+    /// All the region labels are displayed.
+    ShowAll,
+}
+
+impl fmt::Display for ChartRegionLabelLayout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::None => write!(f, "none"),
+            Self::BestFitOnly => write!(f, "bestFitOnly"),
+            Self::ShowAll => write!(f, "showAll"),
+        }
+    }
+}
+
+/// The `ChartMapProjection` enum defines the map projection for
+/// [`ChartType::RegionMap`] charts.
+///
+/// It is used with the [`Chart::set_region_map_projection()`] method.
+///
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ChartMapProjection {
+    /// Mercator projection.
+    Mercator,
+
+    /// Miller projection.
+    Miller,
+
+    /// Robinson projection.
+    Robinson,
+
+    /// Albers projection.
+    Albers,
+}
+
+impl fmt::Display for ChartMapProjection {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Mercator => write!(f, "mercator"),
+            Self::Miller => write!(f, "miller"),
+            Self::Robinson => write!(f, "robinson"),
+            Self::Albers => write!(f, "albers"),
+        }
+    }
 }
 
 // -----------------------------------------------------------------------

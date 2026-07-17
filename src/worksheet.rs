@@ -16796,10 +16796,25 @@ impl Worksheet {
 
     // Convert the chart dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
-    pub(crate) fn prepare_worksheet_charts(&mut self, chart_id: u32, drawing_id: u32) {
-        for (chart_id, chart) in (chart_id..).zip(self.charts.values_mut()) {
-            chart.id = chart_id;
-            chart.add_axis_ids(chart_id);
+    pub(crate) fn prepare_worksheet_charts(
+        &mut self,
+        chart_id: u32,
+        chartex_id: u32,
+        drawing_id: u32,
+    ) {
+        // Number classic charts and ChartEx charts separately since they are
+        // written to different file types ("chartN.xml" vs "chartExN.xml").
+        let mut chart_id = chart_id;
+        let mut chartex_id = chartex_id;
+        for chart in self.charts.values_mut() {
+            if chart.is_chartex() {
+                chart.id = chartex_id;
+                chartex_id += 1;
+            } else {
+                chart.id = chart_id;
+                chart.add_axis_ids(chart_id);
+                chart_id += 1;
+            }
         }
 
         let mut rel_id = self.drawing_relationships.len() as u32;
@@ -16812,15 +16827,25 @@ impl Worksheet {
             let chart_id = chart.id;
 
             // Store the linkage to the charts rels file.
-            let chart_name = format!("../charts/chart{chart_id}.xml");
-            self.drawing_relationships
-                .push(("chart".to_string(), chart_name, String::new()));
+            if chart.is_chartex() {
+                let chart_name = format!("../charts/chartEx{chart_id}.xml");
+                self.drawing_relationships
+                    .push(("chartEx".to_string(), chart_name, String::new()));
+            } else {
+                let chart_name = format!("../charts/chart{chart_id}.xml");
+                self.drawing_relationships
+                    .push(("chart".to_string(), chart_name, String::new()));
+            }
 
             // Convert the chart dimensions to drawing dimensions and store the
             // drawing object.
             let mut drawing_info = self.position_object_emus(row, col, chart);
             rel_id += 1;
             drawing_info.rel_id = rel_id;
+
+            if chart.is_chartex() {
+                drawing_info.chartex_ns = Some(chart.chartex_choice_namespace());
+            }
 
             if self.is_chartsheet {
                 drawing_info.drawing_type = DrawingType::ChartSheet;
@@ -17053,6 +17078,7 @@ impl Worksheet {
             rel_id: 0,
             url: None,
             is_portrait: false,
+            chartex_ns: None,
         }
     }
 

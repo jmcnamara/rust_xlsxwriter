@@ -266,6 +266,10 @@ impl<W: Write + Send> Packager<W> {
             content_types.add_chart_name(i + 1);
         }
 
+        for i in 0..options.num_chartex_charts {
+            content_types.add_chartex_name(i + 1);
+        }
+
         for i in 0..options.num_tables {
             content_types.add_table_name(i + 1);
         }
@@ -556,7 +560,18 @@ impl<W: Write + Send> Packager<W> {
         let mut rels = Relationship::new();
 
         for relationship in relationships {
-            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+            // ChartEx charts use a Microsoft Office relationship type instead
+            // of the standard document relationship type.
+            if relationship.0 == "chartEx" {
+                rels.add_office_relationship(
+                    "2014",
+                    &relationship.0,
+                    &relationship.1,
+                    &relationship.2,
+                );
+            } else {
+                rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+            }
         }
 
         let filename = format!("xl/drawings/_rels/drawing{index}.xml.rels");
@@ -1011,17 +1026,64 @@ impl<W: Write + Send> Packager<W> {
 
     // Write the chart files.
     fn write_chart_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
-        let mut index = 1;
-
         for worksheet in &mut workbook.worksheets {
             for chart in worksheet.charts.values_mut() {
-                let filename = format!("xl/charts/chart{index}.xml");
+                // ChartEx (Excel 2016+) charts are written to a different
+                // file type from classic charts. The chart ids are assigned,
+                // per chart kind, in Workbook::prepare_drawings().
+                let filename = if chart.is_chartex() {
+                    format!("xl/charts/chartEx{}.xml", chart.id)
+                } else {
+                    format!("xl/charts/chart{}.xml", chart.id)
+                };
+
                 self.zip.start_file(filename, self.zip_options)?;
                 chart.assemble_xml_file();
                 self.zip.write_all(chart.writer.get_ref())?;
-                index += 1;
+
+                // Excel treats chartEx parts without the "style" and "colors"
+                // sidecar parts as unreadable content, so write a default
+                // version of each along with the rels file that links them.
+                if chart.is_chartex() {
+                    self.write_chartex_style_files(chart.id)?;
+                }
             }
         }
+
+        Ok(())
+    }
+
+    // Write the default style/colors parts and the rels file for a chartEx
+    // chart.
+    fn write_chartex_style_files(&mut self, chart_id: u32) -> Result<(), XlsxError> {
+        let filename = format!("xl/charts/style{chart_id}.xml");
+        self.zip.start_file(filename, self.zip_options)?;
+        self.zip
+            .write_all(crate::chart::chartex_styles::CHARTEX_STYLE_XML.as_bytes())?;
+
+        let filename = format!("xl/charts/colors{chart_id}.xml");
+        self.zip.start_file(filename, self.zip_options)?;
+        self.zip
+            .write_all(crate::chart::chartex_styles::CHARTEX_COLORS_XML.as_bytes())?;
+
+        let mut rels = Relationship::new();
+        rels.add_office_relationship(
+            "2011",
+            "chartStyle",
+            format!("style{chart_id}.xml").as_str(),
+            "",
+        );
+        rels.add_office_relationship(
+            "2011",
+            "chartColorStyle",
+            format!("colors{chart_id}.xml").as_str(),
+            "",
+        );
+
+        let filename = format!("xl/charts/_rels/chartEx{chart_id}.xml.rels");
+        self.zip.start_file(filename, self.zip_options)?;
+        rels.assemble_xml_file();
+        self.zip.write_all(rels.writer.get_ref())?;
 
         Ok(())
     }
@@ -1110,6 +1172,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) num_chartsheets: u16,
     pub(crate) num_drawings: u16,
     pub(crate) num_charts: u16,
+    pub(crate) num_chartex_charts: u16,
     pub(crate) num_tables: u16,
     pub(crate) num_comments: u16,
     pub(crate) doc_security: u8,
@@ -1137,6 +1200,7 @@ impl PackagerOptions {
             num_chartsheets: 0,
             num_drawings: 0,
             num_charts: 0,
+            num_chartex_charts: 0,
             num_tables: 0,
             num_comments: 0,
             doc_security: 0,

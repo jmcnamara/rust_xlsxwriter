@@ -104,6 +104,23 @@ impl ContentTypes {
         self.add_override(&part_name, content_type);
     }
 
+    // Add the name of a chartEx (Excel 2016+) chart to the ContentTypes
+    // overrides. Excel requires the chart "style" and "colors" sidecar parts
+    // for chartEx charts, so they are also added here.
+    pub(crate) fn add_chartex_name(&mut self, index: u16) {
+        let content_type = "application/vnd.ms-office.chartex+xml";
+        let part_name = format!("/xl/charts/chartEx{index}.xml");
+        self.add_override(&part_name, content_type);
+
+        let content_type = "application/vnd.ms-office.chartstyle+xml";
+        let part_name = format!("/xl/charts/style{index}.xml");
+        self.add_override(&part_name, content_type);
+
+        let content_type = "application/vnd.ms-office.chartcolorstyle+xml";
+        let part_name = format!("/xl/charts/colors{index}.xml");
+        self.add_override(&part_name, content_type);
+    }
+
     // Add the name of a table to the ContentTypes overrides.
     pub(crate) fn add_table_name(&mut self, index: u16) {
         let content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml";

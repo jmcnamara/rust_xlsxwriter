@@ -44,6 +44,7 @@ mod drawing_tests {
             drawing_type: DrawingType::Image,
             url: None,
             is_portrait: false,
+            chartex_ns: None,
         };
 
         drawing.drawings.push(drawing_info);

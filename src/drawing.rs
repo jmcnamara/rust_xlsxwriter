@@ -108,6 +108,7 @@ impl Drawing {
         match drawing_info.drawing_type {
             DrawingType::Image => self.write_pic(index, drawing_info),
             DrawingType::Chart => self.write_graphic_frame(index, drawing_info),
+            DrawingType::ChartEx => self.write_chartex_alternate_content(index, drawing_info),
             DrawingType::Shape => {
                 let shape = self.shapes[self.shape_id].clone();
                 self.shape_id += 1;
@@ -491,6 +492,146 @@ impl Drawing {
         ];
 
         xml_empty_tag(&mut self.writer, "c:chart", &attributes);
+    }
+
+    // Write the <mc:AlternateContent> element for ChartEx (Excel 2016+)
+    // charts. The chart frame is wrapped in a Markup Compatibility element
+    // with a fallback shape for older versions of Excel.
+    fn write_chartex_alternate_content(&mut self, index: u32, drawing_info: &DrawingInfo) {
+        let attributes = [(
+            "xmlns:mc",
+            "http://schemas.openxmlformats.org/markup-compatibility/2006",
+        )];
+        xml_start_tag(&mut self.writer, "mc:AlternateContent", &attributes);
+
+        // Write the <mc:Choice> element with the namespace version required
+        // for the chartEx chart type.
+        let namespace = drawing_info
+            .chartex_ns
+            .unwrap_or("http://schemas.microsoft.com/office/drawing/2015/9/8/chartex");
+        let attributes = [("xmlns:cx1", namespace), ("Requires", "cx1")];
+        xml_start_tag(&mut self.writer, "mc:Choice", &attributes);
+
+        // Write the <xdr:graphicFrame> element.
+        let attributes = [("macro", "")];
+        xml_start_tag(&mut self.writer, "xdr:graphicFrame", &attributes);
+
+        // Write the <xdr:nvGraphicFramePr> element.
+        self.write_nv_graphic_frame_pr(index, drawing_info);
+
+        // Write the <xdr:xfrm> element.
+        self.write_xfrm();
+
+        // Write the <a:graphic> element.
+        xml_start_tag_only(&mut self.writer, "a:graphic");
+
+        // Write the <a:graphicData> element with the chartEx uri.
+        let attributes = [(
+            "uri",
+            "http://schemas.microsoft.com/office/drawing/2014/chartex",
+        )];
+        xml_start_tag(&mut self.writer, "a:graphicData", &attributes);
+
+        // Write the <cx:chart> element.
+        let attributes = [
+            (
+                "xmlns:cx",
+                "http://schemas.microsoft.com/office/drawing/2014/chartex".to_string(),
+            ),
+            (
+                "xmlns:r",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships".to_string(),
+            ),
+            ("r:id", format!("rId{}", drawing_info.rel_id)),
+        ];
+        xml_empty_tag(&mut self.writer, "cx:chart", &attributes);
+
+        xml_end_tag(&mut self.writer, "a:graphicData");
+        xml_end_tag(&mut self.writer, "a:graphic");
+        xml_end_tag(&mut self.writer, "xdr:graphicFrame");
+        xml_end_tag(&mut self.writer, "mc:Choice");
+
+        // Write the <mc:Fallback> element with a placeholder shape for
+        // versions of Excel that don't support chartEx charts.
+        xml_start_tag_only(&mut self.writer, "mc:Fallback");
+        self.write_chartex_fallback_sp(index, drawing_info);
+        xml_end_tag(&mut self.writer, "mc:Fallback");
+
+        xml_end_tag(&mut self.writer, "mc:AlternateContent");
+    }
+
+    // Write the fallback <xdr:sp> element for ChartEx charts. This is the
+    // placeholder shape and message that Excel shows in versions that don't
+    // support chartEx charts.
+    fn write_chartex_fallback_sp(&mut self, index: u32, drawing_info: &DrawingInfo) {
+        let attributes = [("macro", ""), ("textlink", "")];
+        xml_start_tag(&mut self.writer, "xdr:sp", &attributes);
+
+        // Write the <xdr:nvSpPr> element.
+        xml_start_tag_only(&mut self.writer, "xdr:nvSpPr");
+        self.write_c_nv_pr(index, drawing_info, "Chart");
+
+        xml_start_tag_only(&mut self.writer, "xdr:cNvSpPr");
+        let attributes = [("noTextEdit", "1")];
+        xml_empty_tag(&mut self.writer, "a:spLocks", &attributes);
+        xml_end_tag(&mut self.writer, "xdr:cNvSpPr");
+
+        xml_end_tag(&mut self.writer, "xdr:nvSpPr");
+
+        // Write the <xdr:spPr> element.
+        xml_start_tag_only(&mut self.writer, "xdr:spPr");
+
+        xml_start_tag_only(&mut self.writer, "a:xfrm");
+        self.write_a_off(drawing_info);
+        self.write_a_ext(drawing_info);
+        xml_end_tag(&mut self.writer, "a:xfrm");
+
+        // Write the <a:prstGeom> element.
+        self.write_a_prst_geom();
+
+        // Write the <a:solidFill> element.
+        xml_start_tag_only(&mut self.writer, "a:solidFill");
+        let attributes = [("val", "white")];
+        xml_empty_tag(&mut self.writer, "a:prstClr", &attributes);
+        xml_end_tag(&mut self.writer, "a:solidFill");
+
+        // Write the <a:ln> element.
+        let attributes = [("w", "1")];
+        xml_start_tag(&mut self.writer, "a:ln", &attributes);
+        xml_start_tag_only(&mut self.writer, "a:solidFill");
+        let attributes = [("val", "green")];
+        xml_empty_tag(&mut self.writer, "a:prstClr", &attributes);
+        xml_end_tag(&mut self.writer, "a:solidFill");
+        xml_end_tag(&mut self.writer, "a:ln");
+
+        xml_end_tag(&mut self.writer, "xdr:spPr");
+
+        // Write the <xdr:txBody> element with the fallback message.
+        xml_start_tag_only(&mut self.writer, "xdr:txBody");
+
+        let attributes = [("vertOverflow", "clip"), ("horzOverflow", "clip")];
+        xml_empty_tag(&mut self.writer, "a:bodyPr", &attributes);
+        xml_empty_tag_only(&mut self.writer, "a:lstStyle");
+
+        xml_start_tag_only(&mut self.writer, "a:p");
+        xml_start_tag_only(&mut self.writer, "a:r");
+
+        let attributes = [("lang", "en-US"), ("sz", "1100")];
+        xml_empty_tag(&mut self.writer, "a:rPr", &attributes);
+
+        xml_data_element_only(
+            &mut self.writer,
+            "a:t",
+            "This chart isn't available in your version of Excel. \
+             Editing this shape or saving this workbook into a different file \
+             format will permanently break the chart.",
+        );
+
+        xml_end_tag(&mut self.writer, "a:r");
+        xml_end_tag(&mut self.writer, "a:p");
+        xml_end_tag(&mut self.writer, "xdr:txBody");
+
+        xml_end_tag(&mut self.writer, "xdr:sp");
     }
 
     // Write the <xdr:sp> element.
@@ -1270,6 +1411,7 @@ impl Default for DrawingInfo {
             drawing_type: DrawingType::Image,
             url: None,
             is_portrait: false,
+            chartex_ns: None,
         }
     }
 }
@@ -1290,11 +1432,13 @@ pub(crate) struct DrawingInfo {
     pub(crate) drawing_type: DrawingType,
     pub(crate) url: Option<Url>,
     pub(crate) is_portrait: bool,
+    pub(crate) chartex_ns: Option<&'static str>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum DrawingType {
     Chart,
+    ChartEx,
     ChartSheet,
     Image,
     Shape,
