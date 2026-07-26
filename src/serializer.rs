@@ -1946,7 +1946,11 @@
 //! mapped to a 2D grid of cells and the order of the fields is not guaranteed.
 //! As a side effect of this it also not possible to serialize structs that use
 //! the Serde [`flatten`] attribute, since Serde converts the fixed set of named
-//! fields into a dynamically sized map.
+//! fields into a dynamically sized map. However, a struct that contains a map
+//! field can be serialized if the field is omitted via one of the [field
+//! skipping](#skipping-fields-when-serializing) methods such as the
+//! `#[serde(skip)]`,`#[xlsx(skip)] or [`CustomSerializeField::skip()`]; or by
+//! excluding it via [`SerializeFieldOptions::use_custom_headers_only()`].
 //!
 //! [`flatten`]: https://serde.rs/field-attrs.html#flatten
 //! [Serde data model]: https://serde.rs/data-model.html
@@ -2021,6 +2025,16 @@ impl SerializerState {
         let value_format = Arc::clone(&field.value_format);
 
         Ok((row, col, value_format))
+    }
+
+    // Check if the current field has been skipped from serialization via the
+    // `#[xlsx(skip)]` attribute, `CustomSerializeField::skip()`, or by omitting
+    // it from `SerializeFieldOptions::use_custom_headers_only()` headers.
+    pub(crate) fn is_unselected_field(&self) -> bool {
+        match self.structs.get(&self.current_struct) {
+            Some(header_config) => !header_config.fields.contains_key(&self.current_field),
+            None => false,
+        }
     }
 
     // Store the name and max row of the current struct being serialized.
@@ -3744,9 +3758,14 @@ impl ser::Serializer for &mut Worksheet {
     // Maps, and structs that use `#[serde(flatten)]`, are serialized by Serde
     // as maps. These don't carry a struct name or a static list of field names
     // so they can't be mapped onto Excel's fixed 2D grid of cells. We reject
-    // them with an explicit error rather than silently writing nothing.
+    // them with an explicit error rather than silently writing nothing. However
+    // we also check if the map can be explicitly skipped by the user.
     #[doc(hidden)]
     fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap, XlsxError> {
+        if self.serializer_state.is_unselected_field() {
+            return Ok(self);
+        }
+
         Err(XlsxError::SerdeError(
             "Map types and structs that use `#[serde(flatten)]` cannot be serialized to Excel. \
             See the limitations section in the `rust_xlsxwriter::serializer` documentation."
@@ -3865,24 +3884,25 @@ impl ser::SerializeTupleVariant for &mut Worksheet {
     }
 }
 
-// Serialize tuple map sequences.
+// Maps only get to this point if they are in a skipped/deselected field, see
+// `serialize_map()` above. Ignore the keys and values without traversing them.
 #[doc(hidden)]
 impl ser::SerializeMap for &mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
 
-    fn serialize_key<T>(&mut self, key: &T) -> Result<(), XlsxError>
+    fn serialize_key<T>(&mut self, _key: &T) -> Result<(), XlsxError>
     where
         T: ?Sized + Serialize,
     {
-        key.serialize(&mut **self)
+        Ok(())
     }
 
-    fn serialize_value<T>(&mut self, value: &T) -> Result<(), XlsxError>
+    fn serialize_value<T>(&mut self, _value: &T) -> Result<(), XlsxError>
     where
         T: ?Sized + Serialize,
     {
-        value.serialize(&mut **self)
+        Ok(())
     }
 
     fn end(self) -> Result<(), XlsxError> {

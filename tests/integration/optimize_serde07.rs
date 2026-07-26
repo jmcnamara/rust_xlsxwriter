@@ -10,6 +10,7 @@ use rust_xlsxwriter::{
     CustomSerializeField, SerializeFieldOptions, Workbook, XlsxError, XlsxSerialize,
 };
 use serde::Serialize;
+use std::collections::HashMap;
 
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -655,6 +656,182 @@ fn create_new_xlsx_file_16(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization with enum values.
+fn create_new_xlsx_file_17(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet_with_low_memory();
+
+    // Define an enum for the test.
+    #[derive(Serialize)]
+    #[serde(rename_all = "lowercase")]
+    enum MyEnum {
+        Aaa,
+        Bbb,
+        Ccc,
+    }
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: u8,
+        col2: MyEnum,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: MyEnum::Aaa,
+        },
+        MyStruct {
+            col1: 2,
+            col2: MyEnum::Bbb,
+        },
+        MyStruct {
+            col1: 3,
+            col2: MyEnum::Ccc,
+        },
+    ];
+
+    worksheet.serialize_headers(0, 0, &data.get(0).unwrap())?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for skipping a map field via skip(). Maps can't be serialized to
+// Excel but a skipped map field shouldn't raise an error.
+fn create_new_xlsx_file_18(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet_with_low_memory();
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: u8,
+        col2: &'static str,
+        col3: HashMap<&'static str, &'static str>,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: "aaa",
+            col3: HashMap::from([("key", "value")]),
+        },
+        MyStruct {
+            col1: 2,
+            col2: "bbb",
+            col3: HashMap::from([("key", "value")]),
+        },
+        MyStruct {
+            col1: 3,
+            col2: "ccc",
+            col3: HashMap::from([("key", "value")]),
+        },
+    ];
+
+    let custom_headers = [CustomSerializeField::new("col3").skip(true)];
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
+
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for skipping a map field implicitly by omitting it from the custom
+// headers when using use_custom_headers_only().
+fn create_new_xlsx_file_19(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet_with_low_memory();
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: u8,
+        col2: &'static str,
+        col3: HashMap<&'static str, &'static str>,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: "aaa",
+            col3: HashMap::from([("key", "value")]),
+        },
+        MyStruct {
+            col1: 2,
+            col2: "bbb",
+            col3: HashMap::from([("key", "value")]),
+        },
+        MyStruct {
+            col1: 3,
+            col2: "ccc",
+            col3: HashMap::from([("key", "value")]),
+        },
+    ];
+
+    let custom_headers = [
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
+    ];
+    let header_options = SerializeFieldOptions::new()
+        .set_custom_headers(&custom_headers)
+        .use_custom_headers_only(true);
+
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for skipping a map field via the #[xlsx(skip)] proc macro
+// attribute.
+fn create_new_xlsx_file_20(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet_with_low_memory();
+
+    // Create a serializable test struct.
+    #[derive(Serialize, XlsxSerialize)]
+    struct MyStruct {
+        col1: u8,
+        col2: &'static str,
+        #[xlsx(skip)]
+        col3: HashMap<&'static str, &'static str>,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: "aaa",
+            col3: HashMap::from([("key", "value")]),
+        },
+        MyStruct {
+            col1: 2,
+            col2: "bbb",
+            col3: HashMap::from([("key", "value")]),
+        },
+        MyStruct {
+            col1: 3,
+            col2: "ccc",
+            col3: HashMap::from([("key", "value")]),
+        },
+    ];
+
+    worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_optimize_serde07_1() {
     let test_runner = common::TestRunner::new()
@@ -855,6 +1032,58 @@ fn test_optimize_serde07_16() {
         .set_name("serde07")
         .set_function(create_new_xlsx_file_16)
         .unique("optimize16")
+        .ignore_worksheet_spans()
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_optimize_serde07_17() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_17)
+        .unique("optimize17")
+        .ignore_worksheet_spans()
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_optimize_serde07_18() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_18)
+        .unique("optimize18")
+        .ignore_worksheet_spans()
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_optimize_serde07_19() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_19)
+        .unique("optimize19")
+        .ignore_worksheet_spans()
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_optimize_serde07_20() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_20)
+        .unique("optimize20")
         .ignore_worksheet_spans()
         .initialize();
 
