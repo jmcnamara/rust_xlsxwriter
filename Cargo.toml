@@ -10,11 +10,11 @@ readme = "README.md"
 license = "MIT OR Apache-2.0"
 version = "0.96.0"
 edition = "2021"
-rust-version = "1.83.0" # For zip.rs compatibility.
+rust-version = "1.88.0" # For zip.rs compatibility.
 
 [dependencies]
 # Default/non-optional dependencies.
-zip = {version = "7.2", default-features = false, features = ["deflate"]}
+zip = {version = "8.3", default-features = false, features = ["deflate"]}
 
 # Optional dependencies.
 ryu = {optional = true, version = "1.0"}
