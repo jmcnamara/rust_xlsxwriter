@@ -5,6 +5,35 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.97.0] - 2026-07-30
+
+### Added
+
+- Updated `zip` dependency to v8.3 to pick up two upstream fixes for ZIP64
+  "large file" handling. This requires a MSRV of 1.88.0. See [Issue #183].
+
+  [Issue #183]: https://github.com/jmcnamara/rust_xlsxwriter/issues/183
+
+### Fixed
+
+- Fixed issue where serializing a struct containing a map field returned an
+  error even if the field was skipped. Map types cannot be serialized to Excel,
+  but a map field can now be skipped via the `#[serde(skip)]` (this was already
+  working) or `#[xlsx(skip)]` attributes, the `CustomSerializeField::skip()`
+  method, or by omitting it via `SerializeFieldOptions::use_custom_headers_only()`.
+
+  [Issue #182].
+
+  [Issue #182]: https://github.com/jmcnamara/rust_xlsxwriter/issues/182
+
+- Fixed an issue when handling BMP images that use a "top-down" DIB (Device
+  Independent Bitmap) row order.
+
+- Added a check for the minimum required data size when reading an image so
+  that invalid or truncated image data returns an error instead of causing a
+  panic.
+
+
 ## [0.96.0] - 2026-07-01
 
 ### Added
