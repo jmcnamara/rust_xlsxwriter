@@ -18013,14 +18013,14 @@ impl Worksheet {
         {
             xml_start_tag(&mut self.writer, "sheetPr", &attributes);
 
-            // Write the pageSetUpPr element.
-            self.write_page_set_up_pr();
-
             // Write the tabColor element.
             self.write_tab_color();
 
             // Write the outlinePr element.
             self.write_outline_pr();
+
+            // Write the pageSetUpPr element.
+            self.write_page_set_up_pr();
 
             xml_end_tag(&mut self.writer, "sheetPr");
         } else {
