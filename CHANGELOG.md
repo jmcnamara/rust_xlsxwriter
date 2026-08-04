@@ -5,6 +5,17 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.97.1] - 2026-08-05
+
+### Fixed
+
+- Fixed issue where using `Worksheet::set_tab_color()` and
+  `Worksheet::set_print_fit_to_pages()` on the same worksheet caused an invalid
+  Excel file due to an XML element ordering issue. See [Issue #184].
+
+  [Issue #184]: https://github.com/jmcnamara/rust_xlsxwriter/issues/184
+
+
 ## [0.97.0] - 2026-07-30
 
 ### Added
