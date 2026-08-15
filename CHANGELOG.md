@@ -5,6 +5,14 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.98.0] - 2026-08-15
+
+### Added
+
+- Updated optional `polars` dependency to v0.55 to allow a similar update in the
+  [`polars_excel_writer`] crate.
+
+
 ## [0.97.1] - 2026-08-05
 
 ### Fixed
