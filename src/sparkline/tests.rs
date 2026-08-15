@@ -11,6 +11,7 @@ mod sparkline_tests {
     use crate::xmlwriter;
     use crate::ChartEmptyCells;
     use crate::Color;
+    use crate::ConditionalFormatDataBar;
     use crate::Sparkline;
     use crate::SparklineType;
     use crate::Worksheet;
@@ -3089,6 +3090,127 @@ mod sparkline_tests {
                           <xm:sqref>F7</xm:sqref>
                         </x14:sparkline>
                     </x14:sparklines>
+                    </x14:sparklineGroup>
+                  </x14:sparklineGroups>
+                </ext>
+              </extLst>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn sparkline15() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let data = [1, 2, 3];
+
+        worksheet.write_row(0, 0, data)?;
+        worksheet.write_row(1, 0, data)?;
+
+        let sparkline = Sparkline::new()
+            .set_range(("Sheet1", 0, 0, 0, 2))
+            .set_style(29);
+
+        worksheet.add_sparkline(0, 3, &sparkline)?;
+
+        let conditional_format = ConditionalFormatDataBar::new();
+
+        worksheet.add_conditional_format(1, 0, 1, 2, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+              <dimension ref="A1:C2"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData>
+                <row r="1" spans="1:3" x14ac:dyDescent="0.25">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                  <c r="B1">
+                    <v>2</v>
+                  </c>
+                  <c r="C1">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:3" x14ac:dyDescent="0.25">
+                  <c r="A2">
+                    <v>1</v>
+                  </c>
+                  <c r="B2">
+                    <v>2</v>
+                  </c>
+                  <c r="C2">
+                    <v>3</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A2:C2">
+                <cfRule type="dataBar" priority="1">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FF638EC6"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000001}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FF638EC6"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A2:C2</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{05C60535-1F16-4fd2-B633-F4F36F0B64E0}">
+                  <x14:sparklineGroups xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                    <x14:sparklineGroup displayEmptyCellsAs="gap">
+                      <x14:colorSeries rgb="FF376092"/>
+                      <x14:colorNegative rgb="FFD00000"/>
+                      <x14:colorAxis rgb="FF000000"/>
+                      <x14:colorMarkers rgb="FFD00000"/>
+                      <x14:colorFirst rgb="FFD00000"/>
+                      <x14:colorLast rgb="FFD00000"/>
+                      <x14:colorHigh rgb="FFD00000"/>
+                      <x14:colorLow rgb="FFD00000"/>
+                      <x14:sparklines>
+                        <x14:sparkline>
+                          <xm:f>Sheet1!A1:C1</xm:f>
+                          <xm:sqref>D1</xm:sqref>
+                        </x14:sparkline>
+                      </x14:sparklines>
                     </x14:sparklineGroup>
                   </x14:sparklineGroups>
                 </ext>

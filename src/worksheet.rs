@@ -18425,6 +18425,7 @@ impl Worksheet {
         }
 
         xml_end_tag(&mut self.writer, "x14:conditionalFormattings");
+        xml_end_tag(&mut self.writer, "ext");
     }
 
     // Write the <dataValidations> element.
@@ -20101,8 +20102,6 @@ impl Worksheet {
             self.write_sparkline_groups();
         }
 
-        xml_end_tag(&mut self.writer, "ext");
-
         xml_end_tag(&mut self.writer, "extLst");
     }
 
@@ -20122,6 +20121,7 @@ impl Worksheet {
         }
 
         xml_end_tag(&mut self.writer, "x14:sparklineGroups");
+        xml_end_tag(&mut self.writer, "ext");
     }
 
     // Write the <x14:sparklineGroup> element.
