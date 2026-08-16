@@ -113,4 +113,84 @@ mod image_tests {
             assert!(matches!(image, Err(XlsxError::UnknownImageType)));
         }
     }
+
+    #[test]
+    fn truncated_image_loop_data() {
+        // Tests to check for truncated data in PNG and JPEG loops.
+
+        // PNG truncated 1 byte into a chunk header.
+        let mut png_short_marker = Vec::new();
+        png_short_marker.extend_from_slice(&[0x89]);
+        png_short_marker.extend_from_slice(b"PNG\r\n\x1a\n");
+        png_short_marker.extend_from_slice(&13u32.to_be_bytes());
+        png_short_marker.extend_from_slice(b"IHDR");
+        png_short_marker.extend_from_slice(&[0; 17]); // Payload + CRC.
+        png_short_marker.push(0); // 1 byte of the next chunk header.
+
+        // PNG where "IHDR" isn't the first marker and is truncated mid-payload.
+        let mut png_short_ihdr = Vec::new();
+        png_short_ihdr.extend_from_slice(&[0x89]);
+        png_short_ihdr.extend_from_slice(b"PNG\r\n\x1a\n");
+        png_short_ihdr.extend_from_slice(&2u32.to_be_bytes());
+        png_short_ihdr.extend_from_slice(b"aaaa");
+        png_short_ihdr.extend_from_slice(&[0; 10]);
+        png_short_ihdr.extend_from_slice(b"IHDR");
+
+        // PNG truncated just after a non-first pHYs marker.
+        let mut png_short_phys = Vec::new();
+        png_short_phys.extend_from_slice(&[0x89]);
+        png_short_phys.extend_from_slice(b"PNG\r\n\x1a\n");
+        png_short_phys.extend_from_slice(&2u32.to_be_bytes());
+        png_short_phys.extend_from_slice(b"aaaa");
+        png_short_phys.extend_from_slice(&[0; 6]); // Payload + CRC.
+        png_short_phys.extend_from_slice(&9u32.to_be_bytes());
+        png_short_phys.extend_from_slice(b"pHYs"); // Truncated after marker.
+
+        // JPEG truncated mid-SOF0, after the length field.
+        let mut jpg_short_sof = Vec::new();
+        jpg_short_sof.extend_from_slice(&[0xFF, 0xD8]); // SOI.
+        jpg_short_sof.extend_from_slice(&[0xFF, 0xE0, 0x00, 0x14]); // APP0.
+        jpg_short_sof.extend_from_slice(&[0; 18]); // APP0 payload.
+        jpg_short_sof.extend_from_slice(&[0xFF, 0xC0, 0x00, 0x11]); // SOF0.
+        jpg_short_sof.push(8); // Precision byte only, then truncated.
+
+        // JPEG truncated 1 byte into a segment marker.
+        let mut jpg_short_marker = Vec::new();
+        jpg_short_marker.extend_from_slice(&[0xFF, 0xD8]); // SOI.
+        jpg_short_marker.extend_from_slice(&[0xFF, 0xE0, 0x00, 0x15]); // APP0.
+        jpg_short_marker.extend_from_slice(&[0; 19]); // APP0 payload.
+        jpg_short_marker.push(0xFF); // 1 byte of the next marker.
+
+        // JPEG truncated in a non-first 0xFFE0 segment.
+        let mut jpg_short_app0 = Vec::new();
+        jpg_short_app0.extend_from_slice(&[0xFF, 0xD8]); // SOI.
+        jpg_short_app0.extend_from_slice(&[0xFF, 0xFE, 0x00, 0x14]); // COM.
+        jpg_short_app0.extend_from_slice(&[0; 18]); // COM payload.
+        jpg_short_app0.extend_from_slice(&[0xFF, 0xE0, 0x00, 0x14]); // APP0.
+        jpg_short_app0.extend_from_slice(&[0; 5]); // Truncated payload.
+
+        // PNG with a length large enough to overflow the 32 bit offset
+        // calculation.
+        let mut png_overflow = Vec::new();
+        png_overflow.extend_from_slice(&[0x89]);
+        png_overflow.extend_from_slice(b"PNG\r\n\x1a\n");
+        png_overflow.extend_from_slice(&u32::MAX.to_be_bytes());
+        png_overflow.extend_from_slice(b"aaaa");
+        png_overflow.extend_from_slice(&[0; 10]);
+
+        let cases = vec![
+            png_short_marker,
+            png_short_ihdr,
+            png_short_phys,
+            jpg_short_sof,
+            jpg_short_marker,
+            jpg_short_app0,
+            png_overflow,
+        ];
+
+        for data in cases {
+            let image = Image::new_from_buffer(&data);
+            assert!(matches!(image, Err(XlsxError::ImageDimensionError)));
+        }
+    }
 }

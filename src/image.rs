@@ -918,9 +918,9 @@ impl Image {
         let gif_marker = &data[0..4];
 
         if png_marker == "PNG".as_bytes() {
-            self.process_png(&data);
+            self.process_png(&data)?;
         } else if jpg_marker == 0xFFD8 {
-            self.process_jpg(&data);
+            self.process_jpg(&data)?;
         } else if bmp_marker == "BM".as_bytes() {
             self.process_bmp(&data);
         } else if gif_marker == "GIF8".as_bytes() {
@@ -946,7 +946,7 @@ impl Image {
     }
 
     // Extract width and height information from a PNG file.
-    fn process_png(&mut self, data: &[u8]) {
+    fn process_png(&mut self, data: &[u8]) -> Result<(), XlsxError> {
         let mut offset: usize = 8;
         let mut width: u32 = 0;
         let mut height: u32 = 0;
@@ -957,17 +957,32 @@ impl Image {
         // Search through the image data to read the height and width in the
         // IHDR element. Also read the DPI in the pHYs element, if present.
         while offset < data_length {
+            // Ensure there is enough data to read the length and marker.
+            if offset + 8 > data_length {
+                return Err(XlsxError::ImageDimensionError);
+            }
+
             let marker = &data[offset + 4..offset + 8];
             let length = unpack_u32_from_be_bytes(data, offset);
 
             // Read the image dimensions.
             if marker == "IHDR".as_bytes() {
+                // Ensure there is enough data to read the dimensions.
+                if offset + 16 > data_length {
+                    return Err(XlsxError::ImageDimensionError);
+                }
+
                 width = unpack_u32_from_be_bytes(data, offset + 8);
                 height = unpack_u32_from_be_bytes(data, offset + 12);
             }
 
             // Read the image DPI values.
             if marker == "pHYs".as_bytes() {
+                // Ensure there is enough data to read the DPI properties.
+                if offset + 17 > data_length {
+                    return Err(XlsxError::ImageDimensionError);
+                }
+
                 let units = &data[offset + 16];
                 let x_density = unpack_u32_from_be_bytes(data, offset + 8);
                 let y_density = unpack_u32_from_be_bytes(data, offset + 12);
@@ -983,7 +998,7 @@ impl Image {
                 break;
             }
 
-            offset = offset + length as usize + 12;
+            offset = offset.saturating_add(length as usize).saturating_add(12);
         }
 
         self.width = f64::from(width);
@@ -991,10 +1006,12 @@ impl Image {
         self.width_dpi = width_dpi;
         self.height_dpi = height_dpi;
         self.image_type = XlsxImageType::Png;
+
+        Ok(())
     }
 
     // Extract width and height information from a PNG file.
-    fn process_jpg(&mut self, data: &[u8]) {
+    fn process_jpg(&mut self, data: &[u8]) -> Result<(), XlsxError> {
         let mut offset: usize = 2;
         let mut height: u32 = 0;
         let mut width: u32 = 0;
@@ -1003,8 +1020,13 @@ impl Image {
         let data_length = data.len();
 
         // Search through the image data to read the height and width in the
-        // IHDR element. Also read the DPI in the pHYs element, if present.
+        // SOF elements. Also read the DPI in the 0xFFE0 element, if present.
         while offset < data_length {
+            // Ensure there is enough data to read the marker and length.
+            if offset + 4 > data_length {
+                return Err(XlsxError::ImageDimensionError);
+            }
+
             let marker = unpack_u16_from_be_bytes(data, offset);
             let length = unpack_u16_from_be_bytes(data, offset + 2);
 
@@ -1015,12 +1037,22 @@ impl Image {
                 && marker != 0xFFC8
                 && marker != 0xFFCC
             {
+                // Ensure there is enough data to read the dimensions.
+                if offset + 9 > data_length {
+                    return Err(XlsxError::ImageDimensionError);
+                }
+
                 height = u32::from(unpack_u16_from_be_bytes(data, offset + 5));
                 width = u32::from(unpack_u16_from_be_bytes(data, offset + 7));
             }
 
             // Read the DPI in the 0xFFE0 element.
             if marker == 0xFFE0 {
+                // Ensure there is enough data to read the DPI properties.
+                if offset + 16 > data_length {
+                    return Err(XlsxError::ImageDimensionError);
+                }
+
                 let units = &data[offset + 11];
                 let x_density = unpack_u16_from_be_bytes(data, offset + 12);
                 let y_density = unpack_u16_from_be_bytes(data, offset + 14);
@@ -1049,7 +1081,7 @@ impl Image {
                 break;
             }
 
-            offset = offset + length as usize + 2;
+            offset = offset.saturating_add(length as usize).saturating_add(2);
         }
 
         self.width = f64::from(width);
@@ -1057,6 +1089,8 @@ impl Image {
         self.width_dpi = width_dpi;
         self.height_dpi = height_dpi;
         self.image_type = XlsxImageType::Jpg;
+
+        Ok(())
     }
 
     // Extract width and height information from a BMP file.
