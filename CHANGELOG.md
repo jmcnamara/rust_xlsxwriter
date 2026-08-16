@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed an issue where sparklines and conditional formattting data bars on the
+- Fixed an issue where sparklines and conditional formatting data bars on the
   same worksheet caused an XML error. See [Issue #185].
 
   [Issue #185]: https://github.com/jmcnamara/rust_xlsxwriter/issues/185
