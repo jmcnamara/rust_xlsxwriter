@@ -5,6 +5,16 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.98.1] - 2026-08-15
+
+### Fixed
+
+- Fixed an issue where sparklines and conditional formattting data bars on the
+  same worksheet caused an XML error. See [Issue #185].
+
+  [Issue #185]: https://github.com/jmcnamara/rust_xlsxwriter/issues/185
+
+
 ## [0.98.0] - 2026-08-15
 
 ### Added
