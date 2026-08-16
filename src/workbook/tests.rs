@@ -47,10 +47,20 @@ mod workbook_tests {
 
         // Test invalid defined names.
         let names = vec![
-            ".foo",    // Invalid start character.
-            "foo bar", // Space in name
-            "Foo,",    // Other invalid characters.
-            "Foo/", "Foo[", "Foo]", "Foo'", "Foo\"bar", "Foo:", "Foo*",
+            ".foo",           // Invalid start character.
+            "foo bar",        // Space in name
+            "Foo,",           // Invalid character ','.
+            "Foo/",           // Invalid character '/'.
+            "Foo[",           // Invalid character '['.
+            "Foo]",           // Invalid character ']'.
+            "Foo'",           // Invalid character "'".
+            "Foo\"bar",       // Invalid character '"'.
+            "Foo:",           // Invalid character ':'.
+            "Foo*",           // Invalid character '*'.
+            "Sheet1!Foo!Bar", // Invalid character '!'.
+            "",               // Blank name.
+            "Sheet1!",        // Blank name.
+            "!Foo",           // Starts with !.
         ];
 
         for name in names {

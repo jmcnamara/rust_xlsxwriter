@@ -1560,6 +1560,12 @@ impl Workbook {
         let mut defined_name = DefinedName::new();
         let name = name.into();
 
+        // Check for a name that starts with ! before we use it as a delimiter.
+        if !name.is_empty() && name.starts_with('!') {
+            let error = format!("Name '{name}' must start with a letter or underscore in Excel");
+            return Err(XlsxError::ParameterError(error));
+        }
+
         // Match Global/Workbook or Local/Worksheet defined names.
         match name.find('!') {
             Some(position) => {
@@ -1571,6 +1577,12 @@ impl Workbook {
                 defined_name.name.clone_from(&name);
                 defined_name.name_type = DefinedNameType::Global;
             }
+        }
+
+        // Check for blank/empty name.
+        if defined_name.name.is_empty() {
+            let error = format!("Name '{}' cannot be empty in Excel", defined_name.name);
+            return Err(XlsxError::ParameterError(error));
         }
 
         // Excel requires that the name starts with a letter or underscore.
@@ -1586,13 +1598,13 @@ impl Workbook {
             return Err(XlsxError::ParameterError(error));
         }
 
-        // Excel also prohibits certain characters in the name.
+        // Excel prohibits certain characters in the name.
         if defined_name
             .name
-            .contains([' ', ',', '/', '*', '[', ']', ':', '"', '\''])
+            .contains([' ', ',', '/', '*', '[', ']', ':', '"', '\'', '!'])
         {
             let error = format!(
-                "Name '{}' cannot contain any of the characters `,/*[]:\"'` or `space` in Excel",
+                "Name '{}' cannot contain any of the characters `,/*[]:\"'!` or `space` in Excel",
                 defined_name.name
             );
             return Err(XlsxError::ParameterError(error));
