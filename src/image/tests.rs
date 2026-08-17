@@ -193,4 +193,31 @@ mod image_tests {
             assert!(matches!(image, Err(XlsxError::ImageDimensionError)));
         }
     }
+
+    #[test]
+    fn bmp_negative_height() {
+        // Test negative BMP heights, which indicate a top-down DIB. Also check
+        // `i32::MIN` to ensure that overflow is handled/rejected correctly.
+        fn tmp_bmp(height: i32) -> Vec<u8> {
+            let mut data = vec![0u8; 26];
+            let width: i32 = 100;
+
+            data[0] = b'B';
+            data[1] = b'M';
+            data[18..22].copy_from_slice(&width.to_le_bytes());
+            data[22..26].copy_from_slice(&height.to_le_bytes());
+
+            data
+        }
+
+        // Positive and negative control values.
+        for height in [50, -50] {
+            let image = Image::new_from_buffer(&tmp_bmp(height)).unwrap();
+            assert_eq!(100.0, image.width());
+            assert_eq!(50.0, image.height());
+        }
+
+        let image = Image::new_from_buffer(&tmp_bmp(i32::MIN));
+        assert!(matches!(image, Err(XlsxError::ImageDimensionError)));
+    }
 }

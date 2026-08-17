@@ -922,7 +922,7 @@ impl Image {
         } else if jpg_marker == 0xFFD8 {
             self.process_jpg(&data)?;
         } else if bmp_marker == "BM".as_bytes() {
-            self.process_bmp(&data);
+            self.process_bmp(&data)?;
         } else if gif_marker == "GIF8".as_bytes() {
             self.process_gif(&data);
         }
@@ -1094,20 +1094,26 @@ impl Image {
     }
 
     // Extract width and height information from a BMP file.
-    fn process_bmp(&mut self, data: &[u8]) {
+    fn process_bmp(&mut self, data: &[u8]) -> Result<(), XlsxError> {
         let width_dpi: f64 = 96.0;
         let height_dpi: f64 = 96.0;
 
-        // The height can be stored as negative for a top-down DIB so we need to
-        // take the absolute value.
-        let height = unpack_i32_from_le_bytes(data, 22).abs();
         let width = unpack_i32_from_le_bytes(data, 18);
+
+        // The height can be stored as negative for a top-down DIB so we need to
+        // take the absolute value. Also, the height `i32::MIN` doesn't have an
+        // absolute value so we treat it as an invalid dimension.
+        let Some(height) = unpack_i32_from_le_bytes(data, 22).checked_abs() else {
+            return Err(XlsxError::ImageDimensionError);
+        };
 
         self.width = f64::from(width);
         self.height = f64::from(height);
         self.width_dpi = width_dpi;
         self.height_dpi = height_dpi;
         self.image_type = XlsxImageType::Bmp;
+
+        Ok(())
     }
 
     // Extract width and height information from a GIF file.
