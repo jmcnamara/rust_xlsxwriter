@@ -5,6 +5,26 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.98.2] - 2026-08-17
+
+### Fixed
+
+- Fixed issue where an empty sheet or variable name in `Workbook::define_name()`
+  created an invalid Excel file. See [Issue #186].
+
+  [Issue #186]: https://github.com/jmcnamara/rust_xlsxwriter/issues/186
+
+- Fixed issue where a truncated PNG or JPEG image data caused a panic when
+  reading the image dimensions. See [Issue #187].
+
+  [Issue #187]: https://github.com/jmcnamara/rust_xlsxwriter/issues/187
+
+- Fixed a potential overflow issue when reading a BMP image with a height of
+  `i32::MIN`. See [Issue #188].
+
+  [Issue #188]: https://github.com/jmcnamara/rust_xlsxwriter/issues/188
+
+
 ## [0.98.1] - 2026-08-15
 
 ### Fixed
