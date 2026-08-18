@@ -99,6 +99,12 @@
 //!
 //! <p>
 //!
+//! - [`Utility`](crate::utility): A module of utility/helper functions for working with Excel files.
+//!
+//! </p>
+//!
+//! <p>
+//!
 //! - [`Working with Serde`](serializer/index.html): Serializing data structures
 //!   to Excel worksheets using Serde.
 //! </p>

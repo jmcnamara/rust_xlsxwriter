@@ -678,6 +678,8 @@ pub(crate) fn chart_error_range(
 /// change in a formula as `=Sheet1!A1`, whereas `Sheet 1` would be represented
 /// as `='Sheet 1'!A1`.
 ///
+/// Named that don't need to be quoted are returned cloned but unchanged.
+///
 /// # Parameters
 ///
 /// - `sheetname`: The worksheet name to quote.
@@ -689,7 +691,7 @@ pub(crate) fn chart_error_range(
 /// ```
 /// use rust_xlsxwriter::utility::quote_sheet_name;
 ///
-/// // Doesn't need to be quoted.
+/// // Doesn't need to be quoted: unchanged.
 /// let result = quote_sheet_name("Sheet1");
 /// assert_eq!(result, "Sheet1");
 ///
