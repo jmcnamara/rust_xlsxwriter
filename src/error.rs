@@ -145,6 +145,10 @@ pub enum XlsxError {
     ///
     NameError(String, String),
 
+    /// A Defined name or Table name is already in use in the workbook, either
+    /// with another table or another defined name.
+    NameReused(String),
+
     /// The table range overlaps a previous table range. This is strictly
     /// prohibited by Excel.
     TableRangeOverlaps(String, String),
@@ -152,9 +156,6 @@ pub enum XlsxError {
     /// A general error that is raised when a table parameter is incorrect, or a
     /// table is configured incorrectly.
     TableError(String),
-
-    /// Table name is already in use in the workbook.
-    TableNameReused(String),
 
     /// A Worksheet and Table autofilter range overlap. This is strictly
     /// prohibited by Excel.
@@ -336,15 +337,12 @@ impl fmt::Display for XlsxError {
                 write!(f, "Name error for '{name}': '{error}'.")
             }
 
-            XlsxError::TableError(error) => {
-                write!(f, "Table error: '{error}'.")
+            XlsxError::NameReused(name) => {
+                write!(f, "Name '{name}' has already been used in this workbook.")
             }
 
-            XlsxError::TableNameReused(name) => {
-                write!(
-                    f,
-                    "Table name '{name}' has already been used in this workbook.",
-                )
+            XlsxError::TableError(error) => {
+                write!(f, "Table error: '{error}'.")
             }
 
             XlsxError::ConditionalFormatError(error) => {

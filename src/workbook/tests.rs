@@ -95,7 +95,7 @@ mod workbook_tests {
     }
 
     #[test]
-    fn duplicate_tables() {
+    fn test_duplicate_table_names() {
         let mut workbook = Workbook::default();
         let worksheet = workbook.add_worksheet();
 
@@ -106,9 +106,83 @@ mod workbook_tests {
         table = table.set_name("foo");
         worksheet.add_table(10, 10, 19, 19, &table).unwrap();
 
-        let result = workbook.prepare_tables();
+        let result = workbook.prepare_names();
 
-        assert!(matches!(result, Err(XlsxError::TableNameReused(_))));
+        assert!(matches!(result, Err(XlsxError::NameReused(_))));
+    }
+
+    #[test]
+    fn test_duplicate_defined_names() {
+        let mut workbook = Workbook::default();
+
+        // Duplicate global defined names. The check is case insensitive.
+        workbook.define_name("Foo", "=Sheet1!$A$1").unwrap();
+        workbook.define_name("foo", "=Sheet1!$B$1").unwrap();
+
+        let result = workbook.prepare_names();
+
+        assert!(matches!(result, Err(XlsxError::NameReused(_))));
+    }
+
+    #[test]
+    fn test_duplicate_local_defined_names() {
+        let mut workbook = Workbook::default();
+
+        // Duplicate local defined names in the same worksheet scope.
+        workbook.define_name("Sheet1!Foo", "=Sheet1!$A$1").unwrap();
+        workbook.define_name("Sheet1!foo", "=Sheet1!$B$1").unwrap();
+
+        let result = workbook.prepare_names();
+
+        assert!(matches!(result, Err(XlsxError::NameReused(_))));
+    }
+
+    #[test]
+    fn test_non_duplicate_defined_names() {
+        let mut workbook = Workbook::default();
+
+        // Global and local defined names are in different worksheet scopes and
+        // shouldn't conflict.
+        workbook.define_name("Foo", "=Sheet1!$A$1").unwrap();
+        workbook.define_name("Sheet1!Foo", "=Sheet1!$B$1").unwrap();
+        workbook.define_name("Sheet2!Foo", "=Sheet2!$A$1").unwrap();
+
+        let result = workbook.prepare_names();
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_duplicate_table_and_defined_name() {
+        let mut workbook = Workbook::default();
+
+        // Table names share the workbook namespace with global defined names.
+        workbook.define_name("Foo", "=Sheet1!$A$1").unwrap();
+
+        let worksheet = workbook.add_worksheet();
+        let table = Table::new().set_name("foo");
+        worksheet.add_table(0, 0, 9, 9, &table).unwrap();
+
+        let result = workbook.prepare_names();
+
+        assert!(matches!(result, Err(XlsxError::NameReused(_))));
+    }
+
+    #[test]
+    fn test_table_name_and_local_defined_name() {
+        let mut workbook = Workbook::default();
+
+        // Table names conflict with defined names in any scope, including sheet
+        // local defined names.
+        workbook.define_name("Sheet1!Foo", "=Sheet1!$A$1").unwrap();
+
+        let worksheet = workbook.add_worksheet();
+        let table = Table::new().set_name("Foo");
+        worksheet.add_table(0, 0, 9, 9, &table).unwrap();
+
+        let result = workbook.prepare_names();
+
+        assert!(matches!(result, Err(XlsxError::NameReused(_))));
     }
 
     #[test]
