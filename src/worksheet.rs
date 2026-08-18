@@ -8894,6 +8894,8 @@ impl Worksheet {
     ///   previous table range.
     /// - [`XlsxError::AutofilterRangeOverlaps`] - The table autofilter range
     ///   overlaps the worksheet autofilter range.
+    /// - [`XlsxError::NameError`] - The table name doesn't meet one of Excel's
+    ///   criteria for table names.
     ///
     /// # Examples
     ///
@@ -8965,6 +8967,7 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/table_set_columns.png">
     ///
+    #[allow(clippy::too_many_lines)]
     pub fn add_table(
         &mut self,
         first_row: RowNum,
@@ -8990,6 +8993,12 @@ impl Worksheet {
             return Err(XlsxError::TableError(
                 "Table must have at least one row".to_string(),
             ));
+        }
+
+        // Check that a user defined table name meets Excel's naming rules.
+        // Empty names are allowed here since a default name is generated later.
+        if !table.name.is_empty() {
+            utility::check_name(&table.name)?;
         }
 
         let default_headers =

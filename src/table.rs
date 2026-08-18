@@ -989,10 +989,17 @@ impl Table {
     /// formulas.
     ///
     /// By default, Excel and `rust_xlsxwriter` use a `Table1` .. `TableN`
-    /// naming convention for tables in a workbook. If required, you can set a
-    /// user-defined name. However, you need to ensure that this name is unique
-    /// across the workbook; otherwise, you will get a warning when you load the
-    /// file in Excel.
+    /// naming convention for tables in a workbook. If required, you can set an
+    /// alternative user-defined name using this function. The name must follow
+    /// the Excel naming rules described in [`XlsxError::NameError`]. It is best
+    /// to keep the name to simple words with alphabetic characters and
+    /// non-leading digits. If in doubt test the name in Excel. The name is
+    /// validated when the table is added with
+    /// [`Worksheet::add_table()`](crate::Worksheet::add_table).
+    ///
+    /// The name must also be unique across the workbook and cannot conflict
+    /// with a Defined name. Duplicate names are validated when the workbook is
+    /// saved.
     ///
     /// # Parameters
     ///

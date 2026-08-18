@@ -128,6 +128,23 @@ pub enum XlsxError {
     ///
     DateTimeParseError(String),
 
+    /// A general error raised when a Table or defined name doesn't meet Excel's
+    /// criteria as defined by the following rules:
+    ///
+    /// - The name cannot be blank.
+    /// - The name should not contain non-word characters apart from period `.`,
+    ///   underscore `_` and backslash `\`. Word characters include Unicode
+    ///   letters and digits.
+    /// - The first character must be a letter, an underscore character `_`, or
+    ///   a backslash `\`.
+    /// - The name cannot contain spaces.
+    /// - The name cannot exceed 255 characters.
+    /// - The name cannot be the same as a cell reference like `A1`, `Z100` or
+    ///   `R1C1`, or any lowercase variant.
+    /// - The name cannot match Excel's internally reserved names or `True` or `False`.
+    ///
+    NameError(String, String),
+
     /// The table range overlaps a previous table range. This is strictly
     /// prohibited by Excel.
     TableRangeOverlaps(String, String),
@@ -313,6 +330,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::DateTimeParseError(error) => {
                 write!(f, "Date parse error: '{error}'")
+            }
+
+            XlsxError::NameError(name, error) => {
+                write!(f, "Name error for '{name}': '{error}'.")
             }
 
             XlsxError::TableError(error) => {

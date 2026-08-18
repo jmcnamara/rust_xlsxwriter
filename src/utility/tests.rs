@@ -284,7 +284,175 @@ mod utility_tests {
         ];
 
         for (sheetname, exp) in tests {
-            assert_eq!(exp, utility::quote_sheet_name(sheetname));
+            assert_eq!(
+                exp,
+                utility::quote_sheet_name(sheetname),
+                "for name '{sheetname}'"
+            );
+        }
+    }
+
+    #[test]
+    fn test_is_cell_reference() {
+        let tests = vec![
+            // Valid names that aren't cell references.
+            ("Sales", false),
+            ("Table1", false),
+            // Outside the Excel column range.
+            ("AAAA1", false),
+            // Outside the Excel row range.
+            ("A1048577", false),
+            // A1 style cell references.
+            ("A1", true),
+            ("a1", true),
+            ("A01", true),
+            ("XFD1048576", true),
+            // R1C1 style cell references, including trailing characters which
+            // are ignored by Excel.
+            ("R", true),
+            ("C", true),
+            ("RC", true),
+            ("r1c1", true),
+            ("R1C1", true),
+            ("R1C1x", true),
+            ("C1foo", true),
+            ("R5x", true),
+            ("RC1x", true),
+            ("R1c1", true),
+            ("rc", true),
+            // Potential false matches for cells.
+            ("_1", false),
+            ("_.1", false),
+            ("A.1", false),
+            ("A..1", false),
+            ("Q.1", false),
+            ("é1", false),
+            ("É1", false),
+            ("Ä1", false),
+            ("Ω1", false),
+            // Zero row/column references aren't valid cell references.
+            ("A0", false),
+            ("R0", false),
+            ("C0", false),
+            ("R0C0", false),
+            ("R0C1", false),
+            // Outside the Excel row/column range boundaries.
+            ("XFE1", false),
+            ("R1048577", false),
+            ("C1048577", false),
+            ("R99999999999999999999999", false),
+            // Inside the Excel row/column range boundaries.
+            ("R1048576", true),
+            ("C16384", true),
+            // Names with digits in the middle aren't cell references.
+            ("A1A", false),
+            ("A1.1", false),
+            // Characters that are invalid as lowercase but uppercase into ASCII
+            // letters. However, these aren't treated as cell references by Excel.
+            ("\u{00DF}1", false), // "ß1" -> "SS".
+            ("\u{017F}1", false), // "ſ1" -> "S1".
+            ("\u{FB00}1", false), // "ﬀ1" -> "FF1".
+            ("\u{FB04}1", false), // "ﬄ1" -> "FFL1".
+            ("\u{0130}1", false), // Dotted "İ1".
+            ("\u{FF21}1", false), // Fullwidth "Ａ1".
+            ("A\u{308}1", false), // NFD "Ä1".
+        ];
+
+        for (name, exp) in tests {
+            assert_eq!(exp, utility::is_cell_reference(name), "for name '{name}'");
+        }
+    }
+
+    #[test]
+    fn test_check_name() {
+        let name_255 = "a".repeat(255);
+        let name_256 = "a".repeat(256);
+
+        let tests = vec![
+            // Valid names.
+            ("Sales", true),
+            ("Table1", true),
+            ("_name", true),
+            ("\\name", true),
+            ("My.Name", true),
+            ("été", true),
+            ("日本語", true),
+            // Outside the Excel cell reference row/column ranges.
+            ("AAAA1", true),
+            ("A1048577", true),
+            // At the 255 character limit.
+            (name_255.as_str(), true),
+            // Excel allows a single underscore or backslash as a name.
+            ("_", true),
+            ("\\", true),
+            // Blank name.
+            ("", false),
+            // Exceeds the 255 character limit.
+            (name_256.as_str(), false),
+            // Invalid first characters.
+            ("1name", false),
+            (".name", false),
+            ("?name", false),
+            // Underscore and digit are valid.
+            ("_1", true),
+            // Non-word characters.
+            ("name space", false),
+            ("name$", false),
+            ("name!", false),
+            ("name,", false),
+            ("name-", false),
+            // Cell references.
+            ("A1", false),
+            ("a1", false),
+            ("Z100", false),
+            ("XFD1048576", false),
+            ("R1C1", false),
+            ("r1c1", false),
+            // Excel's internally reserved names.
+            ("_xlnm.Print_Area", false),
+            ("_xlnm._FilterDatabase", false),
+            ("_xlnm.Print_Titles", false),
+            ("_xlnm.print_area", false),
+            ("_XLNM.PRINT_TITLES", false),
+            ("_XLNM._FILTERDATABASE", false),
+            // Excel's logical constants aren't allowed.
+            ("TRUE", false),
+            ("FALSE", false),
+            ("True", false),
+            ("false", false),
+            // A backslash followed by a single letter or digit isn't allowed.
+            ("\\a", false),
+            ("\\z", false),
+            ("\\A", false),
+            ("\\0", false),
+            ("\\9", false),
+            ("\\aa", true),
+            ("\\11", true),
+            // Names in decomposed/NFD form, with combining marks should be
+            // valid like their composed/NFC equivalents.
+            ("Verk\u{E4}ufe", true),   // NFC "Verkäufe".
+            ("Verka\u{308}ufe", true), // NFD "Verkäufe".
+            ("e\u{301}", true),        // NFD "é".
+            // Characters that uppercase into ASCII letters but aren't treated
+            // as cell references.
+            ("\u{00DF}1", true), // "ß1" -> "SS1".
+            ("\u{017F}1", true), // "ſ1" -> "S1".
+            ("\u{FB00}1", true), // "ﬀ1" -> "FF1".
+            ("\u{FB04}1", true), // "ﬄ1" -> "FFL1".
+            ("\u{0130}1", true), // Dotted "İ1".
+            ("\u{FF21}1", true), // Fullwidth "Ａ1".
+            ("A\u{308}1", true), // NFD "Ä1".
+            // Words that require Unicode marks to spell them.
+            ("\u{0E44}\u{0E21}\u{0E48}", true), // Thai, tone mark U+0E48.
+            ("\u{0939}\u{093F}\u{0928}\u{094D}\u{0926}\u{0940}", true), // Hindi, virama U+094D.
+            ("\u{05D1}\u{0591}", true),         // Hebrew, cantillation mark U+0591.
+            // Control characters aren't valid in the target XML.
+            ("X\nX", false),
+            ("X\tX", false),
+        ];
+
+        for (name, exp) in tests {
+            assert_eq!(exp, utility::check_name(name).is_ok(), "for name '{name}'");
         }
     }
 

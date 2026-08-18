@@ -1440,8 +1440,8 @@ impl Workbook {
 
     /// Create a defined name in the workbook to use as a variable.
     ///
-    /// The `define_name()` method is used to define a variable name that can
-    /// be used to represent a value, a single cell, or a range of cells in a
+    /// The `define_name()` method is used to define a variable name that can be
+    /// used to represent a value, a single cell, or a range of cells in a
     /// workbook. These are sometimes referred to as "Named Ranges."
     ///
     /// Defined names are generally used to simplify or clarify formulas by
@@ -1465,11 +1465,10 @@ impl Workbook {
     ///
     /// See the full example below.
     ///
-    /// Note, Excel has limitations on names used in defined names. For example,
-    /// it must start with a letter or underscore and cannot contain a space or
-    /// any of the characters: `,/*[]:\"'`. It also cannot look like an Excel
-    /// range such as `A1`, `XFD12345`, or `R1C1`. If in doubt, it is best to test
-    /// the name in Excel first.
+    /// Note, Excel has limitations on names used in defined names. See
+    /// [`XlsxError::NameError`] for details. It is best to keep the name to
+    /// simple words with alphabetic characters and non-leading digits. If in
+    /// doubt test the name in Excel.
     ///
     /// For local defined names sheet name must exist (at the time of saving)
     /// and if the sheet name contains spaces or special characters you must
@@ -1491,10 +1490,8 @@ impl Workbook {
     ///
     /// # Errors
     ///
-    /// - [`XlsxError::ParameterError`] - The following Excel error cases will
-    ///   raise a `ParameterError` error:
-    ///   * If the name doesn't start with a letter or underscore.
-    ///   * If the name contains `,/*[]:\"'` or `space`.
+    /// - [`XlsxError::NameError`] - The name doesn't meet one of Excel's
+    ///   criteria for defined names. See [`XlsxError::NameError`] for details.
     ///
     /// # Examples
     ///
@@ -1561,9 +1558,11 @@ impl Workbook {
         let name = name.into();
 
         // Check for a name that starts with ! before we use it as a delimiter.
-        if !name.is_empty() && name.starts_with('!') {
-            let error = format!("Name '{name}' must start with a letter or underscore in Excel");
-            return Err(XlsxError::ParameterError(error));
+        if name.starts_with('!') {
+            return Err(XlsxError::NameError(
+                name,
+                "Name contains a character that isn't allowed by Excel: '!'".to_string(),
+            ));
         }
 
         // Match Global/Workbook or Local/Worksheet defined names.
@@ -1579,36 +1578,8 @@ impl Workbook {
             }
         }
 
-        // Check for blank/empty name.
-        if defined_name.name.is_empty() {
-            let error = format!("Name '{}' cannot be empty in Excel", defined_name.name);
-            return Err(XlsxError::ParameterError(error));
-        }
-
-        // Excel requires that the name starts with a letter or underscore.
-        // Also, backspace is allowed but undocumented by Excel.
-        if !defined_name.name.chars().next().unwrap().is_alphabetic()
-            && !defined_name.name.starts_with('_')
-            && !defined_name.name.starts_with('\\')
-        {
-            let error = format!(
-                "Name '{}' must start with a letter or underscore in Excel",
-                defined_name.name
-            );
-            return Err(XlsxError::ParameterError(error));
-        }
-
-        // Excel prohibits certain characters in the name.
-        if defined_name
-            .name
-            .contains([' ', ',', '/', '*', '[', ']', ':', '"', '\'', '!'])
-        {
-            let error = format!(
-                "Name '{}' cannot contain any of the characters `,/*[]:\"'!` or `space` in Excel",
-                defined_name.name
-            );
-            return Err(XlsxError::ParameterError(error));
-        }
+        // Check the name meets Excel's naming rules for defined names.
+        utility::check_name(&defined_name.name)?;
 
         defined_name.range = utility::formula_to_string(formula);
         defined_name.set_sort_name();

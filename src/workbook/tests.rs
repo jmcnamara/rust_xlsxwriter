@@ -65,7 +65,10 @@ mod workbook_tests {
 
         for name in names {
             let result = workbook.define_name(name, "");
-            assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+            assert!(
+                matches!(result, Err(XlsxError::NameError(_, _))),
+                "for name '{name}'"
+            );
         }
     }
 
