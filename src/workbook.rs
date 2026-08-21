@@ -1566,10 +1566,10 @@ impl Workbook {
         }
 
         // Match Global/Workbook or Local/Worksheet defined names.
-        match name.find('!') {
-            Some(position) => {
-                defined_name.quoted_sheet_name = name[0..position].to_string();
-                defined_name.name = name[position + 1..].to_string();
+        match utility::split_local_name(&name) {
+            Some((sheet_name, local_name)) => {
+                defined_name.quoted_sheet_name = sheet_name.to_string();
+                defined_name.name = local_name.to_string();
                 defined_name.name_type = DefinedNameType::Local;
             }
             None => {

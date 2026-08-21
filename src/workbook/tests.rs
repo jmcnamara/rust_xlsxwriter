@@ -42,7 +42,7 @@ mod workbook_tests {
     }
 
     #[test]
-    fn define_name() {
+    fn test_define_name() {
         let mut workbook = Workbook::default();
 
         // Test invalid defined names.
@@ -61,6 +61,10 @@ mod workbook_tests {
             "",               // Blank name.
             "Sheet1!",        // Blank name.
             "!Foo",           // Starts with !.
+            "'A!B'Sales",     // Malformed: missing "!" after quoted sheet name.
+            "'A!B",           // Malformed: unclosed sheet name quote.
+            "'!",             // Malformed: string too short after quote.
+            "!",              // Malformed: delimiter only.
         ];
 
         for name in names {
@@ -70,6 +74,25 @@ mod workbook_tests {
                 "for name '{name}'"
             );
         }
+    }
+
+    #[test]
+    fn test_define_name_with_quoted_sheet_name() {
+        let mut workbook = Workbook::default();
+
+        // Test local defined names on sheet names that require quoting,
+        // including sheet names with the "!" delimiter or escaped quotes.
+        let _ = workbook.add_worksheet().set_name("Sheet 1").unwrap();
+        let _ = workbook.add_worksheet().set_name("A!B").unwrap();
+        let _ = workbook.add_worksheet().set_name("It's").unwrap();
+
+        workbook.define_name("'Sheet 1'!Sales", "=1").unwrap();
+        workbook.define_name("'A!B'!Sales", "=2").unwrap();
+        workbook.define_name("'It''s'!Sales", "=3").unwrap();
+
+        let result = workbook.save_to_buffer();
+
+        assert!(result.is_ok());
     }
 
     #[test]

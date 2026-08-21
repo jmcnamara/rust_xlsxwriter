@@ -831,6 +831,43 @@ pub(crate) fn unquote_sheetname(sheetname: &str) -> String {
     }
 }
 
+// Split a local defined name like "Sheet1!Name" or "'Sheet 1'!Name" into its
+// sheet name and defined name parts.
+pub(crate) fn split_local_name(name: &str) -> Option<(&str, &str)> {
+    // Handle simple unquoted names like "Sheet1!Name".
+    if !name.starts_with('\'') {
+        return name
+            .find('!')
+            .map(|position| (&name[..position], &name[position + 1..]));
+    }
+
+    // Handle quoted sheet names like "'Sheet 1'!Name" by finding the closing
+    // quote, skipping any escaped/doubled quotes.
+    let mut chars = name.char_indices().skip(1).peekable();
+    while let Some((index, char)) = chars.next() {
+        if char == '\'' {
+            // Peek ahead for another quote or the "!" delimiter.
+            match chars.peek() {
+                // An escaped quote within the sheet name.
+                Some((_, '\'')) => {
+                    chars.next();
+                }
+
+                // The closing quote followed by the "!" delimiter.
+                Some((next_index, '!')) => {
+                    return Some((&name[..=index], &name[next_index + 1..]));
+                }
+
+                // Reject a closing quote without a "!" delimiter.
+                _ => return None,
+            }
+        }
+    }
+
+    // Reject a quoted sheet name without a closing quote.
+    None
+}
+
 // Match emoji characters when quoting sheetnames. The following were generated from:
 // https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AEmoji%3DYes%3A%5D&abb=on&esc=on&g=&i=
 //

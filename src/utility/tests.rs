@@ -474,6 +474,33 @@ mod utility_tests {
     }
 
     #[test]
+    fn test_splitting_local_name() {
+        let tests = vec![
+            // Simple unquoted local names.
+            ("Sheet1!Name", Some(("Sheet1", "Name"))),
+            ("Sheet1!Foo!Bar", Some(("Sheet1", "Foo!Bar"))),
+            ("Sheet1!", Some(("Sheet1", ""))),
+            // Quoted sheet names, including "!" and escaped quotes.
+            ("'Sheet 1'!Name", Some(("'Sheet 1'", "Name"))),
+            ("'A!B'!Sales", Some(("'A!B'", "Sales"))),
+            ("'It''s'!Sales", Some(("'It''s'", "Sales"))),
+            ("'A!''B'!Sales", Some(("'A!''B'", "Sales"))),
+            // Global names, without a sheet name part.
+            ("Sales", None),
+            ("", None),
+            // Malformed quoted names. These are treated as Global names and
+            // rejected by the `check_name()` validation.
+            ("'A!B'Sales", None), // Missing "!" after the quoted part.
+            ("'A!B'", None),      // Missing name part.
+            ("'A!B!Sales", None), // Unclosed quote.
+        ];
+
+        for (name, exp) in tests {
+            assert_eq!(exp, utility::split_local_name(name), "for name '{name}'");
+        }
+    }
+
+    #[test]
     fn test_pixel_width() {
         let tests = vec![
             (" ", 3),
