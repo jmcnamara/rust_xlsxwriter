@@ -222,6 +222,15 @@ mod utility_tests {
             ("XFD01048577", "XFD01048577"),
             ("XFD01048576", "'XFD01048576'"),
             ("A123456789012345678901", "A123456789012345678901"), // Exceeds u64.
+            // Sheet names where the characters before the digits aren't ASCII
+            // column letters aren't treated as cell references.
+            ("Q.1", "Q.1"),
+            ("_1", "_1"),
+            ("é1", "é1"),
+            ("一1", "一1"),
+            ("éa1", "éa1"),
+            ("ß1", "ß1"), // Uppercases to "SS" but isn't treated as "SS1".
+            ("ﬁ1", "ﬁ1"), // Uppercases to "FI" but isn't treated as "FI1".
             // ----------------------------------------------------------------
             // Rule 4.
             // ----------------------------------------------------------------

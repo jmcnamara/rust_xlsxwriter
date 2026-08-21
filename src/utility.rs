@@ -731,6 +731,9 @@ pub fn quote_sheet_name(sheetname: &str) -> String {
     // leading string and a trailing number.
     let (string_part, number_part) = split_cell_reference(&sheetname);
 
+    // Check for potential column name characters before the first digit.
+    let column_part_is_ascii = column_part_is_ascii(&sheetname);
+
     // The number part of the sheet name can have trailing non-digit characters
     // and still be a valid R1C1 match. However, to test the R1C1 row/col part
     // we need to extract just the number part.
@@ -758,10 +761,12 @@ pub fn quote_sheet_name(sheetname: &str) -> String {
         }
         // --------------------------------------------------------------------
         // Rule 3. Sheet names must not be a valid A1 style cell reference.
-        // Valid means that the row and column range values must also be within
-        // Excel row and column limits.
+        // Valid means that the string part must be ASCII/column letters and the
+        // row and column range values must also be within Excel row and column
+        // limits.
         // --------------------------------------------------------------------
-        else if (1..=3).contains(&string_part.len())
+        else if column_part_is_ascii
+            && (1..=3).contains(&string_part.len())
             && number_part.chars().all(|c| c.is_ascii_digit())
         {
             let col = column_name_to_number(&string_part);
@@ -871,7 +876,7 @@ pub(crate) fn split_local_name(name: &str) -> Option<(&str, &str)> {
 // Match emoji characters when quoting sheetnames. The following were generated from:
 // https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AEmoji%3DYes%3A%5D&abb=on&esc=on&g=&i=
 //
-pub(crate) fn is_emoji(c: char) -> bool {
+fn is_emoji(c: char) -> bool {
     if c < '\u{203C}' {
         // Shortcut for most chars in the lower range. We ignore '#', '*',
         // '0-9', '©️' and '®️' which are in this range and which are, strictly
@@ -928,6 +933,16 @@ pub(crate) fn is_emoji(c: char) -> bool {
     )
 }
 
+// Check that the characters in a name (before the first digit) are ASCII letters,
+// i.e., possible column name characters. This check is done on the original
+// string to avoid false positives like "ß", which uppercases to "SS".
+fn column_part_is_ascii(name: &str) -> bool {
+    match name.find(|c: char| c.is_ascii_digit()) {
+        Some(position) => name[..position].chars().all(|c| c.is_ascii_alphabetic()),
+        None => false,
+    }
+}
+
 // Split sheetnames that look like A1 and R1C1 style cell references into a
 // leading string and a trailing number.
 pub(crate) fn split_cell_reference(sheetname: &str) -> (String, String) {
@@ -968,16 +983,12 @@ pub(crate) fn is_valid_range(range: &str) -> bool {
 // Check if a name looks like an Excel A1 or R1C1 style cell reference and thus
 // can't be used as a defined name or table name. The rules are a subset of the
 // cell reference rules in `quote_sheet_name()` above.
-pub(crate) fn is_cell_reference(name: &str) -> bool {
+fn is_cell_reference(name: &str) -> bool {
     let col_max = u64::from(COL_MAX);
     let row_max = u64::from(ROW_MAX);
 
-    // Check that potential column name characters before the first digit are
-    // ASCII/column letters.
-    let column_part_is_ascii = match name.find(|c: char| c.is_ascii_digit()) {
-        Some(position) => name[..position].chars().all(|c| c.is_ascii_alphabetic()),
-        None => false,
-    };
+    // Check for potential column name characters before the first digit.
+    let column_part_is_ascii = column_part_is_ascii(name);
 
     // Normalize to uppercase since the Excel check is case-insensitive.
     let name = name.to_uppercase();
