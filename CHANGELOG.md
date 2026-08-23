@@ -5,6 +5,31 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.99.0] - 2026-08-23
+
+### Changed
+
+- **Breaking change**: Renamed error `XlsxError::TableNameReused` to
+  `XlsxError::NameReused` to clarify that Table names and Defined names must be
+  unique to each other as well as within their own namespaces. Also added checks
+  to ensure this. See [Issue #189].
+
+### Fixed
+
+- Fixed issue in `utility::quote_sheet_name()` to avoid incorrectly matching
+  names like `Q.1` as cell references. See [Issue #189].
+
+- Fixed issue where where worksheet level defined names with quotes like
+- `'Sheet 1'!Name` were not split correctly. See [Issue #189].
+
+### Added
+
+- Added additional validation checks for Table names and Defined names to more
+  closely match Excel's requirements. See [Issue #189].
+
+  [Issue #189]: https://github.com/jmcnamara/rust_xlsxwriter/issues/189
+
+
 ## [0.98.2] - 2026-08-17
 
 ### Fixed

@@ -2774,7 +2774,7 @@ impl Workbook {
                 return Err(XlsxError::NameReused(defined_name.name.clone()));
             }
 
-            // Also store the unscoped name to check against table names below.
+            // Also store the un-scoped name to check against table names below.
             seen_names.insert(defined_name.name.to_lowercase());
         }
 
