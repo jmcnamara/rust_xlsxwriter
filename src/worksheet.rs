@@ -15503,7 +15503,7 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Transfer to dynamic formula handling function.
         if formula.has_dynamic_function {
-            return self.store_array_formula(row, col, row, col, formula, None, true);
+            return self.store_array_formula(row, col, row, col, formula, format, true);
         }
 
         // Check row and col are in the allowed range.
