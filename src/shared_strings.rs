@@ -62,7 +62,6 @@ impl SharedStrings {
     }
 
     // Write the <sst> string elements.
-    #[allow(clippy::from_iter_instead_of_collect)] // from_iter() is faster than collect() here.
     fn write_sst_strings(&mut self, string_table: &Arc<Mutex<SharedStringsTable>>) {
         let string_table = string_table.lock().unwrap();
 

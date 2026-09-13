@@ -7993,19 +7993,16 @@ impl Worksheet {
         width: impl Into<f64>,
     ) -> Result<&mut Worksheet, XlsxError> {
         let width = width.into();
-        let width_pixels;
 
         // Convert from Excel character width to pixels. The algorithm for the
         // conversion is different below 1 character width.
-        if width == 0.0 {
-            width_pixels = 0;
+        let width_pixels = if width == 0.0 {
+            0
         } else if width < 1.0 {
-            width_pixels =
-                (width * f64::from(self.max_digit_width + self.cell_padding)).round() as u32;
+            (width * f64::from(self.max_digit_width + self.cell_padding)).round() as u32
         } else {
-            width_pixels =
-                (width * f64::from(self.max_digit_width)).round() as u32 + self.cell_padding;
-        }
+            (width * f64::from(self.max_digit_width)).round() as u32 + self.cell_padding
+        };
 
         self.set_column_width_internal(col, width_pixels, false)
     }
@@ -21143,28 +21140,27 @@ impl DefinedName {
     pub(crate) fn set_range(&mut self) {
         match self.name_type {
             DefinedNameType::Autofilter | DefinedNameType::PrintArea => {
-                let range;
-                if self.first_col == 0 && self.last_col == COL_MAX - 1 {
+                let range = if self.first_col == 0 && self.last_col == COL_MAX - 1 {
                     // The print range is the entire column range, therefore we
                     // create a row only range.
-                    range = format!("${}:${}", self.first_row + 1, self.last_row + 1);
+                    format!("${}:${}", self.first_row + 1, self.last_row + 1)
                 } else if self.first_row == 0 && self.last_row == ROW_MAX - 1 {
                     // The print range is the entire row range, therefore we
                     // create a column only range.
-                    range = format!(
+                    format!(
                         "${}:${}",
                         utility::column_number_to_name(self.first_col),
                         utility::column_number_to_name(self.last_col)
-                    );
+                    )
                 } else {
                     // Otherwise handle it as a standard cell range.
-                    range = utility::cell_range_absolute(
+                    utility::cell_range_absolute(
                         self.first_row,
                         self.first_col,
                         self.last_row,
                         self.last_col,
-                    );
-                }
+                    )
+                };
 
                 self.range = format!("{}!{}", self.quoted_sheet_name, range);
             }

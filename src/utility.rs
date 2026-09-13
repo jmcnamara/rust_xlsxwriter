@@ -1040,12 +1040,8 @@ fn is_cell_reference(name: &str) -> bool {
         }
     }
 
-    // Check for single R/C references.
-    if name == "R" || name == "C" || name == "RC" {
-        return true;
-    }
-
-    false
+    // Finally, check for single R/C references.
+    name == "R" || name == "C" || name == "RC"
 }
 
 /// Check that a worksheet name is valid in Excel.
