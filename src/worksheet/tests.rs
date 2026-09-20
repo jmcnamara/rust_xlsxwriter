@@ -14,6 +14,96 @@ mod worksheet_tests {
     use std::collections::HashMap;
 
     #[test]
+    fn test_reserve_xml_buffer_capacity_on_first_and_repeated_save() {
+        let mut worksheet = Worksheet::new();
+        for col in 0..100 {
+            worksheet.write_number(0, col, col).unwrap();
+        }
+        worksheet.reserve_xml_buffer();
+        assert!(worksheet.writer.get_ref().capacity() >= 2048 + 40 + 100 * 40);
+        worksheet.assemble_xml_file();
+
+        worksheet.reset();
+        for col in 100..200 {
+            worksheet.write_number(0, col, col).unwrap();
+        }
+        worksheet.reserve_xml_buffer();
+        assert!(worksheet.writer.get_ref().capacity() >= 2048 + 40 + 200 * 40);
+    }
+
+    #[test]
+    fn test_column_data_preserves_order_overwrites_removals_and_clone() {
+        fn number(value: u32) -> CellType {
+            CellType::Number {
+                number: f64::from(value),
+                xf_index: 0,
+            }
+        }
+        fn snapshot(columns: &ColumnData) -> Vec<(ColNum, f64)> {
+            columns
+                .iter()
+                .map(|(col, cell)| match cell {
+                    CellType::Number { number, .. } => (col, *number),
+                    _ => panic!("expected a numeric cell"),
+                })
+                .collect()
+        }
+
+        let mut columns = ColumnData::from_one(0, number(0));
+        let mut expected = BTreeMap::from([(0, 0.0)]);
+        for col in 1..256 {
+            columns.insert(col, number(u32::from(col)));
+            expected.insert(col, f64::from(col));
+        }
+        // Overwrites, tail removal, empty rows and reinsertion must all work
+        // without depending on the internal storage representation.
+        let mut empty = columns.clone();
+        for col in (0..256).rev() {
+            empty.remove(&col);
+        }
+        assert_eq!(empty.len(), 0);
+        empty.insert(16383, number(42));
+        assert_eq!(snapshot(&empty), vec![(16383, 42.0)]);
+
+        let mut seed = 42u32;
+        for step in 0..2048 {
+            seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+            let col = ((seed >> 16) % 1024) as ColNum;
+            if step % 3 == 0 {
+                columns.remove(&col);
+                expected.remove(&col);
+            } else {
+                columns.insert(col, number(step));
+                expected.insert(col, f64::from(step));
+            }
+            assert_eq!(columns.len(), expected.len());
+            assert_eq!(
+                snapshot(&columns),
+                expected
+                    .iter()
+                    .map(|(&col, &value)| (col, value))
+                    .collect::<Vec<_>>()
+            );
+        }
+
+        let original = snapshot(&columns);
+        let mut cloned = columns.clone();
+        for cell in cloned.values_mut() {
+            if let CellType::Number { number, .. } = cell {
+                *number += 1.0;
+            }
+        }
+        assert_eq!(snapshot(&columns), original);
+        assert_eq!(
+            snapshot(&cloned),
+            original
+                .iter()
+                .map(|&(col, value)| (col, value + 1.0))
+                .collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
     fn test_assemble() {
         let mut worksheet = Worksheet {
             selected: true,

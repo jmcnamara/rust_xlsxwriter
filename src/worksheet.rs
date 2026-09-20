@@ -17727,28 +17727,10 @@ impl Worksheet {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Pre-size the in-memory XML writer buffer in a single allocation before the
-    // worksheet is assembled.
-    //
-    // By default the writer `Vec<u8>` starts at 2 KiB and grows by repeated
-    // doubling as cell data is written. For a large worksheet that is ~11
-    // reallocations, each one allocating a new block and freeing the old one. In
-    // the threaded save path (see `Packager::assemble_file`) those reallocations
-    // happen on transient scoped worker threads while the final buffer is freed
-    // later on the saving thread. On Windows that pattern of many progressively
-    // sized, cross-thread allocations leaves committed pages behind in the heap's
-    // per-thread front-end long after the workbook is dropped.
-    //
-    // Reserving the whole buffer once, up front and on the saving thread, turns
-    // that into a single allocation/free pair on one thread. A single large block
-    // is also more likely to be returned to the OS (it typically bypasses the
-    // small-block front-end), which reduces the retained private bytes seen by
-    // long-running processes that build and drop workbooks repeatedly.
-    //
-    // The estimate only needs to be in the right ballpark: overshooting wastes a
-    // little transient memory (freed with the buffer), undershooting costs at most
-    // one further reallocation. It is deliberately cheap to compute (O(rows), not
-    // O(cells)) so it never dominates the assembly it is trying to speed up.
+    // Reserve estimated XML capacity before assembly, without visiting each
+    // cell. This reduces buffer growth for typical numeric worksheets. It is
+    // not an upper bound: formulas, inline strings and worksheet metadata can
+    // require additional allocations. Allocator retention is platform dependent.
     pub(crate) fn reserve_xml_buffer(&mut self) {
         // Only ordinary in-memory worksheets buffer all their cell data; in
         // constant memory mode the cells are already streamed to disk.
@@ -17758,10 +17740,10 @@ impl Worksheet {
 
         // Sum the populated cells per row without visiting each cell. A dense
         // numeric `<c r="AA100" s="1"><v>1234</v></c>` element is ~30-40 bytes;
-        // use 40 as a safe per-cell upper bound and ~40 bytes per `<row>` wrapper.
+        // use 40 as an estimate per cell and per `<row>` wrapper.
         let mut cell_count = 0usize;
         for columns in self.data_table.values() {
-            cell_count += columns.len();
+            cell_count = cell_count.saturating_add(columns.len());
         }
         let row_count = self.data_table.len();
 
@@ -17770,12 +17752,12 @@ impl Worksheet {
         const XML_OVERHEAD: usize = 2048;
 
         let estimate = XML_OVERHEAD
-            + row_count.saturating_mul(BYTES_PER_ROW)
-            + cell_count.saturating_mul(BYTES_PER_CELL);
+            .saturating_add(row_count.saturating_mul(BYTES_PER_ROW))
+            .saturating_add(cell_count.saturating_mul(BYTES_PER_CELL));
 
         let buffer = self.writer.get_mut();
         if estimate > buffer.capacity() {
-            buffer.reserve_exact(estimate - buffer.capacity());
+            buffer.reserve_exact(estimate - buffer.len());
         }
     }
 
@@ -21023,99 +21005,119 @@ struct ColOptions {
     format: Option<Format>,
 }
 
-// Contiguous, column-sorted storage for the cells in a single worksheet row.
-//
-// This replaces a per-row `BTreeMap<ColNum, CellType>`. A B-tree scatters a
-// dense row's cells across ~two dozen separately allocated interior/leaf nodes;
-// this stores them in one contiguous `Vec` that is allocated and, crucially,
-// *freed* as a single block. That matters for long-running processes on Windows:
-// freeing hundreds of thousands of small same-sized cell nodes interleaved with
-// the serialization path's allocations fragments the process heap and leaves
-// committed pages behind (the small-block front-end/LFH bucket is not returned
-// to the OS). A dense row's `Vec` (~18 KiB for 256 numeric cells) is above the
-// 16 KiB LFH cap, so it comes from the coalescing variable-size heap and is
-// released cleanly; sparse rows allocate nothing until their first cell.
-//
-// The vector is kept sorted by column so iteration yields the same order Excel
-// requires, matching the previous `BTreeMap` semantics (sparse storage, arbitrary
-// write order, overwrites). Cells are almost always written in increasing column
-// order, which stays O(1) amortized; out-of-order writes fall back to an inserting
-// binary search.
-#[derive(Clone, Default)]
-struct ColumnData {
-    cells: Vec<(ColNum, CellType)>,
+// Rows written in ascending column order use contiguous storage to reduce
+// allocation operations. Existing cells can be overwritten without moving any
+// other cells. An insertion or removal that would shift cells converts the row
+// to a BTreeMap once, avoiding quadratic work for reverse or random writes and
+// repeated removals. Both representations retain sparse, sorted columns.
+#[derive(Clone)]
+enum ColumnData {
+    Dense(Vec<(ColNum, CellType)>),
+    Sparse(BTreeMap<ColNum, CellType>),
 }
 
 impl ColumnData {
     // Create a row store seeded with a single cell.
     fn from_one(col: ColNum, cell: CellType) -> ColumnData {
-        ColumnData {
-            cells: vec![(col, cell)],
-        }
+        ColumnData::Dense(vec![(col, cell)])
     }
 
     // Number of populated cells in the row.
     fn len(&self) -> usize {
-        self.cells.len()
-    }
-
-    // Position of a column in the sorted vector, if present.
-    fn position(&self, col: ColNum) -> Result<usize, usize> {
-        self.cells.binary_search_by(|(c, _)| c.cmp(&col))
+        match self {
+            Self::Dense(cells) => cells.len(),
+            Self::Sparse(cells) => cells.len(),
+        }
     }
 
     // Get a reference to the cell in a column.
     fn get(&self, col: &ColNum) -> Option<&CellType> {
-        match self.position(*col) {
-            Ok(index) => Some(&self.cells[index].1),
-            Err(_) => None,
+        match self {
+            Self::Dense(cells) => cells
+                .binary_search_by_key(col, |(column, _)| *column)
+                .ok()
+                .map(|index| &cells[index].1),
+            Self::Sparse(cells) => cells.get(col),
         }
     }
 
     // Get a mutable reference to the cell in a column.
     fn get_mut(&mut self, col: &ColNum) -> Option<&mut CellType> {
-        match self.position(*col) {
-            Ok(index) => Some(&mut self.cells[index].1),
-            Err(_) => None,
+        match self {
+            Self::Dense(cells) => cells
+                .binary_search_by_key(col, |(column, _)| *column)
+                .ok()
+                .map(|index| &mut cells[index].1),
+            Self::Sparse(cells) => cells.get_mut(col),
         }
     }
 
-    // Insert or overwrite the cell in a column, keeping the vector sorted.
+    // Insert or overwrite a cell while preserving column order.
     fn insert(&mut self, col: ColNum, cell: CellType) {
-        // Fast path: appending the next column in an ascending write.
-        match self.cells.last() {
-            Some((last_col, _)) if col > *last_col => {
-                self.cells.push((col, cell));
-                return;
+        if let Self::Dense(cells) = self {
+            if cells.last().is_none_or(|(last_col, _)| col > *last_col) {
+                cells.push((col, cell));
+            } else if let Ok(index) = cells.binary_search_by_key(&col, |(column, _)| *column) {
+                cells[index].1 = cell;
+            } else {
+                self.promote_to_sparse().insert(col, cell);
             }
-            None => {
-                self.cells.push((col, cell));
-                return;
-            }
-            _ => {}
-        }
-
-        match self.position(col) {
-            Ok(index) => self.cells[index].1 = cell,
-            Err(index) => self.cells.insert(index, (col, cell)),
+        } else if let Self::Sparse(cells) = self {
+            cells.insert(col, cell);
         }
     }
 
     // Remove the cell in a column, if present.
     fn remove(&mut self, col: &ColNum) {
-        if let Ok(index) = self.position(*col) {
-            self.cells.remove(index);
+        if let Self::Dense(cells) = self {
+            let Ok(index) = cells.binary_search_by_key(col, |(column, _)| *column) else {
+                return;
+            };
+            if index + 1 == cells.len() {
+                cells.pop();
+            } else {
+                self.promote_to_sparse().remove(col);
+            }
+        } else if let Self::Sparse(cells) = self {
+            cells.remove(col);
+        }
+    }
+
+    // Convert once; keeping tree storage avoids repeated conversion costs.
+    fn promote_to_sparse(&mut self) -> &mut BTreeMap<ColNum, CellType> {
+        if let Self::Dense(cells) = self {
+            *self = Self::Sparse(mem::take(cells).into_iter().collect());
+        }
+        match self {
+            Self::Sparse(cells) => cells,
+            Self::Dense(_) => unreachable!("row was converted to sparse storage"),
         }
     }
 
     // Iterate over the cells in column order.
     fn iter(&self) -> impl Iterator<Item = (ColNum, &CellType)> {
-        self.cells.iter().map(|(col, cell)| (*col, cell))
+        let (dense, sparse) = match self {
+            Self::Dense(cells) => (Some(cells.iter()), None),
+            Self::Sparse(cells) => (None, Some(cells.iter())),
+        };
+        dense
+            .into_iter()
+            .flatten()
+            .map(|(col, cell)| (*col, cell))
+            .chain(sparse.into_iter().flatten().map(|(col, cell)| (*col, cell)))
     }
 
     // Mutably iterate over the cells in column order.
     fn values_mut(&mut self) -> impl Iterator<Item = &mut CellType> {
-        self.cells.iter_mut().map(|(_, cell)| cell)
+        let (dense, sparse) = match self {
+            Self::Dense(cells) => (Some(cells.iter_mut()), None),
+            Self::Sparse(cells) => (None, Some(cells.values_mut())),
+        };
+        dense
+            .into_iter()
+            .flatten()
+            .map(|(_, cell)| cell)
+            .chain(sparse.into_iter().flatten())
     }
 }
 

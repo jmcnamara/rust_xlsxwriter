@@ -120,13 +120,9 @@ impl<W: Write + Send> Packager<W> {
         self.write_styles_file(workbook)?;
         self.write_workbook_file(workbook)?;
 
-        // Pre-size each worksheet's in-memory XML buffer in a single allocation
-        // on this (the saving) thread, before the parallel assembly below. This
-        // keeps the large per-sheet allocation and its eventual free on the same
-        // thread and avoids the repeated doubling reallocations that otherwise
-        // happen on the transient scoped workers. Both reduce the private bytes
-        // retained on Windows after the workbook is dropped. See
-        // `Worksheet::reserve_xml_buffer` for details.
+        // Reserve an estimated XML capacity on the saving thread before parallel
+        // assembly. This reduces buffer growth for typical numeric worksheets;
+        // larger cell contents can still require growth on the assembly threads.
         for worksheet in &mut workbook.worksheets {
             worksheet.reserve_xml_buffer();
         }
