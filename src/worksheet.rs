@@ -1547,7 +1547,7 @@ pub struct Worksheet {
     pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
     pub(crate) background_relationships: Vec<(String, String, String)>,
 
-    data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
+    data_table: BTreeMap<RowNum, ColumnData>,
     is_writing_ahead: bool,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
@@ -1644,7 +1644,7 @@ pub struct Worksheet {
     pub(crate) file_writer: BufWriter<File>,
 
     #[cfg(feature = "constant_memory")]
-    write_ahead: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
+    write_ahead: BTreeMap<RowNum, ColumnData>,
 
     #[cfg(feature = "serde")]
     pub(crate) serializer_state: SerializerState,
@@ -15871,7 +15871,7 @@ impl Worksheet {
         row: RowNum,
         col: ColNum,
         cell: CellType,
-        data_table: &mut BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
+        data_table: &mut BTreeMap<RowNum, ColumnData>,
     ) {
         match data_table.entry(row) {
             Entry::Occupied(mut entry) => {
@@ -15882,8 +15882,7 @@ impl Worksheet {
             Entry::Vacant(entry) => {
                 // The row doesn't exist, create a new row with columns and insert
                 // the cell value.
-                let columns = BTreeMap::from([(col, cell)]);
-                entry.insert(columns);
+                entry.insert(ColumnData::from_one(col, cell));
             }
         }
     }
@@ -15931,8 +15930,7 @@ impl Worksheet {
                         xf_index: format_id,
                     };
 
-                    let columns = BTreeMap::from([(col, cell)]);
-                    entry.insert(columns);
+                    entry.insert(ColumnData::from_one(col, cell));
                 }
             }
         }
@@ -17729,6 +17727,58 @@ impl Worksheet {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
+    // Pre-size the in-memory XML writer buffer in a single allocation before the
+    // worksheet is assembled.
+    //
+    // By default the writer `Vec<u8>` starts at 2 KiB and grows by repeated
+    // doubling as cell data is written. For a large worksheet that is ~11
+    // reallocations, each one allocating a new block and freeing the old one. In
+    // the threaded save path (see `Packager::assemble_file`) those reallocations
+    // happen on transient scoped worker threads while the final buffer is freed
+    // later on the saving thread. On Windows that pattern of many progressively
+    // sized, cross-thread allocations leaves committed pages behind in the heap's
+    // per-thread front-end long after the workbook is dropped.
+    //
+    // Reserving the whole buffer once, up front and on the saving thread, turns
+    // that into a single allocation/free pair on one thread. A single large block
+    // is also more likely to be returned to the OS (it typically bypasses the
+    // small-block front-end), which reduces the retained private bytes seen by
+    // long-running processes that build and drop workbooks repeatedly.
+    //
+    // The estimate only needs to be in the right ballpark: overshooting wastes a
+    // little transient memory (freed with the buffer), undershooting costs at most
+    // one further reallocation. It is deliberately cheap to compute (O(rows), not
+    // O(cells)) so it never dominates the assembly it is trying to speed up.
+    pub(crate) fn reserve_xml_buffer(&mut self) {
+        // Only ordinary in-memory worksheets buffer all their cell data; in
+        // constant memory mode the cells are already streamed to disk.
+        if self.use_constant_memory || self.is_chartsheet {
+            return;
+        }
+
+        // Sum the populated cells per row without visiting each cell. A dense
+        // numeric `<c r="AA100" s="1"><v>1234</v></c>` element is ~30-40 bytes;
+        // use 40 as a safe per-cell upper bound and ~40 bytes per `<row>` wrapper.
+        let mut cell_count = 0usize;
+        for columns in self.data_table.values() {
+            cell_count += columns.len();
+        }
+        let row_count = self.data_table.len();
+
+        const BYTES_PER_CELL: usize = 40;
+        const BYTES_PER_ROW: usize = 40;
+        const XML_OVERHEAD: usize = 2048;
+
+        let estimate = XML_OVERHEAD
+            + row_count.saturating_mul(BYTES_PER_ROW)
+            + cell_count.saturating_mul(BYTES_PER_CELL);
+
+        let buffer = self.writer.get_mut();
+        if estimate > buffer.capacity() {
+            buffer.reserve_exact(estimate - buffer.capacity());
+        }
+    }
+
     // Assemble and generate the XML file. It is split into sections that are
     // before, during and after <sheetData> to allow those sections to be
     // written separately, and to different in-memory and file based buffers, in
@@ -18850,7 +18900,7 @@ impl Worksheet {
 
         // Swap out the worksheet data structures so we can iterate over them and
         // still call self.write_*() methods.
-        let mut temp_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>> = BTreeMap::new();
+        let mut temp_table: BTreeMap<RowNum, ColumnData> = BTreeMap::new();
         let mut temp_changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
         mem::swap(&mut temp_table, &mut self.data_table);
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
@@ -18872,7 +18922,7 @@ impl Worksheet {
 
             // The row has data. Write it out cell by cell.
             self.write_table_row(row_num, span, row_options, true);
-            for (&col_num, cell) in columns {
+            for (col_num, cell) in columns.iter() {
                 // Faster column name lookup for inner loop.
                 let col_name = if col_num < 26 {
                     &COLUMN_LETTERS[col_num as usize..(col_num + 1) as usize]
@@ -19076,7 +19126,7 @@ impl Worksheet {
 
         // Swap out the worksheet data structures so we can iterate over them and
         // still call self.write_*() methods.
-        let mut temp_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>> = BTreeMap::new();
+        let mut temp_table: BTreeMap<RowNum, ColumnData> = BTreeMap::new();
         let mut temp_changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
         mem::swap(&mut temp_table, &mut self.data_table);
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
@@ -19103,7 +19153,7 @@ impl Worksheet {
 
         // The row has data. Write it out cell by cell.
         self.write_constant_table_row(current_row, row_options, true);
-        for (&col_num, cell) in columns {
+        for (col_num, cell) in columns.iter() {
             let col_name = if col_num < 26 {
                 &COLUMN_LETTERS[col_num as usize..(col_num + 1) as usize]
             } else {
@@ -19259,7 +19309,7 @@ impl Worksheet {
 
         for row_num in self.dimensions.first_row..=self.dimensions.last_row {
             if let Some(columns) = self.data_table.get(&row_num) {
-                for &col_num in columns.keys() {
+                for (col_num, _) in columns.iter() {
                     if span_min == COL_MAX {
                         span_min = col_num;
                         span_max = col_num;
@@ -20971,6 +21021,102 @@ struct ColOptions {
     collapsed: bool,
     autofit: bool,
     format: Option<Format>,
+}
+
+// Contiguous, column-sorted storage for the cells in a single worksheet row.
+//
+// This replaces a per-row `BTreeMap<ColNum, CellType>`. A B-tree scatters a
+// dense row's cells across ~two dozen separately allocated interior/leaf nodes;
+// this stores them in one contiguous `Vec` that is allocated and, crucially,
+// *freed* as a single block. That matters for long-running processes on Windows:
+// freeing hundreds of thousands of small same-sized cell nodes interleaved with
+// the serialization path's allocations fragments the process heap and leaves
+// committed pages behind (the small-block front-end/LFH bucket is not returned
+// to the OS). A dense row's `Vec` (~18 KiB for 256 numeric cells) is above the
+// 16 KiB LFH cap, so it comes from the coalescing variable-size heap and is
+// released cleanly; sparse rows allocate nothing until their first cell.
+//
+// The vector is kept sorted by column so iteration yields the same order Excel
+// requires, matching the previous `BTreeMap` semantics (sparse storage, arbitrary
+// write order, overwrites). Cells are almost always written in increasing column
+// order, which stays O(1) amortized; out-of-order writes fall back to an inserting
+// binary search.
+#[derive(Clone, Default)]
+struct ColumnData {
+    cells: Vec<(ColNum, CellType)>,
+}
+
+impl ColumnData {
+    // Create a row store seeded with a single cell.
+    fn from_one(col: ColNum, cell: CellType) -> ColumnData {
+        ColumnData {
+            cells: vec![(col, cell)],
+        }
+    }
+
+    // Number of populated cells in the row.
+    fn len(&self) -> usize {
+        self.cells.len()
+    }
+
+    // Position of a column in the sorted vector, if present.
+    fn position(&self, col: ColNum) -> Result<usize, usize> {
+        self.cells.binary_search_by(|(c, _)| c.cmp(&col))
+    }
+
+    // Get a reference to the cell in a column.
+    fn get(&self, col: &ColNum) -> Option<&CellType> {
+        match self.position(*col) {
+            Ok(index) => Some(&self.cells[index].1),
+            Err(_) => None,
+        }
+    }
+
+    // Get a mutable reference to the cell in a column.
+    fn get_mut(&mut self, col: &ColNum) -> Option<&mut CellType> {
+        match self.position(*col) {
+            Ok(index) => Some(&mut self.cells[index].1),
+            Err(_) => None,
+        }
+    }
+
+    // Insert or overwrite the cell in a column, keeping the vector sorted.
+    fn insert(&mut self, col: ColNum, cell: CellType) {
+        // Fast path: appending the next column in an ascending write.
+        match self.cells.last() {
+            Some((last_col, _)) if col > *last_col => {
+                self.cells.push((col, cell));
+                return;
+            }
+            None => {
+                self.cells.push((col, cell));
+                return;
+            }
+            _ => {}
+        }
+
+        match self.position(col) {
+            Ok(index) => self.cells[index].1 = cell,
+            Err(index) => self.cells.insert(index, (col, cell)),
+        }
+    }
+
+    // Remove the cell in a column, if present.
+    fn remove(&mut self, col: &ColNum) {
+        if let Ok(index) = self.position(*col) {
+            self.cells.remove(index);
+        }
+    }
+
+    // Iterate over the cells in column order.
+    fn iter(&self) -> impl Iterator<Item = (ColNum, &CellType)> {
+        self.cells.iter().map(|(col, cell)| (*col, cell))
+    }
+
+    // Mutably iterate over the cells in column order.
+    fn values_mut(&mut self) -> impl Iterator<Item = &mut CellType> {
+        self.cells.iter_mut().map(|(_, cell)| cell)
+    }
 }
 
 #[derive(Clone)]
