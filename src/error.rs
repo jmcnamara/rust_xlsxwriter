@@ -194,6 +194,12 @@ pub enum XlsxError {
     /// or as a conversion target for other error types.
     CustomError(String),
 
+    /// An error that is raised when a temporary file can't be created for a
+    /// "constant memory" or "low memory" worksheet, or when using a custom
+    /// temporary directory. This is usually caused by the temporary directory
+    /// not existing or not being writable.
+    TempFileError(String),
+
     /// Wrapper for a variety of [`std::io::Error`] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by a
     /// non-existent parent directory or, commonly on Windows, if the file is
@@ -374,6 +380,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::CustomError(error) => {
                 write!(f, "{error}")
+            }
+
+            XlsxError::TempFileError(error) => {
+                write!(f, "Temporary file error: '{error}'.")
             }
 
             XlsxError::IoError(error) => {

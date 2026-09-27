@@ -20,7 +20,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let format2 = Format::new().set_num_format("0.00_ ;\\-0.00\\ ");
     let format3 = Format::new().set_num_format("0.00_ ;[Red]\\-0.00\\ ");
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Manually set the indices to get the same order as the target file.
     worksheet.format_dxf_index(&format3);
@@ -73,7 +73,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let format2 = Format::new().set_num_format("0.00_ ;\\-0.00\\ ");
     let format3 = Format::new().set_num_format("0.00_ ;[Red]\\-0.00\\ ");
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     #[derive(Serialize)]
     #[serde(rename_all = "PascalCase")]
@@ -150,7 +150,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Test Worksheet table.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     let format1 = Format::new().set_num_format("0.00;[Red]0.00");
     let format2 = Format::new().set_num_format("0.00_ ;\\-0.00\\ ");

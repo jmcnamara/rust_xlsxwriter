@@ -16,7 +16,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let format2 = Format::new().set_num_format("0.00_ ;\\-0.00\\ ");
     let format3 = Format::new().set_num_format("0.00_ ;[Red]\\-0.00\\ ");
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Manually set the indices to get the same order as the target file.
     worksheet.format_dxf_index(&format3);
@@ -69,7 +69,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let format2 = Format::new().set_num_format("0.00_ ;\\-0.00\\ ");
     let format3 = Format::new().set_num_format("0.00_ ;[Red]\\-0.00\\ ");
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Manually set the indices to get the same order as the target file.
     worksheet.format_dxf_index(&format3);
@@ -122,7 +122,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let format2 = "0.00_ ;\\-0.00\\ ".into();
     let format3 = "0.00_ ;[Red]\\-0.00\\ ".into();
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Manually set the indices to get the same order as the target file.
     worksheet.format_dxf_index(&format3);

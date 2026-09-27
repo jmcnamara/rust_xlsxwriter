@@ -12,7 +12,7 @@ use rust_xlsxwriter::{Table, Workbook, XlsxError};
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.write_string(0, 0, "Foo")?;
 
     worksheet.set_column_width(2, 10.288)?;

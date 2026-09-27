@@ -13,7 +13,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let bold = Format::new().set_bold();
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     worksheet.write_number_with_format(0, 0, 123, &bold)?;
     worksheet.write_url(1, 0, "https://www.rust-lang.org/")?;

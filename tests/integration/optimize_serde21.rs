@@ -22,7 +22,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     workbook.populate_string_table("Column3", 2);
     workbook.populate_string_table("Column4", 3);
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     worksheet.set_column_width(2, 10.288)?;
     worksheet.set_column_width(3, 10.288)?;
@@ -49,7 +49,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     #[derive(Serialize)]
     #[serde(rename_all = "PascalCase")]

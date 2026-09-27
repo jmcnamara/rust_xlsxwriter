@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(0, 0, "Standard")?;
 
     // Add a worksheet in "constant memory" mode.
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
     worksheet.write(0, 0, "Constant memory")?;
 
     workbook.save("workbook.xlsx")?;

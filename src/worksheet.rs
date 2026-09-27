@@ -1361,9 +1361,6 @@ use std::sync::{Arc, Mutex, RwLock};
 use std::{cmp, fmt};
 
 #[cfg(feature = "constant_memory")]
-use tempfile::tempfile_in;
-
-#[cfg(feature = "constant_memory")]
 use std::io::BufWriter;
 
 #[cfg(feature = "constant_memory")]
@@ -1641,7 +1638,7 @@ pub struct Worksheet {
     max_autofit_row: RowNum,
 
     #[cfg(feature = "constant_memory")]
-    pub(crate) file_writer: BufWriter<File>,
+    pub(crate) file_writer: Option<BufWriter<File>>,
 
     #[cfg(feature = "constant_memory")]
     write_ahead: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
@@ -1737,9 +1734,6 @@ impl Worksheet {
             freeze_cell: (0, 0),
             top_cell: (0, 0),
         };
-
-        #[cfg(feature = "constant_memory")]
-        let file_writer = BufWriter::new(tempfile_in(std::env::temp_dir()).unwrap());
 
         Worksheet {
             writer,
@@ -1891,7 +1885,7 @@ impl Worksheet {
             has_workbook_global_sst: false,
 
             #[cfg(feature = "constant_memory")]
-            file_writer,
+            file_writer: None,
 
             #[cfg(feature = "constant_memory")]
             write_ahead: BTreeMap::new(),
@@ -19006,6 +19000,14 @@ impl Worksheet {
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
     }
 
+    // Get the temporary file writer used for "constant memory" mode.
+    #[cfg(feature = "constant_memory")]
+    pub(crate) fn file_writer(&mut self) -> &mut BufWriter<File> {
+        self.file_writer
+            .as_mut()
+            .expect("constant memory worksheets required a temp file")
+    }
+
     // Flush the last row of constant memory data, the write-ahead cache and any
     // modified rows.
     #[cfg(feature = "constant_memory")]
@@ -19118,7 +19120,7 @@ impl Worksheet {
                 CellType::Number { number, xf_index } | CellType::DateTime { number, xf_index } => {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_number_cell(
-                        &mut self.file_writer,
+                        self.file_writer(),
                         current_row + 1,
                         col_name,
                         *number,
@@ -19134,7 +19136,7 @@ impl Worksheet {
                     if let Some(string_id) = string_id {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                         Self::write_string_cell(
-                            &mut self.file_writer,
+                            self.file_writer(),
                             current_row + 1,
                             col_name,
                             *string_id,
@@ -19148,7 +19150,7 @@ impl Worksheet {
                 } => {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_inline_rich_string_cell(
-                        &mut self.file_writer,
+                        self.file_writer(),
                         current_row + 1,
                         col_name,
                         string,
@@ -19161,7 +19163,7 @@ impl Worksheet {
                 } => {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_inline_string_cell(
-                        &mut self.file_writer,
+                        self.file_writer(),
                         current_row + 1,
                         col_name,
                         string,
@@ -19176,7 +19178,7 @@ impl Worksheet {
                 } => {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_formula_cell(
-                        &mut self.file_writer,
+                        self.file_writer(),
                         current_row + 1,
                         col_name,
                         formula,
@@ -19194,7 +19196,7 @@ impl Worksheet {
                 } => {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_array_formula_cell(
-                        &mut self.file_writer,
+                        self.file_writer(),
                         current_row + 1,
                         col_name,
                         formula,
@@ -19207,19 +19209,14 @@ impl Worksheet {
 
                 CellType::Blank { xf_index } => {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                    Self::write_blank_cell(
-                        &mut self.file_writer,
-                        current_row + 1,
-                        col_name,
-                        xf_index,
-                    );
+                    Self::write_blank_cell(self.file_writer(), current_row + 1, col_name, xf_index);
                 }
 
                 CellType::Boolean { boolean, xf_index } => {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
 
                     Self::write_boolean_cell(
-                        &mut self.file_writer,
+                        self.file_writer(),
                         current_row + 1,
                         col_name,
                         *boolean,
@@ -19231,7 +19228,7 @@ impl Worksheet {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     let image_id = self.global_embedded_image_indices[*value as usize];
                     Self::write_error_cell(
-                        &mut self.file_writer,
+                        self.file_writer(),
                         current_row + 1,
                         col_name,
                         image_id,
@@ -19240,7 +19237,7 @@ impl Worksheet {
                 }
             }
         }
-        xml_end_tag(&mut self.file_writer, "row");
+        xml_end_tag(self.file_writer(), "row");
 
         // Swap back in changed rows data.
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
@@ -19417,9 +19414,9 @@ impl Worksheet {
         }
 
         if has_data {
-            xml_start_tag(&mut self.file_writer, "row", &attributes);
+            xml_start_tag(self.file_writer(), "row", &attributes);
         } else {
-            xml_empty_tag(&mut self.file_writer, "row", &attributes);
+            xml_empty_tag(self.file_writer(), "row", &attributes);
         }
     }
 

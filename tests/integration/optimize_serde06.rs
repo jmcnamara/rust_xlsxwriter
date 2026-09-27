@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     let bold = Format::new().set_bold();
 
     worksheet.set_paper_size(9);
@@ -37,7 +37,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     let bold = Format::new().set_bold();
 
     worksheet.set_paper_size(9);
@@ -75,7 +75,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 // Test case for serialize_headers_with_options().
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     let bold = Format::new().set_bold();
 
     worksheet.set_paper_size(9);
@@ -119,7 +119,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 // Test case for serialize_headers_with_options().
 fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     let bold = Format::new().set_bold();
 
     worksheet.set_paper_size(9);
@@ -166,7 +166,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Header deserialization.
 fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     let bold = Format::new().set_bold();
 
     worksheet.set_paper_size(9);
@@ -204,7 +204,7 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. With XlsxSerialize.
 fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.set_paper_size(9);
 
     // Create a serializable test struct.
@@ -241,7 +241,7 @@ fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. With XlsxSerialize.
 fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.set_paper_size(9);
 
     // Create a serializable test struct.

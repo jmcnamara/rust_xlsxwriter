@@ -15,11 +15,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let italic = Format::new().set_italic();
 
     // Constant memory worksheet.
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
     worksheet.write_number_with_format(0, 0, 123, &bold)?;
 
     // Constant memory worksheet.
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
     worksheet.write_number_with_format(0, 0, 123, &italic)?;
 
     workbook.save(filename)?;

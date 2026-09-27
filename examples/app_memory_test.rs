@@ -79,7 +79,7 @@ fn main() -> Result<(), XlsxError> {
 
     let worksheet = if constant_memory {
         #[cfg(feature = "constant_memory")]
-        let worksheet = workbook.add_worksheet_with_constant_memory();
+        let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
         #[cfg(not(feature = "constant_memory"))]
         let worksheet = workbook.add_worksheet();

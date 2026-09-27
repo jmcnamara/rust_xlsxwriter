@@ -17,3 +17,6 @@ jobs:
 
     - name: Run the integration tests for the constant_memory feature set
       run: cargo test --test integration --features constant_memory
+
+    - name: Run the lib tests for the constant_memory feature set
+      run: cargo test --lib --features constant_memory

@@ -15,7 +15,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let bold = Format::new().set_bold();
     let num_format = Format::new().set_num_format("0.00");
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     worksheet.write(1, 1, "Apple")?;
     worksheet.write(1, 3, 1.23456)?;

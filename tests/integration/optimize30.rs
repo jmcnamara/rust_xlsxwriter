@@ -12,7 +12,7 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     worksheet.write_array_formula(0, 0, 2, 0, "=SUM(B1:C1*B2:C2)")?;
 

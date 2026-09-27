@@ -13,7 +13,7 @@ use serde::Serialize;
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.write_string(0, 0, "Foo")?;
 
     worksheet.set_column_width(2, 10.288)?;
@@ -33,7 +33,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Test Worksheet table.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.write_string(0, 0, "Foo")?;
 
     #[derive(Serialize)]
@@ -76,7 +76,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Test Worksheet table.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.write_string(0, 0, "Foo")?;
 
     #[derive(Serialize)]

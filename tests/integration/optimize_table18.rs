@@ -12,7 +12,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, XlsxError};
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     let text_wrap = Format::new().set_text_wrap();
 
     worksheet.set_column_range_width(2, 5, 10.288)?;
@@ -43,7 +43,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     let text_wrap = Format::new().set_text_wrap();
 
     worksheet.set_column_range_width(2, 5, 10.288)?;
@@ -77,7 +77,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     workbook.populate_string_table("Column2", 1);
     workbook.populate_string_table("Column3", 2);
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     let text_wrap = Format::new().set_text_wrap();
 
     worksheet.set_column_range_width(2, 5, 10.288)?;

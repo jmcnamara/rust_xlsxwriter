@@ -15,7 +15,7 @@ use std::collections::HashMap;
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Not serialized.
     worksheet.write(0, 0, "col1")?;
@@ -35,7 +35,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -70,7 +70,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 // Test case for skipping fields.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -111,7 +111,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 // Test case for serialize_headers_with_options().
 fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -153,7 +153,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 // Test case for skipping fields via serialize_headers_with_options().
 fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -200,7 +200,7 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
 // Test case for skipping fields via skip().
 fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -246,7 +246,7 @@ fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
 // Test case for serialize_headers_with_options(). Field order is changed.
 fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -289,7 +289,7 @@ fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
 // Test case for field rename via Serde.
 fn create_new_xlsx_file_8(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -333,7 +333,7 @@ fn create_new_xlsx_file_8(filename: &str) -> Result<(), XlsxError> {
 // Test case for field rename via rename().
 fn create_new_xlsx_file_9(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -374,7 +374,7 @@ fn create_new_xlsx_file_9(filename: &str) -> Result<(), XlsxError> {
 // Test case for skipping fields via skip() for single field only.
 fn create_new_xlsx_file_10(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -416,7 +416,7 @@ fn create_new_xlsx_file_10(filename: &str) -> Result<(), XlsxError> {
 // Test case for skipping fields via skip() (custom headers only)
 fn create_new_xlsx_file_11(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -464,7 +464,7 @@ fn create_new_xlsx_file_11(filename: &str) -> Result<(), XlsxError> {
 // Test case for skipping fields via proc macro.
 fn create_new_xlsx_file_12(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize, XlsxSerialize)]
@@ -504,7 +504,7 @@ fn create_new_xlsx_file_12(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde skipping fields via proc macro.
 fn create_new_xlsx_file_13(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize, XlsxSerialize)]
@@ -545,7 +545,7 @@ fn create_new_xlsx_file_13(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde skipping fields via proc macro.
 fn create_new_xlsx_file_14(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize, XlsxSerialize)]
@@ -586,7 +586,7 @@ fn create_new_xlsx_file_14(filename: &str) -> Result<(), XlsxError> {
 // Test case for field rename via Serde and proc macro.
 fn create_new_xlsx_file_15(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize, XlsxSerialize)]
@@ -624,7 +624,7 @@ fn create_new_xlsx_file_15(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Test Result types.
 fn create_new_xlsx_file_16(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -659,7 +659,7 @@ fn create_new_xlsx_file_16(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization with enum values.
 fn create_new_xlsx_file_17(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Define an enum for the test.
     #[derive(Serialize)]
@@ -704,7 +704,7 @@ fn create_new_xlsx_file_17(filename: &str) -> Result<(), XlsxError> {
 // Excel but a skipped map field shouldn't raise an error.
 fn create_new_xlsx_file_18(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -747,7 +747,7 @@ fn create_new_xlsx_file_18(filename: &str) -> Result<(), XlsxError> {
 // headers when using use_custom_headers_only().
 fn create_new_xlsx_file_19(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -795,7 +795,7 @@ fn create_new_xlsx_file_19(filename: &str) -> Result<(), XlsxError> {
 // attribute.
 fn create_new_xlsx_file_20(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     // Create a serializable test struct.
     #[derive(Serialize, XlsxSerialize)]

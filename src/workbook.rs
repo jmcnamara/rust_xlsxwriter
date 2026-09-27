@@ -541,6 +541,13 @@ impl Workbook {
     /// [restrictions](../performance/index.html#restrictions-when-using-constant-memory-mode)
     /// on its usage.
     ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::TempFileError`] - Error creating the temporary file used
+    ///   by the worksheet. This is usually caused by the default temporary
+    ///   directory, or the directory set with [`Workbook::set_tempdir()`], not
+    ///   being writable.
+    ///
     /// # Examples
     ///
     /// The following example demonstrates adding worksheets in "standard" and
@@ -560,7 +567,7 @@ impl Workbook {
     ///     worksheet.write(0, 0, "Standard")?;
     ///
     ///     // Add a worksheet in "constant memory" mode.
-    ///     let worksheet = workbook.add_worksheet_with_constant_memory();
+    ///     let worksheet = workbook.add_worksheet_with_constant_memory()?;
     ///     worksheet.write(0, 0, "Constant memory")?;
     ///
     /// #     workbook.save("workbook.xlsx")?;
@@ -576,7 +583,10 @@ impl Workbook {
     ///
     #[cfg(feature = "constant_memory")]
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
-    pub fn add_worksheet_with_constant_memory(&mut self) -> &mut Worksheet {
+    pub fn add_worksheet_with_constant_memory(&mut self) -> Result<&mut Worksheet, XlsxError> {
+        // Create temp file first so that a failure doesn't change the workbook.
+        let file_writer = self.new_tempfile_writer()?;
+
         let name = format!("Sheet{}", self.num_worksheets + 1);
         self.num_worksheets += 1;
 
@@ -585,9 +595,7 @@ impl Workbook {
 
         self.initialize_default_format(&mut worksheet);
 
-        if let Some(tempdir) = &self.tempdir {
-            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
-        }
+        worksheet.file_writer = Some(file_writer);
 
         worksheet.use_inline_strings = true;
         worksheet.use_constant_memory = true;
@@ -598,7 +606,7 @@ impl Workbook {
         self.worksheets.push(worksheet);
         let worksheet = self.worksheets.last_mut().unwrap();
 
-        worksheet
+        Ok(worksheet)
     }
 
     /// Add a new worksheet that supports "low memory" mode.
@@ -615,6 +623,13 @@ impl Workbook {
     /// are some
     /// [restrictions](../performance/index.html#restrictions-when-using-constant-memory-mode)
     /// on its usage.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::TempFileError`] - Error creating the temporary file used
+    ///   by the worksheet. This is usually caused by the default temporary
+    ///   directory, or the directory set with [`Workbook::set_tempdir()`], not
+    ///   being writable.
     ///
     /// # Examples
     ///
@@ -635,7 +650,7 @@ impl Workbook {
     ///     worksheet.write(0, 0, "Standard")?;
     ///
     ///     // Add a worksheet in "low memory" mode.
-    ///     let worksheet = workbook.add_worksheet_with_low_memory();
+    ///     let worksheet = workbook.add_worksheet_with_low_memory()?;
     ///     worksheet.write(0, 0, "Low memory")?;
     ///
     /// #     workbook.save("workbook.xlsx")?;
@@ -651,7 +666,10 @@ impl Workbook {
     ///
     #[cfg(feature = "constant_memory")]
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
-    pub fn add_worksheet_with_low_memory(&mut self) -> &mut Worksheet {
+    pub fn add_worksheet_with_low_memory(&mut self) -> Result<&mut Worksheet, XlsxError> {
+        // Create temp file first so that a failure doesn't change the workbook.
+        let file_writer = self.new_tempfile_writer()?;
+
         let name = format!("Sheet{}", self.num_worksheets + 1);
         self.num_worksheets += 1;
 
@@ -660,9 +678,7 @@ impl Workbook {
 
         self.initialize_default_format(&mut worksheet);
 
-        if let Some(tempdir) = &self.tempdir {
-            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
-        }
+        worksheet.file_writer = Some(file_writer);
 
         worksheet.use_inline_strings = false;
         worksheet.use_constant_memory = true;
@@ -676,7 +692,7 @@ impl Workbook {
         self.worksheets.push(worksheet);
         let worksheet = self.worksheets.last_mut().unwrap();
 
-        worksheet
+        Ok(worksheet)
     }
 
     /// Create a new worksheet that supports "constant memory" mode.
@@ -703,14 +719,19 @@ impl Workbook {
     /// Constant memory mode requires the `rust_xlsxwriter` `constant_memory`
     /// feature flag.
     ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::TempFileError`] - Error creating the temporary file used
+    ///   by the worksheet. This is usually caused by the default temporary
+    ///   directory, or the directory set with [`Workbook::set_tempdir()`], not
+    ///   being writable.
+    ///
     #[cfg(feature = "constant_memory")]
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
-    pub fn new_worksheet_with_constant_memory(&mut self) -> Worksheet {
+    pub fn new_worksheet_with_constant_memory(&mut self) -> Result<Worksheet, XlsxError> {
         let mut worksheet = Worksheet::new();
 
-        if let Some(tempdir) = &self.tempdir {
-            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
-        }
+        worksheet.file_writer = Some(self.new_tempfile_writer()?);
 
         worksheet.use_inline_strings = true;
         worksheet.use_constant_memory = true;
@@ -718,7 +739,7 @@ impl Workbook {
         worksheet.workbook_xf_indices = Arc::clone(&self.xf_indices);
         worksheet.has_workbook_global_xfs = true;
 
-        worksheet
+        Ok(worksheet)
     }
 
     /// Create a new worksheet that supports "low memory" mode.
@@ -745,14 +766,19 @@ impl Workbook {
     /// Constant memory mode requires the `rust_xlsxwriter` `constant_memory`
     /// feature flag.
     ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::TempFileError`] - Error creating the temporary file used
+    ///   by the worksheet. This is usually caused by the default temporary
+    ///   directory, or the directory set with [`Workbook::set_tempdir()`], not
+    ///   being writable.
+    ///
     #[cfg(feature = "constant_memory")]
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
-    pub fn new_worksheet_with_low_memory(&mut self) -> Worksheet {
+    pub fn new_worksheet_with_low_memory(&mut self) -> Result<Worksheet, XlsxError> {
         let mut worksheet = Worksheet::new();
 
-        if let Some(tempdir) = &self.tempdir {
-            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
-        }
+        worksheet.file_writer = Some(self.new_tempfile_writer()?);
 
         worksheet.use_inline_strings = false;
         worksheet.use_constant_memory = true;
@@ -763,7 +789,7 @@ impl Workbook {
         worksheet.string_table = Arc::clone(&self.string_table);
         worksheet.has_workbook_global_sst = true;
 
-        worksheet
+        Ok(worksheet)
     }
 
     /// Set the temporary directory used in "constant memory" and "low memory"
@@ -788,8 +814,9 @@ impl Workbook {
     ///
     /// # Errors
     ///
-    /// - [`XlsxError::IoError`] - A wrapper for various IO errors when creating
-    ///   a temporary file in the custom temporary directory.
+    /// - [`XlsxError::TempFileError`] - Error creating a temporary file in the
+    ///   custom temporary directory. This is usually caused by the directory
+    ///   not existing or not being writable.
     ///
     /// # Examples
     ///
@@ -809,7 +836,7 @@ impl Workbook {
     ///     workbook.set_tempdir(".")?;
     ///
     ///     // Add a worksheet in "constant memory" mode.
-    ///     let worksheet = workbook.add_worksheet_with_constant_memory();
+    ///     let worksheet = workbook.add_worksheet_with_constant_memory()?;
     ///     worksheet.write(0, 0, "Hello")?;
     /// #
     /// #     workbook.save("workbook.xlsx")?;
@@ -827,7 +854,7 @@ impl Workbook {
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
     pub fn set_tempdir<P: AsRef<Path>>(&mut self, dir: P) -> Result<&mut Workbook, XlsxError> {
         // Check that the directory exists and is writable.
-        tempfile_in(&dir)?;
+        Self::create_tempfile(dir.as_ref())?;
 
         self.tempdir = Some(dir.as_ref().to_path_buf());
 
@@ -2386,6 +2413,25 @@ impl Workbook {
             self.cell_padding,
             self.max_col_width,
         );
+    }
+
+    // Create the temporary file used by "constant memory" and "low memory"
+    // worksheets. This uses the directory set by `set_tempdir()`, if any, or
+    // else the default `std::env::temp_dir()` directory.
+    #[cfg(feature = "constant_memory")]
+    fn new_tempfile_writer(&self) -> Result<BufWriter<File>, XlsxError> {
+        let tempdir = self.tempdir.clone().unwrap_or_else(std::env::temp_dir);
+        let file = Self::create_tempfile(&tempdir)?;
+
+        Ok(BufWriter::new(file))
+    }
+
+    // Create a temporary file in a directory and map any IO error to a
+    // TempFileError that includes the directory name.
+    #[cfg(feature = "constant_memory")]
+    fn create_tempfile(dir: &Path) -> Result<File, XlsxError> {
+        tempfile_in(dir)
+            .map_err(|error| XlsxError::TempFileError(format!("{}: {error}", dir.display())))
     }
 
     // Read theme XML from either a zip file (thmx/xlsx) or a text file.

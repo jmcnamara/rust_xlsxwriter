@@ -457,8 +457,9 @@ impl<W: Write + Send> Packager<W> {
                 // We also need to flush the last remaining row.
                 worksheet.flush_last_row();
 
-                worksheet.file_writer.rewind().unwrap();
-                let mut reader = BufReader::new(worksheet.file_writer.get_ref());
+                let file_writer = worksheet.file_writer();
+                file_writer.rewind().unwrap();
+                let mut reader = BufReader::new(file_writer.get_ref());
                 std::io::copy(&mut reader, &mut self.zip)?;
             }
 

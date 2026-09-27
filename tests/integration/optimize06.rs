@@ -12,7 +12,7 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     // Test that control characters and any other single byte characters are
     // handled correctly by the SharedStrings module. We skip chr 34 = " in

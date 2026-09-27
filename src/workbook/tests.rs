@@ -237,4 +237,43 @@ mod workbook_tests {
 
         assert!(matches!(result, Err(XlsxError::ThemeError(_))));
     }
+
+    // Test a failure to create a temporary file. The temp dir is removed after
+    // it is set to simulate a directory that isn't writable.
+    #[test]
+    #[cfg(feature = "constant_memory")]
+    fn test_tempfile_error() -> Result<(), XlsxError> {
+        let tempdir = tempfile::tempdir()?;
+        let tempdir_path = tempdir.path().to_path_buf();
+
+        let mut workbook = Workbook::new();
+        workbook.set_tempdir(&tempdir_path)?;
+        tempdir.close()?;
+
+        let result = workbook.add_worksheet_with_constant_memory();
+        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+
+        let result = workbook.add_worksheet_with_low_memory();
+        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+
+        let result = workbook.new_worksheet_with_constant_memory();
+        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+
+        let result = workbook.new_worksheet_with_low_memory();
+        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+
+        // Failed worksheets shouldn't be added to the workbook.
+        assert!(workbook.worksheets.is_empty());
+        let worksheet = workbook.add_worksheet();
+        assert_eq!("Sheet1", worksheet.name());
+
+        // Standard worksheets don't need a temp file.
+        workbook.save_to_buffer()?;
+
+        // A non-existent directory is also an error in set_tempdir().
+        let result = workbook.set_tempdir(&tempdir_path);
+        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+
+        Ok(())
+    }
 }

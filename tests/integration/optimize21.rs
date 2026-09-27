@@ -14,7 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format = Format::new().set_bold().set_italic();
 
     // Constant memory worksheet.
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
     worksheet.write_number_with_format(0, 0, 123, &format)?;
     worksheet.set_portrait();
 

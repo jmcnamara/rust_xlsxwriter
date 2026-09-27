@@ -11,7 +11,7 @@ use rust_xlsxwriter::{Table, Workbook, XlsxError};
 // Create a rust_xlsxwriter file to compare against an Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     worksheet.set_column_width(2, 10.288)?;
     worksheet.set_column_width(3, 10.288)?;

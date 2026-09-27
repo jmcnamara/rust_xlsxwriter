@@ -14,23 +14,23 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let format = Format::new().set_align(FormatAlign::Center);
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
     worksheet.write(0, 5, 123)?;
     worksheet.merge_range(1, 1, 5, 3, "", &format)?;
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
     worksheet.write(1, 5, 123)?;
     worksheet.merge_range(1, 1, 5, 3, "", &format)?;
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
     worksheet.merge_range(1, 1, 5, 3, "", &format)?;
     worksheet.write(3, 5, 123)?;
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
     worksheet.merge_range(1, 1, 5, 3, "", &format)?;
     worksheet.write(5, 5, 123)?;
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
     worksheet.merge_range(1, 1, 5, 3, "", &format)?;
     worksheet.write(6, 5, 123)?;
 

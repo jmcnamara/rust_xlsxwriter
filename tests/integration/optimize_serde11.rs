@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.set_paper_size(9);
 
     let bold = Format::new().set_bold();
@@ -41,7 +41,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Overwrite all default headers.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.set_paper_size(9);
 
     let bold = Format::new().set_bold();
@@ -94,7 +94,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Overwrite one header.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.set_paper_size(9);
 
     let bold = Format::new().set_bold();
@@ -145,7 +145,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Overwrite two headers.
 fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.set_paper_size(9);
 
     let bold = Format::new().set_bold();
@@ -199,7 +199,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Overwrite two headers with deserialization.
 fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
     worksheet.set_paper_size(9);
 
     let bold = Format::new().set_bold();

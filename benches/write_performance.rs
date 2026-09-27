@@ -105,7 +105,7 @@ fn write_workbook(
     populate: fn(&mut Worksheet, u32, u16) -> Result<(), XlsxError>,
 ) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    populate(add_benchmark_worksheet(&mut workbook), rows, cols)?;
+    populate(add_benchmark_worksheet(&mut workbook)?, rows, cols)?;
 
     let temp_file =
         std::env::temp_dir().join(format!("bench_write_perf_{}.xlsx", std::process::id()));
@@ -116,9 +116,9 @@ fn write_workbook(
 }
 
 /// Add a worksheet in the memory mode selected by feature flags / env var.
-fn add_benchmark_worksheet(workbook: &mut Workbook) -> &mut Worksheet {
+fn add_benchmark_worksheet(workbook: &mut Workbook) -> Result<&mut Worksheet, XlsxError> {
     #[cfg(not(feature = "constant_memory"))]
-    return workbook.add_worksheet();
+    return Ok(workbook.add_worksheet());
 
     #[cfg(feature = "constant_memory")]
     if std::env::var_os("BENCH_LOW_MEMORY").is_some() {

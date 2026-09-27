@@ -20,7 +20,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     workbook.register_format(&both);
 
     // Constant memory worksheet.
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     worksheet.set_row_format(1, &bold)?;
     worksheet.set_column_format(2, &italic)?;
@@ -48,7 +48,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     workbook.register_format(&both);
 
     // Constant memory worksheet.
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     worksheet.set_row_format(1, &bold)?;
     worksheet.set_column_format(2, &italic)?;

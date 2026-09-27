@@ -12,7 +12,7 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     worksheet.write_string(0, 0, "Hello")?;
     worksheet.write_number(1, 0, 123)?;
@@ -29,7 +29,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let mut worksheet = workbook.add_worksheet_with_constant_memory();
+    let mut worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     worksheet.write_string(0, 0, "Hello")?;
     workbook.save(filename)?;
@@ -52,7 +52,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 
     workbook.set_tempdir(".")?;
 
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     worksheet.write_string(0, 0, "Hello")?;
     worksheet.write_number(1, 0, 123)?;

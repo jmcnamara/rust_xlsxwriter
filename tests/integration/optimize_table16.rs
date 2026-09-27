@@ -13,7 +13,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let table = Table::new();
 
-    let worksheet1 = workbook.add_worksheet_with_low_memory();
+    let worksheet1 = workbook.add_worksheet_with_low_memory()?;
 
     worksheet1.set_column_width(1, 10.288)?;
     worksheet1.set_column_width(2, 10.288)?;
@@ -25,7 +25,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet1.set_column_width(8, 10.288)?;
     worksheet1.set_column_width(9, 10.288)?;
 
-    let worksheet2 = workbook.add_worksheet_with_low_memory();
+    let worksheet2 = workbook.add_worksheet_with_low_memory()?;
 
     worksheet2.set_column_width(2, 10.288)?;
     worksheet2.set_column_width(3, 10.288)?;

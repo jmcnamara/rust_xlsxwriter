@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     workbook.populate_string_table("Column3", 2);
     workbook.populate_string_table("Column4", 3);
 
-    let worksheet = workbook.add_worksheet_with_low_memory();
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
 
     worksheet.set_column_width(2, 10.288)?;
     worksheet.set_column_width(3, 10.288)?;

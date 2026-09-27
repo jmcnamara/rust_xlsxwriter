@@ -58,7 +58,7 @@ fn create_new_xlsx_file_standalone(filename: &str) -> Result<(), XlsxError> {
 #[cfg(feature = "constant_memory")]
 fn create_new_xlsx_file_constant_memory(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
 
     let format1 = Format::new().set_num_format("0.0");
     let format2 = Format::new().set_num_format("0.000");
