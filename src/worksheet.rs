@@ -18394,12 +18394,16 @@ impl Worksheet {
         let mut guid_index = 1;
         let mut priority = 1;
 
-        for (cell_range, conditionals_for_range) in &self.conditional_formats {
+        for cell_range in &self.conditional_format_order {
+            let conditionals_for_range = self.conditional_formats.get(cell_range).unwrap();
+
             // Only create an entry if range contains a x14 style conditional.
+            // Otherwise skip the range but maintain the priority count.
             if !conditionals_for_range
                 .iter()
                 .any(|rule| rule.has_x14_extensions())
             {
+                priority += conditionals_for_range.len() as u32;
                 continue;
             }
 
