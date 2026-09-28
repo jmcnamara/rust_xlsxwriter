@@ -87,16 +87,12 @@ impl<W: Write + Send> Packager<W> {
     // -----------------------------------------------------------------------
 
     // Create a new Packager struct.
-    pub(crate) fn new(
-        writer: W,
-        use_large_file: bool,
-        compression_level: Option<i64>,
-    ) -> Packager<W> {
+    pub(crate) fn new(writer: W, use_large_file: bool, compression_level: u8) -> Packager<W> {
         let zip = zip::ZipWriter::new_stream(writer);
 
         let zip_options = SimpleFileOptions::default()
             .compression_method(zip::CompressionMethod::Deflated)
-            .compression_level(compression_level)
+            .compression_level(Some(i64::from(compression_level)))
             .unix_permissions(0o600)
             .last_modified_time(DateTime::default())
             .large_file(use_large_file);

@@ -353,7 +353,7 @@ pub struct Workbook {
     num_worksheets: u16,
     num_chartsheets: u16,
     use_large_file: bool,
-    zip_compression_level: Option<i64>,
+    zip_compression_level: u8,
     default_format: Format,
     default_row_height: u32,
     default_col_width: u32,
@@ -443,7 +443,7 @@ impl Workbook {
             num_worksheets: 0,
             num_chartsheets: 0,
             use_large_file: false,
-            zip_compression_level: None,
+            zip_compression_level: 3,
             feature_property_bags: HashSet::new(),
             default_format: Format::default(),
             default_row_height: 20,
@@ -2213,7 +2213,7 @@ impl Workbook {
     ///
     /// # Parameters
     ///
-    /// - `level`: The compression level in the range 1 to 9. The default is 6.
+    /// - `level`: The compression level in the range 1 to 9. The default is 3.
     ///   Values outside the range are ignored with a warning.
     ///
     pub fn set_zip_compression_level(&mut self, level: u8) -> &mut Workbook {
@@ -2222,7 +2222,7 @@ impl Workbook {
             return self;
         }
 
-        self.zip_compression_level = Some(i64::from(level));
+        self.zip_compression_level = level;
 
         self
     }

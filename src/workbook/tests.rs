@@ -302,24 +302,27 @@ mod workbook_tests {
             Ok(workbook)
         };
 
-        // Out of range values are ignored.
-        let mut workbook = create_workbook(Some(0))?;
-        assert_eq!(None, workbook.zip_compression_level);
+        // The default level is 3.
+        let mut workbook = create_workbook(None)?;
+        assert_eq!(3, workbook.zip_compression_level);
         let default_size = workbook.save_to_buffer()?.len();
 
-        let workbook = create_workbook(Some(10))?;
-        assert_eq!(None, workbook.zip_compression_level);
-
-        // The default level is 6.
-        let mut workbook = create_workbook(Some(6))?;
+        let mut workbook = create_workbook(Some(3))?;
         assert_eq!(default_size, workbook.save_to_buffer()?.len());
 
+        // Out of range values are ignored.
+        let workbook = create_workbook(Some(0))?;
+        assert_eq!(3, workbook.zip_compression_level);
+
+        let workbook = create_workbook(Some(10))?;
+        assert_eq!(3, workbook.zip_compression_level);
+
         let mut workbook = create_workbook(Some(1))?;
-        assert_eq!(Some(1), workbook.zip_compression_level);
+        assert_eq!(1, workbook.zip_compression_level);
         let fast_size = workbook.save_to_buffer()?.len();
 
         let mut workbook = create_workbook(Some(9))?;
-        assert_eq!(Some(9), workbook.zip_compression_level);
+        assert_eq!(9, workbook.zip_compression_level);
         let best_size = workbook.save_to_buffer()?.len();
 
         assert!(best_size < fast_size);
