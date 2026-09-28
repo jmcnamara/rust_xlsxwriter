@@ -276,4 +276,54 @@ mod workbook_tests {
 
         Ok(())
     }
+
+    // Test the zip compression level for the xlsx container.
+    #[test]
+    fn test_zip_compression_level() -> Result<(), XlsxError> {
+        use crate::Image;
+
+        let create_workbook = |level: Option<u8>| -> Result<Workbook, XlsxError> {
+            let mut workbook = Workbook::new();
+            if let Some(level) = level {
+                workbook.set_zip_compression_level(level);
+            }
+
+            let worksheet = workbook.add_worksheet();
+            for row in 0..1000 {
+                worksheet.write(row, 0, "Hello")?;
+                worksheet.write(row, 1, row)?;
+            }
+
+            // Binary files are stored uncompressed and shouldn't be affected
+            // by the compression level.
+            let image = Image::new("tests/input/images/red.png")?;
+            worksheet.insert_image(0, 3, &image)?;
+
+            Ok(workbook)
+        };
+
+        // Out of range values are ignored.
+        let mut workbook = create_workbook(Some(0))?;
+        assert_eq!(None, workbook.zip_compression_level);
+        let default_size = workbook.save_to_buffer()?.len();
+
+        let workbook = create_workbook(Some(10))?;
+        assert_eq!(None, workbook.zip_compression_level);
+
+        // The default level is 6.
+        let mut workbook = create_workbook(Some(6))?;
+        assert_eq!(default_size, workbook.save_to_buffer()?.len());
+
+        let mut workbook = create_workbook(Some(1))?;
+        assert_eq!(Some(1), workbook.zip_compression_level);
+        let fast_size = workbook.save_to_buffer()?.len();
+
+        let mut workbook = create_workbook(Some(9))?;
+        assert_eq!(Some(9), workbook.zip_compression_level);
+        let best_size = workbook.save_to_buffer()?.len();
+
+        assert!(best_size < fast_size);
+
+        Ok(())
+    }
 }

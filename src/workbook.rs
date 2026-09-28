@@ -353,6 +353,7 @@ pub struct Workbook {
     num_worksheets: u16,
     num_chartsheets: u16,
     use_large_file: bool,
+    zip_compression_level: Option<i64>,
     default_format: Format,
     default_row_height: u32,
     default_col_width: u32,
@@ -442,6 +443,7 @@ impl Workbook {
             num_worksheets: 0,
             num_chartsheets: 0,
             use_large_file: false,
+            zip_compression_level: None,
             feature_property_bags: HashSet::new(),
             default_format: Format::default(),
             default_row_height: 20,
@@ -2203,6 +2205,28 @@ impl Workbook {
         self
     }
 
+    /// Set the compression level for the xlsx zip container.
+    ///
+    /// Set the deflate compression level used for the XML files in the xlsx zip
+    /// container. Lower levels are faster and higher levels produce smaller
+    /// files.
+    ///
+    /// # Parameters
+    ///
+    /// - `level`: The compression level in the range 1 to 9. The default is 6.
+    ///   Values outside the range are ignored with a warning.
+    ///
+    pub fn set_zip_compression_level(&mut self, level: u8) -> &mut Workbook {
+        if !(1..=9).contains(&level) {
+            eprintln!("Zip compression level {level} outside range: 1 <= level <= 9.");
+            return self;
+        }
+
+        self.zip_compression_level = Some(i64::from(level));
+
+        self
+    }
+
     /// Add a signed vba macro file to the workbook.
     ///
     /// The `add_vba_project_with_signature()` method can be used to add signed
@@ -2635,7 +2659,7 @@ impl Workbook {
         package_options = self.set_package_options(package_options)?;
 
         // Create the Packager object that will assemble the zip/xlsx file.
-        let packager = Packager::new(writer, self.use_large_file);
+        let packager = Packager::new(writer, self.use_large_file, self.zip_compression_level);
         packager.assemble_file(self, &package_options)?;
 
         Ok(())
