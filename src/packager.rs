@@ -893,7 +893,12 @@ impl<W: Write + Send> Packager<W> {
 
                 let mut comment = Comment::new();
                 comment.notes = worksheet.notes.clone();
-                comment.note_authors = worksheet.note_authors.keys().cloned().collect();
+                let mut authors: Vec<(&String, &usize)> = worksheet.note_authors.iter().collect();
+                authors.sort_by_key(|x| x.1);
+                comment.note_authors = authors
+                    .into_iter()
+                    .map(|(author, _)| author.clone())
+                    .collect();
 
                 comment.assemble_xml_file();
 

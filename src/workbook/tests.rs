@@ -329,4 +329,177 @@ mod workbook_tests {
 
         Ok(())
     }
+
+    // Helper function to extract xl/comments1.xml from a workbook in memory.
+    fn get_comments_xml(workbook: &mut Workbook) -> Result<String, XlsxError> {
+        let buf = workbook.save_to_buffer()?;
+        let reader = std::io::Cursor::new(buf);
+        let mut zip = zip::ZipArchive::new(reader).unwrap();
+        let mut file = zip.by_name("xl/comments1.xml").unwrap();
+        let mut xml = String::new();
+        std::io::Read::read_to_string(&mut file, &mut xml).unwrap();
+
+        Ok(xml)
+    }
+
+    #[test]
+    fn test_note_authors_order() -> Result<(), XlsxError> {
+        let mut workbook = Workbook::new();
+        let worksheet = workbook.add_worksheet();
+
+        let note1 = crate::Note::new("Note 1").set_author("Alice");
+        worksheet.insert_note(0, 0, &note1)?;
+
+        let note2 = crate::Note::new("Note 2");
+        worksheet.insert_note(1, 0, &note2)?;
+
+        let xml = get_comments_xml(&mut workbook)?;
+        let got = xml_to_vec(&xml);
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+              <authors>
+                <author>Author</author>
+                <author>Alice</author>
+              </authors>
+              <commentList>
+                <comment ref="A1" authorId="1">
+                  <text>
+                    <r>
+                      <rPr>
+                        <b/>
+                        <sz val="8"/>
+                        <color indexed="81"/>
+                        <rFont val="Tahoma"/>
+                        <family val="2"/>
+                      </rPr>
+                      <t>Alice:</t>
+                    </r>
+                    <r>
+                      <rPr>
+                        <sz val="8"/>
+                        <color indexed="81"/>
+                        <rFont val="Tahoma"/>
+                        <family val="2"/>
+                      </rPr>
+                      <t xml:space="preserve">
+Note 1</t>
+                    </r>
+                  </text>
+                </comment>
+                <comment ref="A2" authorId="0">
+                  <text>
+                    <r>
+                      <rPr>
+                        <b/>
+                        <sz val="8"/>
+                        <color indexed="81"/>
+                        <rFont val="Tahoma"/>
+                        <family val="2"/>
+                      </rPr>
+                      <t>Author:</t>
+                    </r>
+                    <r>
+                      <rPr>
+                        <sz val="8"/>
+                        <color indexed="81"/>
+                        <rFont val="Tahoma"/>
+                        <family val="2"/>
+                      </rPr>
+                      <t xml:space="preserve">
+Note 2</t>
+                    </r>
+                  </text>
+                </comment>
+              </commentList>
+            </comments>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_note_authors_non_lexical_order() -> Result<(), XlsxError> {
+        let mut workbook = Workbook::new();
+        let worksheet = workbook.add_worksheet();
+
+        let note1 = crate::Note::new("Note from Zed").set_author("Zed");
+        worksheet.insert_note(0, 0, &note1)?;
+
+        let note2 = crate::Note::new("Note from Alice").set_author("Alice");
+        worksheet.insert_note(1, 0, &note2)?;
+
+        let xml = get_comments_xml(&mut workbook)?;
+        let got = xml_to_vec(&xml);
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+              <authors>
+                <author>Author</author>
+                <author>Zed</author>
+                <author>Alice</author>
+              </authors>
+              <commentList>
+                <comment ref="A1" authorId="1">
+                  <text>
+                    <r>
+                      <rPr>
+                        <b/>
+                        <sz val="8"/>
+                        <color indexed="81"/>
+                        <rFont val="Tahoma"/>
+                        <family val="2"/>
+                      </rPr>
+                      <t>Zed:</t>
+                    </r>
+                    <r>
+                      <rPr>
+                        <sz val="8"/>
+                        <color indexed="81"/>
+                        <rFont val="Tahoma"/>
+                        <family val="2"/>
+                      </rPr>
+                      <t xml:space="preserve">
+Note from Zed</t>
+                    </r>
+                  </text>
+                </comment>
+                <comment ref="A2" authorId="2">
+                  <text>
+                    <r>
+                      <rPr>
+                        <b/>
+                        <sz val="8"/>
+                        <color indexed="81"/>
+                        <rFont val="Tahoma"/>
+                        <family val="2"/>
+                      </rPr>
+                      <t>Alice:</t>
+                    </r>
+                    <r>
+                      <rPr>
+                        <sz val="8"/>
+                        <color indexed="81"/>
+                        <rFont val="Tahoma"/>
+                        <family val="2"/>
+                      </rPr>
+                      <t xml:space="preserve">
+Note from Alice</t>
+                    </r>
+                  </text>
+                </comment>
+              </commentList>
+            </comments>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
 }
