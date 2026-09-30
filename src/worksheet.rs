@@ -19051,9 +19051,8 @@ impl Worksheet {
         // First find any write ahead cached rows.
         let mut intermediate_rows: Vec<_> = self
             .write_ahead
-            .keys()
-            .filter(|x| **x < next_row)
-            .copied()
+            .range(..next_row)
+            .map(|(row, _)| *row)
             .collect();
 
         // Add any changed row elements.
