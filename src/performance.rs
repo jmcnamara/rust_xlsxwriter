@@ -6,49 +6,35 @@ This section explains some of the performance characteristics of `rust_xlsxwrite
 
 Contents:
 
-- [Relative performance of `rust_xlsxwriter`](#relative-performance-of-rust_xlsxwriter)
-- [Performance profile](#performance-profile)
-- [Constant memory mode](#constant-memory-mode)
-  - [Enabling "constant memory" mode](#enabling-constant-memory-mode)
-  - [Restrictions when using "constant memory" mode](#restrictions-when-using-constant-memory-mode)
-- [ZMIJ - faster floating-point conversion](#zmij---faster-floating-point-conversion)
-- [Performance testing](#performance-testing)
-- [Programs used to generate the test results](#programs-used-to-generate-the-test-results)
-  - [Rust performance test program](#rust-performance-test-program)
-  - [C performance test program](#c-performance-test-program)
-  - [Python performance test program](#python-performance-test-program)
+- [Performance characteristics of `rust_xlsxwriter`](#performance-characteristics-of-rust_xlsxwriter)
+  - [Relative performance of `rust_xlsxwriter`](#relative-performance-of-rust_xlsxwriter)
+  - [Performance profile](#performance-profile)
+  - [Constant memory mode](#constant-memory-mode)
+    - [Enabling "constant memory" mode](#enabling-constant-memory-mode)
+    - [Restrictions when using "constant memory" mode](#restrictions-when-using-constant-memory-mode)
+  - [Zip compression level](#zip-compression-level)
+  - [ZMIJ - faster floating-point conversion](#zmij---faster-floating-point-conversion)
+  - [Performance testing](#performance-testing)
+  - [Programs used to generate the test results](#programs-used-to-generate-the-test-results)
+    - [Rust performance test program](#rust-performance-test-program)
+    - [C performance test program](#c-performance-test-program)
+    - [Python performance test program](#python-performance-test-program)
 
 ## Relative performance of `rust_xlsxwriter`
 
 The `rust_xlsxwriter` library has sister libraries written in C
 ([libxlsxwriter]), Python ([XlsxWriter]), and Perl ([Excel::Writer::XLSX]).
 
-It also has an optional compilation "feature" called `zlib` which allows it, via
-[ZipWriter], to use compression from a native C library. This improves the
-performance on large files significantly and even surpasses the C/libxlsxwriter
-version.
+A relative performance comparison between the C, Rust, and Python versions is:
 
-A relative performance comparison between the C, Rust, and Python versions is
-shown below. The Perl performance is similar to the Python library, so it has
-been omitted.
+- `rust_xlsxwriter` is 1.6x faster than C/libxlsxwriter.
+- `rust_xlsxwriter` is 6.5x faster than Python/XlsxWriter.
 
-| Library                       | Relative to rust+zlib | Relative to C | Relative to Rust |
-|-------------------------------|-----------------------|---------------|------------------|
-| `rust_xlsxwriter` with `zlib` | 1.00                  |               |                  |
-| C/libxlsxwriter               | 1.38                  | 1.00          |                  |
-| `rust_xlsxwriter`             | 1.58                  | 1.14          | 1.00             |
-| Python/XlsxWriter             | 6.02                  | 4.36          | 3.81             |
-
-<br>
-
-The way to interpret this is that, relative to the Python version, the
-`rust_xlsxwriter with zlib` library is 6 times faster, the C version is 4.4 times
-faster, and the standard `rust_xlsxwriter` version is 3.8 times faster.
+The Perl performance is similar to the Python library.
 
 The programs and methodology to generate this data are shown in the section below
 on [Performance testing](#performance-testing).
 
-[ZipWriter]: https://docs.rs/zip/latest/zip/write/struct.ZipWriter.html
 [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
 [libxlsxwriter]: https://libxlsxwriter.github.io
 [Excel::Writer::XLSX]: https://metacpan.org/dist/Excel-Writer-XLSX/view/lib/Excel/Writer/XLSX.pm
@@ -135,8 +121,10 @@ and "constant memory" modes:
 <img src="https://rustxlsxwriter.github.io/images/performance_memory1.png">
 
 <br>
-The speed performance is similar in all modes but slightly better (5-10%) in
-"constant memory" mode.
+The speed performance is similar in all modes but slightly better (around 5%)
+in "constant memory" mode. For worksheets with a large number of unique strings,
+"constant memory" mode can be up to 30% faster since it doesn't need to
+maintain a shared string table.
 <br>
 <br>
 
@@ -215,6 +203,71 @@ There are some limitations and restrictions when using "constant memory" mode.
 [tempfile]: https://crates.io/crates/tempfile
 
 
+## Zip compression level
+
+An xlsx file is a zip container of XML files, and a large part of the time taken
+to save a file is spent compressing the XML data and in particular the worksheet
+data. By default `rust_xlsxwriter` uses a compression level of 6, which is the
+default level for the `zip.rs` crate and which give a good balance between file
+size and speed.
+
+If required, the compression level can be changed using
+[`Workbook::set_zip_compression_level()`] to trade file size for speed:
+
+[`Workbook::set_zip_compression_level()`]: crate::Workbook::set_zip_compression_level
+
+
+```rust
+# // This code is available in examples/doc_workbook_set_zip_compression_level.rs
+#
+use rust_xlsxwriter::{Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    // Write some data to the worksheet.
+    for row in 0..1000 {
+        worksheet.write_number(row, 0, row)?;
+        worksheet.write_string(row, 1, "Hello")?;
+    }
+
+    // Use a faster compression level than the default level 6.
+    workbook.set_zip_compression_level(3);
+
+    workbook.save("workbook.xlsx")?;
+
+    Ok(())
+}
+```
+
+The level can be in the range 1 (fastest) to 9 (nominally smallest). The table
+below shows the file size and save time for each compression level relative to
+the default level 6. The worksheet used in this analysis had 4,000 rows x 50
+columns of alternating numbers and strings, with 2,000 distinct values of each,
+and only the time to save the file is measured.
+
+| Level | File size (bytes) | Size vs 6 | Save time vs 6 |
+|-------|-------------------|-----------|----------------|
+| 1     | 2,052,818         | 1.51      | 0.45           |
+| 2     | 1,502,037         | 1.11      | 0.57           |
+| 3     | 1,441,286         | 1.06      | 0.71           |
+| 4     | 1,381,297         | 1.02      | 0.86           |
+| 5     | 1,364,029         | 1.00      | 0.92           |
+| 6     | 1,358,017         | 1.00      | 1.00           |
+| 7     | 1,322,184         | 0.97      | 1.53           |
+| 8     | 1,314,882         | 0.97      | 6.48           |
+| 9     | 1,356,746         | 1.00      | 1.86           |
+
+<br>
+
+If you are looking to increase performance then level 3 is probably the best
+compromise. It give ~30% better performance for a file size that is ~5% bigger
+but comparable in size to a similar file produced by Excel. Excel 365 also uses
+a compression level of 3.
+
+
 ## ZMIJ - faster floating-point conversion
 
 The `rust_xlsxwriter` `zmij` feature flag enables the [zmij] crate, which provides
@@ -226,6 +279,7 @@ This speeds up writing numeric worksheet by about 10%.
 <img src="https://rustxlsxwriter.github.io/images/performance_speed4.png">
 
 [zmij]: https://crates.io/crates/zmij/
+
 
 ## Performance testing
 
@@ -241,38 +295,31 @@ The main test was as follows:
 
 
 ```bash
-$ hyperfine ./rust_perf_test_with_zlib \
-            ./c_perf_test              \
+$ hyperfine ./c_perf_test              \
             ./rust_perf_test           \
             "python py_perf_test.py"   \
             --warmup 3 --sort command
 
-Benchmark 1: ./rust_perf_test_with_zlib
-  Time (mean ± σ):     152.6 ms ±   3.5 ms    [User: 134.3 ms, System: 16.4 ms]
-  Range (min … max):   147.0 ms … 158.9 ms    17 runs
+Benchmark 1: ./c_perf_test
+  Time (mean ± σ):     213.8 ms ±   6.9 ms    [User: 173.8 ms, System: 33.3 ms]
+  Range (min … max):   203.5 ms … 223.8 ms    13 runs
 
-Benchmark 2: ./c_perf_test
-  Time (mean ± σ):     210.9 ms ±   4.2 ms    [User: 171.9 ms, System: 34.1 ms]
-  Range (min … max):   204.1 ms … 219.2 ms    13 runs
+Benchmark 2: ./rust_perf_test
+  Time (mean ± σ):     135.2 ms ±   5.5 ms    [User: 117.7 ms, System: 15.6 ms]
+  Range (min … max):   128.3 ms … 146.1 ms    21 runs
 
-Benchmark 3: ./rust_perf_test
-  Time (mean ± σ):     240.8 ms ±   4.5 ms    [User: 222.4 ms, System: 16.6 ms]
-  Range (min … max):   233.8 ms … 250.9 ms    12 runs
-
-Benchmark 4: python py_perf_test.py
-  Time (mean ± σ):     919.1 ms ±  17.0 ms    [User: 870.2 ms, System: 43.4 ms]
-  Range (min … max):   885.6 ms … 938.2 ms    10 runs
+Benchmark 3: python py_perf_test.py
+  Time (mean ± σ):     878.2 ms ±  24.8 ms    [User: 822.5 ms, System: 46.1 ms]
+  Range (min … max):   837.4 ms … 907.6 ms    10 runs
 
 Relative speed comparison
-        1.00          ./rust_perf_test_with_zlib
-        1.38 ±  0.04  ./c_perf_test
-        1.58 ±  0.05  ./rust_perf_test
-        6.02 ±  0.18  python py_perf_test.py
+        1.58 ±  0.08  ./c_perf_test
+        1.00          ./rust_perf_test
+        6.49 ±  0.32  python py_perf_test.py
 ```
 
-This shows that the `rust_xlsxwriter` with `zlib` version is the fastest version
-and that it is 1.38 times faster than the C version, 1.58 times faster than the
-standard `rust_xlsxwriter` version, and 6 times faster than the Python version.
+This shows that `rust_xlsxwriter` is the fastest version and that it is 1.58
+times faster than the C version and 6.5 times faster than the Python version.
 
 As with any performance test, there are many factors that may affect the
 results. However, these results are indicative of the relative performance.

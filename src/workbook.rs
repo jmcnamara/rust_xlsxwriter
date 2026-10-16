@@ -2213,10 +2213,46 @@ impl Workbook {
     /// container. Lower levels are faster and higher levels produce smaller
     /// files.
     ///
+    /// See the [Zip compression level] section of the performance documentation
+    /// for a comparison of the file size and save time at each level.
+    ///
+    /// [Zip compression level]: crate::performance#zip-compression-level
+    ///
     /// # Parameters
     ///
     /// - `level`: The compression level in the range 1 to 9. The default is 6.
     ///   Values outside the range are ignored with a warning.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the zip compression level of
+    /// a workbook to a different level than the default, to make saving faster
+    /// in exchange for a slightly larger file.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_set_zip_compression_level.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some data to the worksheet.
+    ///     for row in 0..1000 {
+    ///         worksheet.write_number(row, 0, row)?;
+    ///         worksheet.write_string(row, 1, "Hello")?;
+    ///     }
+    ///
+    ///     // Use a faster compression level than the default level 6.
+    ///     workbook.set_zip_compression_level(3);
+    /// #
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
     ///
     pub fn set_zip_compression_level(&mut self, level: u8) -> &mut Workbook {
         if !(1..=9).contains(&level) {

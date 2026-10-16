@@ -47,10 +47,6 @@ harness = false
 # `default`: Includes all the standard functionality.
 default = []
 
-# `zlib`: Adds a dependency on zlib and a C compiler. This includes the same
-# features as `default` but is 1.5x faster for large files.
-zlib = ["zip/deflate-flate2-zlib"]
-
 # `chrono`: Adds support for Chrono dates/times in addition to the native
 # `ExcelDateTime` types.
 chrono = ["dep:chrono"]
@@ -91,6 +87,11 @@ zmij = ["dep:zmij"]
 # by the same author.
 ryu = ["dep:ryu"]
 
+
+# `zlib`: Adds a dependency on zlib and a C compiler. This dependency is
+# deprecated since it no longer gives better performance than the native Rust
+# implementation.
+zlib = ["zip/deflate-flate2-zlib"]
 
 # `test-resave`: Developer-only testing feature.
 test-resave = []
