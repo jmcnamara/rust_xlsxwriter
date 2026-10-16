@@ -415,7 +415,7 @@ impl FilterCondition {
     pub fn new() -> FilterCondition {
         FilterCondition {
             is_list_filter: true,
-            apply_logical_or: true,
+            apply_logical_or: false,
             should_match_blanks: false,
             list: vec![],
             custom1: None,
@@ -703,7 +703,6 @@ impl FilterCondition {
             self.custom1 = Some(value.new_filter_data(criteria));
         } else if self.custom2.is_none() {
             self.custom2 = Some(value.new_filter_data(criteria));
-            self.apply_logical_or = false;
         } else {
             eprintln!("Excel only allows 2 custom filter conditions.");
         }
@@ -721,7 +720,6 @@ impl FilterCondition {
     ///
     pub fn add_custom_boolean_or(mut self) -> FilterCondition {
         self.apply_logical_or = true;
-        self.is_list_filter = false;
         self
     }
 }

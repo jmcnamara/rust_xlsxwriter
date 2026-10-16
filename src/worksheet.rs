@@ -18842,7 +18842,7 @@ impl Worksheet {
     fn write_custom_filters(&mut self, filter_condition: &FilterCondition) {
         let mut attributes = vec![];
 
-        if !filter_condition.apply_logical_or {
+        if !filter_condition.apply_logical_or && filter_condition.custom2.is_some() {
             attributes.push(("and", "1".to_string()));
         }
 
