@@ -7988,17 +7988,7 @@ impl Worksheet {
         col: ColNum,
         width: impl Into<f64>,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let width = width.into();
-
-        // Convert from Excel character width to pixels. The algorithm for the
-        // conversion is different below 1 character width.
-        let width_pixels = if width == 0.0 {
-            0
-        } else if width < 1.0 {
-            (width * f64::from(self.max_digit_width + self.cell_padding)).round() as u32
-        } else {
-            (width * f64::from(self.max_digit_width)).round() as u32 + self.cell_padding
-        };
+        let width_pixels = self.column_width_to_pixels(width.into());
 
         self.set_column_width_internal(col, width_pixels, false)
     }
@@ -8248,22 +8238,8 @@ impl Worksheet {
             return Err(XlsxError::RowColumnLimitError);
         }
 
-        // Update an existing col metadata object or create a new one.
-        match self.changed_cols.get_mut(&col) {
-            Some(col_options) => col_options.hidden = true,
-            None => {
-                let col_options = ColOptions {
-                    width: self.default_col_width,
-                    xf_index: 0,
-                    hidden: true,
-                    level: 0,
-                    collapsed: false,
-                    autofit: false,
-                    format: None,
-                };
-                self.changed_cols.insert(col, col_options);
-            }
-        }
+        // Store the column hidden property.
+        self.store_column_hidden(col);
 
         Ok(self)
     }
@@ -8298,12 +8274,10 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
-        let width = width.into();
-        for col_num in first_col..=last_col {
-            self.set_column_width(col_num, width)?;
-        }
+        // Convert the width once for the whole range.
+        let width_pixels = self.column_width_to_pixels(width.into());
 
-        Ok(self)
+        self.set_column_range_width_pixels(first_col, last_col, width_pixels)
     }
 
     /// Set the pixel width for a range of columns.
@@ -8336,8 +8310,22 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
+        // If the width is 0 then the Excel treats the columns as hidden with
+        // default width.
+        if width == 0 {
+            return self.set_column_range_hidden(first_col, last_col);
+        }
+
+        // Check the column range is in the allowed range without updating
+        // dimensions. The first column is always valid if the last column is
+        // valid.
+        if !self.check_dimensions_only(0, last_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Store the column width for each column in the range.
         for col_num in first_col..=last_col {
-            self.set_column_width_pixels(col_num, width)?;
+            self.store_column_width(col_num, width, false);
         }
 
         Ok(self)
@@ -8419,8 +8407,37 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
+        // Get a suitable minimum value for the dimension check/set.
+        let min_row = self.get_min_row();
+
+        // Check the column range is in the allowed range and set it in the
+        // worksheet dimensions. The first column is always valid if the last
+        // column is valid.
+        if !self.check_dimensions(min_row, last_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+        self.check_dimensions(min_row, first_col);
+
+        // Get the index of the format object once for the whole range.
+        let xf_index = self.format_xf_index(format);
+
+        // Update existing col metadata objects or create new ones.
         for col_num in first_col..=last_col {
-            self.set_column_format(col_num, format)?;
+            match self.changed_cols.get_mut(&col_num) {
+                Some(col_options) => col_options.xf_index = xf_index,
+                None => {
+                    let col_options = ColOptions {
+                        width: self.default_col_width,
+                        xf_index,
+                        hidden: false,
+                        level: 0,
+                        collapsed: false,
+                        autofit: false,
+                        format: Some(format.clone()),
+                    };
+                    self.changed_cols.insert(col_num, col_options);
+                }
+            }
         }
 
         Ok(self)
@@ -8454,8 +8471,16 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
+        // Check the column range is in the allowed range without updating
+        // dimensions. The first column is always valid if the last column is
+        // valid.
+        if !self.check_dimensions_only(0, last_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Store the column hidden property for each column in the range.
         for col_num in first_col..=last_col {
-            self.set_column_hidden(col_num)?;
+            self.store_column_hidden(col_num);
         }
 
         Ok(self)
@@ -16273,6 +16298,38 @@ impl Worksheet {
         Ok(self)
     }
 
+    // Store the column hidden property.
+    fn store_column_hidden(&mut self, col: ColNum) {
+        // Update an existing col metadata object or create a new one.
+        match self.changed_cols.get_mut(&col) {
+            Some(col_options) => col_options.hidden = true,
+            None => {
+                let col_options = ColOptions {
+                    width: self.default_col_width,
+                    xf_index: 0,
+                    hidden: true,
+                    level: 0,
+                    collapsed: false,
+                    autofit: false,
+                    format: None,
+                };
+                self.changed_cols.insert(col, col_options);
+            }
+        }
+    }
+
+    // Convert from Excel character width to pixels. The algorithm for the
+    // conversion is different below 1 character width.
+    fn column_width_to_pixels(&self, width: f64) -> u32 {
+        if width == 0.0 {
+            0
+        } else if width < 1.0 {
+            (width * f64::from(self.max_digit_width + self.cell_padding)).round() as u32
+        } else {
+            (width * f64::from(self.max_digit_width)).round() as u32 + self.cell_padding
+        }
+    }
+
     // Store the column width in Excel pixel units. Updates to the width can
     // come from the external user or from the internal autofit() routines.
     fn store_column_width(&mut self, col: ColNum, width: u32, autofit: bool) {
@@ -19763,32 +19820,30 @@ impl Worksheet {
 
         xml_start_tag_only(&mut self.writer, "cols");
 
+        // Take the column data temporarily so that it can be borrowed while
+        // writing the <col> elements. It is restored at the end.
+        let changed_cols = std::mem::take(&mut self.changed_cols);
+
         // We need to write contiguous equivalent columns as a range with first
         // and last columns, so we convert the HashMap to a sorted vector and
         // iterate over that.
-        let mut col_options: Vec<_> = self
-            .changed_cols
-            .iter()
-            .map(|(k, v)| (*k, v.clone()))
-            .collect();
+        let mut col_options: Vec<_> = changed_cols.iter().map(|(k, v)| (*k, v)).collect();
         col_options.sort_unstable_by_key(|x| x.0);
         let mut col_options = col_options.into_iter();
 
         // Remove the first (key, value) tuple in the vector and use it to set
         // the initial/previous properties.
-        let first_col_options = col_options.next().unwrap();
-        let mut first_col = first_col_options.0;
-        let mut prev_col_options = first_col_options.1;
+        let (mut first_col, mut prev_col_options) = col_options.next().unwrap();
         let mut last_col = first_col;
 
         for (col_num, col_options) in col_options {
             // Check if the column number is contiguous with the previous column
             // and if the format is the same.
-            if col_num == last_col + 1 && col_options == prev_col_options {
+            if col_num == last_col + 1 && col_options.has_same_properties(prev_col_options) {
                 last_col = col_num;
             } else {
                 // If not write out the current range of columns and start again.
-                self.write_col_element(first_col, last_col, &prev_col_options);
+                self.write_col_element(first_col, last_col, prev_col_options);
                 first_col = col_num;
                 last_col = first_col;
                 prev_col_options = col_options;
@@ -19796,7 +19851,10 @@ impl Worksheet {
         }
 
         // We will exit the previous loop with one unhandled column range.
-        self.write_col_element(first_col, last_col, &prev_col_options);
+        self.write_col_element(first_col, last_col, prev_col_options);
+
+        // Restore the column data.
+        self.changed_cols = changed_cols;
 
         xml_end_tag(&mut self.writer, "cols");
     }
@@ -21029,6 +21087,19 @@ struct ColOptions {
     collapsed: bool,
     autofit: bool,
     format: Option<Format>,
+}
+
+impl ColOptions {
+    // Check if two columns have the same properties in the <col> element. The
+    // format is represented by the xf_index so it doesn't need to be compared.
+    fn has_same_properties(&self, other: &ColOptions) -> bool {
+        self.width == other.width
+            && self.xf_index == other.xf_index
+            && self.level == other.level
+            && self.hidden == other.hidden
+            && self.collapsed == other.collapsed
+            && self.autofit == other.autofit
+    }
 }
 
 #[derive(Clone)]
