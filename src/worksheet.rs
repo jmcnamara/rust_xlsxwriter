@@ -1575,6 +1575,7 @@ pub struct Worksheet {
     center_horizontally: bool,
     center_vertically: bool,
     screen_gridlines: bool,
+    hidden_zeroes: bool,
     print_gridlines: bool,
     print_black_and_white: bool,
     print_draft: bool,
@@ -1784,6 +1785,7 @@ impl Worksheet {
             center_horizontally: false,
             center_vertically: false,
             screen_gridlines: true,
+            hidden_zeroes: false,
             print_gridlines: false,
             print_black_and_white: false,
             print_draft: false,
@@ -14813,6 +14815,58 @@ impl Worksheet {
         self
     }
 
+    /// Set the option to hide zero values in worksheet cells.
+    ///
+    /// The `set_hidden_zeroes()` method is used to hide any zero values that
+    /// appear in the cells of the displayed worksheet. This is the equivalent
+    /// of turning off the Excel option "Show a zero in cells that have zero
+    /// value".
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates hiding zero values in worksheet cells.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_hidden_zeros.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write some numbers, including a zero.
+    ///     worksheet.write(0, 0, 0)?;
+    ///     worksheet.write(1, 0, 1)?;
+    ///     worksheet.write(2, 0, 2)?;
+    ///     worksheet.write(3, 0, 3)?;
+    ///
+    ///     // Hide the zero values.
+    ///     worksheet.set_hidden_zeroes(true);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_hidden_zeros.png">
+    ///
+    pub fn set_hidden_zeroes(&mut self, enable: bool) -> &mut Worksheet {
+        self.hidden_zeroes = enable;
+
+        self
+    }
+
     /// Ignore an Excel error or warning in a worksheet cell.
     ///
     /// Excel flags a number of data errors and inconsistencies with a a small
@@ -18117,6 +18171,10 @@ impl Worksheet {
 
         if !self.screen_gridlines {
             attributes.push(("showGridLines", "0".to_string()));
+        }
+
+        if self.hidden_zeroes {
+            attributes.push(("showZeros", "0".to_string()));
         }
 
         if self.right_to_left {

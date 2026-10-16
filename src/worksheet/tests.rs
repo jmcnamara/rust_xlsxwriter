@@ -958,4 +958,29 @@ mod worksheet_tests {
 
         assert_eq!(expected, got);
     }
+
+    #[test]
+    fn test_sheet_views_hidden_zeroes() {
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
+        worksheet.set_hidden_zeroes(true);
+
+        worksheet.write_sheet_views();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheetViews>
+                <sheetView showZeros="0" tabSelected="1" workbookViewId="0"/>
+            </sheetViews>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
 }
