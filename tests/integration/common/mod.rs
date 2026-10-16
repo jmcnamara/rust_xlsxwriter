@@ -253,27 +253,37 @@ fn compare_xlsx_files(
             }
         };
 
+        let filename = match file.name() {
+            Ok(name) => name.to_string(),
+            Err(err) => {
+                return (
+                    vec![exp_file.to_string(), err.to_string()],
+                    vec![got_file.to_string()],
+                )
+            }
+        };
+
         // Ignore any test specific files like "xl/calcChain.xml".
-        if ignore_files.contains(file.name()) {
+        if ignore_files.contains(filename.as_str()) {
             continue;
         }
 
         // Store the filenames for comparison of the file structure.
-        exp_filenames.push(file.name().to_string());
+        exp_filenames.push(filename.clone());
 
-        if is_binary_file(file.name()) {
+        if is_binary_file(&filename) {
             // Get a checksum for binary files.
             let mut bin_data: Vec<u8> = vec![];
             file.read_to_end(&mut bin_data).unwrap();
             let mut hasher = DefaultHasher::new();
             bin_data.hash(&mut hasher);
             let xml_data = format!("checksum = {}", hasher.finish());
-            exp_xml.insert(file.name().to_string(), xml_data);
+            exp_xml.insert(filename, xml_data);
         } else {
             // Read XML data from non-binary files.
             let mut xml_data = String::new();
             file.read_to_string(&mut xml_data).unwrap();
-            exp_xml.insert(file.name().to_string(), xml_data);
+            exp_xml.insert(filename, xml_data);
         }
     }
 
@@ -288,22 +298,32 @@ fn compare_xlsx_files(
             }
         };
 
+        let filename = match file.name() {
+            Ok(name) => name.to_string(),
+            Err(err) => {
+                return (
+                    vec![exp_file.to_string()],
+                    vec![got_file.to_string(), err.to_string()],
+                )
+            }
+        };
+
         // Ignore any test specific files like "xl/calcChain.xml".
-        if ignore_files.contains(file.name()) {
+        if ignore_files.contains(filename.as_str()) {
             continue;
         }
 
         // Store the filenames for comparison of the file structure.
-        got_filenames.push(file.name().to_string());
+        got_filenames.push(filename.clone());
 
-        if is_binary_file(file.name()) {
+        if is_binary_file(&filename) {
             // Get a checksum for binary files.
             let mut bin_data: Vec<u8> = vec![];
             file.read_to_end(&mut bin_data).unwrap();
             let mut hasher = DefaultHasher::new();
             bin_data.hash(&mut hasher);
             let xml_data = format!("checksum = {}", hasher.finish());
-            got_xml.insert(file.name().to_string(), xml_data);
+            got_xml.insert(filename, xml_data);
         } else {
             // Read XML data from non-binary files.
             let mut xml_data = String::new();
@@ -312,7 +332,7 @@ fn compare_xlsx_files(
             // Check for test generator XML error.
             if xml_data.contains("<<") {
                 return (
-                    vec![file.name().to_string()],
+                    vec![filename],
                     vec![
                         "Generated XML contains double start tag".to_string(),
                         String::new(),
@@ -320,7 +340,7 @@ fn compare_xlsx_files(
                 );
             }
 
-            got_xml.insert(file.name().to_string(), xml_data);
+            got_xml.insert(filename, xml_data);
         }
     }
 
