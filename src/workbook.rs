@@ -350,6 +350,7 @@ pub struct Workbook {
     defined_names: Vec<DefinedName>,
     user_defined_names: Vec<DefinedName>,
     read_only_mode: u8,
+    calculation_mode: CalculationMode,
     num_worksheets: u16,
     num_chartsheets: u16,
     use_large_file: bool,
@@ -425,6 +426,7 @@ impl Workbook {
             border_count: 0,
             num_formats: vec![],
             read_only_mode: 0,
+            calculation_mode: CalculationMode::Automatic,
             has_hyperlink_style: false,
             worksheets: vec![],
             xf_formats: vec![],
@@ -2381,6 +2383,70 @@ impl Workbook {
         self
     }
 
+    /// Set the calculation mode for formulas in the workbook.
+    ///
+    /// By default Excel recalculates all the formulas in a `rust_xlsxwriter`
+    /// file when it is opened, and then whenever a value that a formula depends
+    /// on changes. The `set_calculation_mode()` method can be used to change
+    /// this behavior. See [`CalculationMode`] for the available modes.
+    ///
+    /// [`CalculationMode::Manual`] is mainly of use for large workbooks with
+    /// slow formulas, where the user can trigger the calculation manually,
+    /// generally by pressing F9. In this mode Excel doesn't recalculate the
+    /// formulas when the file is opened, so it displays the formula results
+    /// stored in the file. Since `rust_xlsxwriter` doesn't calculate formulas
+    /// these results will be 0 unless they have been set with
+    /// [`Worksheet::set_formula_result()`](crate::Worksheet::set_formula_result)
+    /// or [`Formula::set_result()`](crate::Formula::set_result).
+    ///
+    /// # Parameters
+    ///
+    /// - `mode`: A [`CalculationMode`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the calculation mode of a
+    /// workbook to manual, so that Excel displays the stored formula result
+    /// when the file is opened instead of recalculating it.
+    ///
+    /// Note, that Excel has added a strike-through to the cell with the
+    /// calculation to indicate that the calculated value is stale.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_set_calculation_mode.rs
+    /// #
+    /// # use rust_xlsxwriter::{CalculationMode, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write a formula and its result.
+    ///     worksheet.write_formula(0, 0, "=SUM(A2:A3)")?;
+    ///     worksheet.set_formula_result(0, 0, "30");
+    ///     worksheet.write_number(1, 0, 10)?;
+    ///     worksheet.write_number(2, 0, 20)?;
+    ///
+    ///     // Only recalculate formulas when the user requests it.
+    ///     workbook.set_calculation_mode(CalculationMode::Manual);
+    ///
+    ///     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_set_calculation_mode.png">
+    ///
+    pub fn set_calculation_mode(&mut self, mode: CalculationMode) -> &mut Workbook {
+        self.calculation_mode = mode;
+        self
+    }
+
     /// Set the order/index for the format.
     ///
     /// This is currently only used in testing to ensure the same format order
@@ -3539,8 +3605,48 @@ impl Workbook {
 
     // Write the <calcPr> element.
     fn write_calc_pr(&mut self) {
-        let attributes = [("calcId", "124519"), ("fullCalcOnLoad", "1")];
+        let mut attributes = vec![("calcId", "124519")];
+
+        match self.calculation_mode {
+            CalculationMode::Automatic => {
+                attributes.push(("fullCalcOnLoad", "1"));
+            }
+            CalculationMode::Manual => {
+                attributes.push(("calcMode", "manual"));
+                attributes.push(("calcOnSave", "0"));
+            }
+            CalculationMode::Partial => {
+                attributes.push(("calcMode", "autoNoTable"));
+                attributes.push(("fullCalcOnLoad", "1"));
+            }
+        }
 
         xml_empty_tag(&mut self.writer, "calcPr", &attributes);
     }
+}
+
+// -----------------------------------------------------------------------
+// Helper enums/structs/functions.
+// -----------------------------------------------------------------------
+
+/// The `CalculationMode` enum defines the formula calculation modes for a
+/// workbook.
+///
+/// It is used with [`Workbook::set_calculation_mode()`].
+///
+pub enum CalculationMode {
+    /// Excel recalculates all formulas in the workbook when it is opened, and
+    /// whenever a formula or a value that it depends on changes. This is the
+    /// default.
+    Automatic,
+
+    /// Excel only recalculates the formulas in the workbook when the user
+    /// requests it, generally by pressing F9. The formulas aren't recalculated
+    /// when the file is opened or saved.
+    Manual,
+
+    /// Excel recalculates the formulas in the workbook automatically, except
+    /// for formulas in Data Tables (What-If analysis tables, not worksheet
+    /// tables).
+    Partial,
 }

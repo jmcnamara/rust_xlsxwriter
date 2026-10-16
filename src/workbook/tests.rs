@@ -8,7 +8,7 @@
 mod workbook_tests {
 
     use crate::{test_functions::xml_to_vec, XlsxError};
-    use crate::{xmlwriter, Table, Workbook};
+    use crate::{xmlwriter, CalculationMode, Table, Workbook};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -325,5 +325,56 @@ mod workbook_tests {
         assert!(best_size < fast_size);
 
         Ok(())
+    }
+
+    #[test]
+    fn test_write_calc_pr() {
+        let mut workbook = Workbook::default();
+
+        workbook.write_calc_pr();
+
+        let got = xmlwriter::cursor_to_str(&workbook.writer);
+        let expected = r#"<calcPr calcId="124519" fullCalcOnLoad="1"/>"#;
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_write_calc_pr_auto() {
+        let mut workbook = Workbook::default();
+        workbook.set_calculation_mode(CalculationMode::Automatic);
+
+        workbook.write_calc_pr();
+
+        let got = xmlwriter::cursor_to_str(&workbook.writer);
+        let expected = r#"<calcPr calcId="124519" fullCalcOnLoad="1"/>"#;
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_write_calc_pr_manual() {
+        let mut workbook = Workbook::default();
+        workbook.set_calculation_mode(CalculationMode::Manual);
+
+        workbook.write_calc_pr();
+
+        let got = xmlwriter::cursor_to_str(&workbook.writer);
+        let expected = r#"<calcPr calcId="124519" calcMode="manual" calcOnSave="0"/>"#;
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_write_calc_pr_auto_except_tables() {
+        let mut workbook = Workbook::default();
+        workbook.set_calculation_mode(CalculationMode::Partial);
+
+        workbook.write_calc_pr();
+
+        let got = xmlwriter::cursor_to_str(&workbook.writer);
+        let expected = r#"<calcPr calcId="124519" calcMode="autoNoTable" fullCalcOnLoad="1"/>"#;
+
+        assert_eq!(expected, got);
     }
 }
