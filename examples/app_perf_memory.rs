@@ -9,7 +9,7 @@
 //!
 //! The number of rows and the "constant memory" mode can be optionally set.
 //!
-//! usage: ./target/release/examples/app_perf_test [num_rows] [--constant-memory]
+//! usage: ./target/release/examples/app_perf_memory [num_rows] [--constant-memory]
 //!
 
 use rust_xlsxwriter::{Workbook, XlsxError};
