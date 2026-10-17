@@ -5,6 +5,97 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.100.0] - 2026-10-17
+
+### Changed
+
+- **Breaking change**: The `Workbook::add_worksheet_with_constant_memory()` and
+  `Workbook::add_worksheet_with_low_memory()` methods now return a `Result`
+  instead of panicking if a temporary file can't be created, for example if the
+  temporary directory isn't writable. A new `XlsxError::TempFileError` error was
+  added for this. The tempfile is also only created when it is needed rather
+  than when the worksheet is created, and standard worksheets no longer create
+  one. See [Issue #195].
+
+  [Issue #195]: https://github.com/jmcnamara/rust_xlsxwriter/issues/195
+
+- Updated the [Performance] docs with new benchmark results. The standard
+  `rust_xlsxwriter` is **now around 1.6 times faster than the C version**,
+  mainly due to performance improvements in the `zip` crate and its default
+  zlib-rs backend.
+
+
+### Added
+
+- Updated the `zip` dependency to v9.0. All previous v8.x `zip` versions were
+  yanked upstream. See [Issue #205].
+
+  [Issue #205]: https://github.com/jmcnamara/rust_xlsxwriter/issues/205
+
+- Added the `Workbook::set_zip_compression_level()` method to set the
+  compression level of the xlsx zip container in the range 1 to 9. The default
+  level is 6. Lower levels are faster and higher levels produce smaller files.
+  See the "Zip compression level" section of the [Performance] docs for a
+  comparison of the levels. See [Issue #197].
+
+  [Issue #197]: https://github.com/jmcnamara/rust_xlsxwriter/issues/197
+  [Performance]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html
+
+- Added the `Workbook::set_calculation_mode()` method and `CalculationMode`
+  enum to set the formula calculation mode of a workbook to `Automatic` (the
+  default), `Manual` or `Partial`. See [Issue #206].
+
+  <img src="https://rustxlsxwriter.github.io/images/workbook_set_calculation_mode.png">
+
+  [Issue #206]: https://github.com/jmcnamara/rust_xlsxwriter/issues/206
+
+- Added the `Worksheet::set_hidden_zeroes()` method to hide zero values in
+  worksheet cells. This is the equivalent of turning off the Excel option "Show
+  a zero in cells that have zero value". See [Issue #201].
+
+  <img src="https://rustxlsxwriter.github.io/images/worksheet_set_hidden_zeros.png">
+
+  [Issue #201]: https://github.com/jmcnamara/rust_xlsxwriter/issues/201
+
+
+### Fixed
+
+- Improved the performance of setting column properties for a large range of
+  columns, such as the entire worksheet, with the
+  `Worksheet::set_column_range_*()` methods. See [Issue #204].
+
+  [Issue #204]: https://github.com/jmcnamara/rust_xlsxwriter/issues/204
+
+- Fixed issue where Excel 2010+ conditional formats, such as data bars, could
+  be written in the wrong order or with the wrong priority when used with other
+  conditional formats. See [Issue #196].
+
+  [Issue #196]: https://github.com/jmcnamara/rust_xlsxwriter/issues/196
+
+- Fixed issue where cell note author names could be assigned to the wrong
+  notes when there were multiple authors. See [Issue #198].
+
+  [Issue #198]: https://github.com/jmcnamara/rust_xlsxwriter/issues/198
+
+- Fixed an O(N^2) performance issue in "constant memory" mode when writing rows
+  under a large vertical merged range. See [Issue #200].
+
+  [Issue #200]: https://github.com/jmcnamara/rust_xlsxwriter/issues/200
+
+- Fixed issue where `FilterCondition::add_custom_boolean_or()` only worked
+  correctly when it was in a certain position in the method chain.
+  See [Issue #202].
+
+  [Issue #202]: https://github.com/jmcnamara/rust_xlsxwriter/issues/202
+
+
+### Deprecated
+
+- Deprecated the `zlib` feature. It no longer gives better performance than the
+  default native Rust zlib-rs backend and is now around 1.2 times slower.
+
+
+
 ## [0.99.1] - 2026-09-14
 
 ### Fixed

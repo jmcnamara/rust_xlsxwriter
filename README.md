@@ -203,9 +203,9 @@ cargo add rust_xlsxwriter -F constant_memory
 
 Recent changes:
 
+- Performance improvements.
 - Added support for writing directly to STDOUT.
 - Added support for autofitting formatted numbers and dates.
-- Added support for workbook themes.
 
 See the full [Release Notes and Changelog].
 

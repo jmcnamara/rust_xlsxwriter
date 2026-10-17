@@ -201,12 +201,6 @@ documentation and generally show how an individual function works.
   The `vba_extract` utility (https://crates.io/crates/vba_extract) can be
   used to extract the `vbaProject.bin` file.
 
-* `app_memory_test.rs` - Simple performance test and memory usage program
-  for `rust_xlsxwriter`. It writes alternate cells of strings and numbers.
-  It defaults to 4,000 rows x 40 columns. The number of rows and the
-  "constant memory" mode can be optionally set. usage:
-  ./target/release/examples/app_perf_test [num_rows] [--constant-memory]
-
 * `app_merge_range.rs` - An example of creating merged ranges in a
   worksheet using the `rust_xlsxwriter` library.
 
@@ -215,6 +209,28 @@ documentation and generally show how an individual function works.
 
 * `app_panes.rs` - A simple example of setting some "freeze" panes in
   worksheets using the `rust_xlsxwriter` library.
+
+* `app_perf_compression.rs` - Performance test program for the
+  `rust_xlsxwriter` zip compression levels. It writes a worksheet of
+  alternate string and number cells and then times `save_to_buffer()` at
+  each compression level from 1 to 9. The worksheet data is only created
+  once so only the save/compression time is measured. The levels are
+  interleaved within each round so that any machine drift affects all
+  levels equally, and the first round is a discarded warm-up. The output is
+  CSV with the median, min and 10th/90th percentile save times, and the
+  size and time relative to level 6, which is the default level. The data
+  mode can be "repetitive", which uses the same data as `app_perf_test`, or
+  "varied", which uses a deterministic mix of 2,000 distinct strings and
+  numbers for more realistic compression. It defaults to "repetitive",
+  4,000 rows x 50 columns and 20 rounds. usage:
+  ./target/release/examples/app_perf_compression [repetitive|varied]
+  [num_rows] [rounds]
+
+* `app_perf_memory.rs` - Simple performance test and memory usage program
+  for `rust_xlsxwriter`. It writes alternate cells of strings and numbers.
+  It defaults to 4,000 rows x 40 columns. The number of rows and the
+  "constant memory" mode can be optionally set. usage:
+  ./target/release/examples/app_perf_memory [num_rows] [--constant-memory]
 
 * `app_perf_test.rs` - Simple performance test program for
   `rust_xlsxwriter`. It writes alternate cells of strings and numbers. It
@@ -1301,6 +1317,11 @@ documentation and generally show how an individual function works.
 * `doc_workbook_save.rs` - Demonstrates creating a simple workbook, with
   one unused worksheet.
 
+* `doc_workbook_set_calculation_mode.rs` - Demonstrates setting the
+  calculation mode of a workbook to manual, so that Excel displays the
+  stored formula result when the file is opened instead of recalculating
+  it.
+
 * `doc_workbook_set_default_format1.rs` - Demonstrates changing the default
   format for a workbook.
 
@@ -1309,6 +1330,10 @@ documentation and generally show how an individual function works.
 
 * `doc_workbook_set_tempdir.rs` - Demonstrates setting a custom directory
   for temporary files when creating a file in "constant memory" mode.
+
+* `doc_workbook_set_zip_compression_level.rs` - Demonstrates setting the
+  zip compression level of a workbook to a different level than the
+  default, to make saving faster in exchange for a slightly larger file.
 
 * `doc_workbook_use_custom_theme.rs` - Demonstrates changing the default
   theme for a workbook to a user supplied custom theme. The example uses an
@@ -1674,6 +1699,9 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_set_header.rs` - Demonstrates setting the worksheet
   header.
+
+* `doc_worksheet_set_hidden_zeros.rs` - Demonstrates hiding zero values in
+  worksheet cells.
 
 * `doc_worksheet_set_hidden.rs` - Demonstrates hiding a worksheet.
 
