@@ -7,7 +7,7 @@
 #[cfg(test)]
 mod error_tests {
 
-    use std::io::Error;
+    use std::io::{Error, ErrorKind};
 
     use crate::XlsxError;
     use pretty_assertions::assert_eq;
@@ -75,6 +75,17 @@ mod error_tests {
         assert_eq!(error.to_string(), "Temporary file error: 'ERROR: ERROR'.");
         assert!(std::error::Error::source(&error).is_some());
         assert!(std::error::Error::source(&XlsxError::IoError(Error::other("ERROR"))).is_none());
+
+        // A zip IO error forwards to the underlying IO error.
+        let io_error = Error::new(ErrorKind::PermissionDenied, "ERROR");
+        let error = XlsxError::ZipError(ZipError::Io(io_error));
+        let source = std::error::Error::source(&error)
+            .and_then(|source| source.downcast_ref::<Error>())
+            .map(Error::kind);
+        assert_eq!(Some(ErrorKind::PermissionDenied), source);
+
+        assert!(std::error::Error::source(&XlsxError::ZipError(ZipError::FileNotFound)).is_none());
+        assert!(std::error::Error::source(&XlsxError::RowColumnLimitError).is_none());
 
         let result = catch_zip_error();
         assert!(matches!(result, Err(XlsxError::ZipError(_))));

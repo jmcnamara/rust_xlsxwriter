@@ -238,7 +238,17 @@ pub enum XlsxError {
 impl Error for XlsxError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
+            // The wrapped IO error is the underlying cause of the error.
             XlsxError::TempFileError(_, error) => Some(error),
+
+            // These variants display the wrapped error directly, so they
+            // forward to its source to avoid repeating the same message.
+            XlsxError::IoError(error) => error.source(),
+            XlsxError::ZipError(error) => error.source(),
+
+            #[cfg(feature = "polars")]
+            XlsxError::PolarsError(error) => error.source(),
+
             _ => None,
         }
     }
