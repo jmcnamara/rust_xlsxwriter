@@ -71,6 +71,11 @@ mod error_tests {
             "specified file not found in archive"
         );
 
+        let error = XlsxError::TempFileError("ERROR".into(), Error::other("ERROR"));
+        assert_eq!(error.to_string(), "Temporary file error: 'ERROR: ERROR'.");
+        assert!(std::error::Error::source(&error).is_some());
+        assert!(std::error::Error::source(&XlsxError::IoError(Error::other("ERROR"))).is_none());
+
         let result = catch_zip_error();
         assert!(matches!(result, Err(XlsxError::ZipError(_))));
 

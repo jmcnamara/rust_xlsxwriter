@@ -10,6 +10,7 @@ mod tests;
 
 use std::error::Error;
 use std::fmt;
+use std::path::PathBuf;
 
 #[cfg(feature = "polars")]
 use polars::prelude::polars_err;
@@ -198,7 +199,15 @@ pub enum XlsxError {
     /// "constant memory" or "low memory" worksheet, or when using a custom
     /// temporary directory. This is usually caused by the temporary directory
     /// not existing or not being writable.
-    TempFileError(String),
+    ///
+    /// The parameters are the temporary directory and the underlying
+    /// [`std::io::Error`], which can be used to get the error kind, such as:
+    ///
+    /// - [`std::io::ErrorKind::NotFound`] or
+    /// - [`std::io::ErrorKind::PermissionDenied`].
+    ///
+    /// The `io::Error` is also returned by [`Error::source()`].
+    TempFileError(PathBuf, std::io::Error),
 
     /// Wrapper for a variety of [`std::io::Error`] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by a
@@ -226,7 +235,14 @@ pub enum XlsxError {
     PolarsError(PolarsError),
 }
 
-impl Error for XlsxError {}
+impl Error for XlsxError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            XlsxError::TempFileError(_, error) => Some(error),
+            _ => None,
+        }
+    }
+}
 
 impl fmt::Display for XlsxError {
     #[allow(clippy::too_many_lines)]
@@ -382,8 +398,8 @@ impl fmt::Display for XlsxError {
                 write!(f, "{error}")
             }
 
-            XlsxError::TempFileError(error) => {
-                write!(f, "Temporary file error: '{error}'.")
+            XlsxError::TempFileError(dir, error) => {
+                write!(f, "Temporary file error: '{}: {error}'.", dir.display())
             }
 
             XlsxError::IoError(error) => {

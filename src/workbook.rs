@@ -2553,11 +2553,10 @@ impl Workbook {
     }
 
     // Create a temporary file in a directory and map any IO error to a
-    // TempFileError that includes the directory name.
+    // TempFileError that includes the directory name and the IO error.
     #[cfg(feature = "constant_memory")]
     fn create_tempfile(dir: &Path) -> Result<File, XlsxError> {
-        tempfile_in(dir)
-            .map_err(|error| XlsxError::TempFileError(format!("{}: {error}", dir.display())))
+        tempfile_in(dir).map_err(|error| XlsxError::TempFileError(dir.to_path_buf(), error))
     }
 
     // Read theme XML from either a zip file (thmx/xlsx) or a text file.

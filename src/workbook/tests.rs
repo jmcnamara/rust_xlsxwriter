@@ -251,16 +251,16 @@ mod workbook_tests {
         tempdir.close()?;
 
         let result = workbook.add_worksheet_with_constant_memory();
-        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+        assert!(matches!(result, Err(XlsxError::TempFileError(..))));
 
         let result = workbook.add_worksheet_with_low_memory();
-        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+        assert!(matches!(result, Err(XlsxError::TempFileError(..))));
 
         let result = workbook.new_worksheet_with_constant_memory();
-        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+        assert!(matches!(result, Err(XlsxError::TempFileError(..))));
 
         let result = workbook.new_worksheet_with_low_memory();
-        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+        assert!(matches!(result, Err(XlsxError::TempFileError(..))));
 
         // Failed worksheets shouldn't be added to the workbook.
         assert!(workbook.worksheets.is_empty());
@@ -272,7 +272,23 @@ mod workbook_tests {
 
         // A non-existent directory is also an error in set_tempdir().
         let result = workbook.set_tempdir(&tempdir_path);
-        assert!(matches!(result, Err(XlsxError::TempFileError(_))));
+        assert!(matches!(result, Err(XlsxError::TempFileError(..))));
+
+        // The directory and the underlying IO error are available.
+        let Err(error) = result else { unreachable!() };
+        let XlsxError::TempFileError(dir, io_error) = &error else {
+            unreachable!()
+        };
+        assert_eq!(&tempdir_path, dir);
+        assert_eq!(std::io::ErrorKind::NotFound, io_error.kind());
+
+        // The IO error is also returned as the error source.
+        let source = std::error::Error::source(&error)
+            .and_then(|source| source.downcast_ref::<std::io::Error>());
+        assert_eq!(
+            Some(std::io::ErrorKind::NotFound),
+            source.map(std::io::Error::kind)
+        );
 
         Ok(())
     }
