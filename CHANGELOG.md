@@ -5,6 +5,26 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.101.0] - 2026-10-21
+
+### Changed
+
+- **Breaking change**: Changed `XlsxError::TempFileError(String)` error that was
+  added in the previous release to `XlsxError::TempFileError(PathBuf,
+  std::io::Error)` so that the temporary directory and the underlying
+  `io::Error` are available to the caller. The `io::Error` is also returned by
+  `Error::source()`. See [Issue #213].
+
+  [Issue #213]: https://github.com/jmcnamara/rust_xlsxwriter/issues/213
+
+### Added
+
+- Also added `Error::source()` support for the `XlsxError::IoError`,
+  `XlsxError::ZipError` and `XlsxError::PolarsError` variants. This allows the
+  underlying cause, such as the `io::Error` in a `ZipError::Io` error, to be
+  accessed via the standard error source chain.
+
+
 ## [0.100.0] - 2026-10-17
 
 ### Changed
