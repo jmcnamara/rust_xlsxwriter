@@ -572,6 +572,8 @@ mod cond_format19;
 mod cond_format20;
 mod cond_format21;
 mod cond_format22;
+mod cond_format23;
+mod cond_format24;
 mod data_validation01;
 mod data_validation02;
 mod data_validation03;

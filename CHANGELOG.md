@@ -5,6 +5,17 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.102.0] - Unreleased
+
+### Fixed
+
+- Fixed conditional format rule priorities when a range is repeated after a
+  different range. The priorities now follow the order that the rules were
+  added in. See [Issue #207].
+
+  [Issue #207]: https://github.com/jmcnamara/rust_xlsxwriter/issues/207
+
+
 ## [0.101.0] - 2026-10-21
 
 ### Changed

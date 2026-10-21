@@ -1408,6 +1408,10 @@ pub type RowNum = u32;
 /// columns in a worksheet is 16,384.
 pub type ColNum = u16;
 
+// A conditional format rule and its priority, which is the order that the rule
+// was added to the worksheet in.
+type PrioritizedConditionalFormat = (u32, Box<dyn ConditionalFormat + Sync + Send>);
+
 pub(crate) const COL_MAX: ColNum = 16_384;
 pub(crate) const ROW_MAX: RowNum = 1_048_576;
 pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
@@ -1608,8 +1612,9 @@ pub struct Worksheet {
     filter_automatic_off: bool,
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashMap<(RowNum, ColNum), (FilterType, CellRange)>,
-    conditional_formats: BTreeMap<String, Vec<Box<dyn ConditionalFormat + Sync + Send>>>,
+    conditional_formats: BTreeMap<String, Vec<PrioritizedConditionalFormat>>,
     conditional_format_order: Vec<String>,
+    conditional_format_count: u32,
     data_validations: BTreeMap<String, DataValidation>,
     has_conditional_formats: bool,
     use_x14_extensions: bool,
@@ -1831,6 +1836,7 @@ impl Worksheet {
             cells_with_autofilter: HashMap::new(),
             conditional_formats: BTreeMap::new(),
             conditional_format_order: vec![],
+            conditional_format_count: 0,
             data_validations: BTreeMap::new(),
             has_conditional_formats: false,
             use_x14_extensions: false,
@@ -9299,16 +9305,22 @@ impl Worksheet {
             format.dxf_index = self.format_dxf_index(format);
         }
 
+        // In Excel the rule priority is a worksheet-wide order and not a
+        // per-range order. Store it with the rule, based on the order that the
+        // rules were added in, since the rules are written grouped by range.
+        self.conditional_format_count += 1;
+        let priority = self.conditional_format_count;
+
         match self.conditional_formats.entry(cell_range.clone()) {
             Entry::Occupied(mut entry) => {
                 // The conditional format range already exists. Append the rule.
                 let rules = entry.get_mut();
-                rules.push(conditional_format);
+                rules.push((priority, conditional_format));
             }
             Entry::Vacant(entry) => {
                 // The row doesn't exist, create a new row with columns and insert
                 // the cell value.
-                let rules = vec![conditional_format];
+                let rules = vec![(priority, conditional_format)];
                 entry.insert(rules);
 
                 // Also store the order that the ranges are added in.
@@ -18448,14 +18460,13 @@ impl Worksheet {
     // Write the <conditionalFormatting> element.
     fn write_conditional_formats(&mut self) {
         let mut guid_index = 1;
-        let mut priority = 1;
 
         for cell_range in &self.conditional_format_order {
             let conditionals_for_range = self.conditional_formats.get(cell_range).unwrap();
 
             let has_x14_only = conditionals_for_range
                 .iter()
-                .all(|rule| rule.has_x14_only());
+                .all(|(_, rule)| rule.has_x14_only());
 
             // Don't write classic CFs if range only contains new style x14 CFs.
             if !has_x14_only {
@@ -18463,7 +18474,7 @@ impl Worksheet {
                 xml_start_tag(&mut self.writer, "conditionalFormatting", &attributes);
             }
 
-            for conditional_format in conditionals_for_range {
+            for (priority, conditional_format) in conditionals_for_range {
                 // Create a pseudo GUID for each unique Excel 2010 data bar.
                 let mut guid = String::new();
                 if conditional_format.has_x14_extensions() {
@@ -18482,11 +18493,9 @@ impl Worksheet {
                 }
 
                 if !conditional_format.has_x14_only() {
-                    let rule = conditional_format.rule(dxf_index, priority, cell_range, &guid);
+                    let rule = conditional_format.rule(dxf_index, *priority, cell_range, &guid);
                     xml_raw_string(&mut self.writer, &rule);
                 }
-
-                priority += 1;
             }
 
             if !has_x14_only {
@@ -18501,18 +18510,15 @@ impl Worksheet {
         xml_start_tag_only(&mut self.writer, "x14:conditionalFormattings");
 
         let mut guid_index = 1;
-        let mut priority = 1;
 
         for cell_range in &self.conditional_format_order {
             let conditionals_for_range = self.conditional_formats.get(cell_range).unwrap();
 
             // Only create an entry if range contains a x14 style conditional.
-            // Otherwise skip the range but maintain the priority count.
             if !conditionals_for_range
                 .iter()
-                .any(|rule| rule.has_x14_extensions())
+                .any(|(_, rule)| rule.has_x14_extensions())
             {
-                priority += conditionals_for_range.len() as u32;
                 continue;
             }
 
@@ -18523,7 +18529,7 @@ impl Worksheet {
 
             xml_start_tag(&mut self.writer, "x14:conditionalFormatting", &attributes);
 
-            for conditional_format in conditionals_for_range {
+            for (priority, conditional_format) in conditionals_for_range {
                 if conditional_format.has_x14_extensions() {
                     // Create a pseudo GUID for each unique Excel 2010 data bar.
                     let guid = format!(
@@ -18533,10 +18539,9 @@ impl Worksheet {
                     );
                     guid_index += 1;
 
-                    let rule = conditional_format.x14_rule(priority, &guid);
+                    let rule = conditional_format.x14_rule(*priority, &guid);
                     xml_raw_string(&mut self.writer, &rule);
                 }
-                priority += 1;
             }
 
             xml_data_element_only(&mut self.writer, "xm:sqref", cell_range);
