@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #207]: https://github.com/jmcnamara/rust_xlsxwriter/issues/207
 
+- Fixed an off by one errro in `Worksheet::set_first_tab()`. See [Issue #208].
+
+  [Issue #208]: https://github.com/jmcnamara/rust_xlsxwriter/issues/208
+
 
 ## [0.101.0] - 2026-10-21
 

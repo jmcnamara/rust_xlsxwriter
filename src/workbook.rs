@@ -3562,8 +3562,7 @@ impl Workbook {
 
         // Store the firstSheet attribute when it isn't the first sheet.
         if self.first_sheet > 0 {
-            let first_sheet = self.first_sheet + 1;
-            attributes.push(("firstSheet", first_sheet.to_string()));
+            attributes.push(("firstSheet", self.first_sheet.to_string()));
         }
 
         // Store the activeTab attribute when it isn't the first sheet.

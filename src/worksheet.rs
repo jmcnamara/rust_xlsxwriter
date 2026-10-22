@@ -12734,6 +12734,37 @@ impl Worksheet {
     ///
     /// - `enable`: Turn the property on/off. It is off by default.
     ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the first visible worksheet
+    /// tab in a workbook with a large number of worksheets.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_first_tab.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     for _ in 0..16 {
+    ///         workbook.add_worksheet();
+    ///     }
+    ///
+    ///     // Make "Sheet13" the leftmost visible tab and "Sheet16" the active tab.
+    ///     workbook.worksheet_from_index(12)?.set_first_tab(true);
+    ///     workbook.worksheet_from_index(15)?.set_active(true);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_first_tab.png">
+    ///
     pub fn set_first_tab(&mut self, enable: bool) -> &mut Worksheet {
         self.first_sheet = enable;
 

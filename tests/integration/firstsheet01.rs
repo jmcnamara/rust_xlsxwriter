@@ -19,8 +19,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet5 = Worksheet::new();
     let worksheet6 = Worksheet::new();
     let worksheet7 = Worksheet::new();
-    let mut worksheet8 = Worksheet::new();
-    let worksheet9 = Worksheet::new();
+    let worksheet8 = Worksheet::new();
+    let mut worksheet9 = Worksheet::new();
     let worksheet10 = Worksheet::new();
     let worksheet11 = Worksheet::new();
     let worksheet12 = Worksheet::new();
@@ -33,7 +33,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet19 = Worksheet::new();
     let mut worksheet20 = Worksheet::new();
 
-    worksheet8.set_first_tab(true);
+    worksheet9.set_first_tab(true);
     worksheet20.set_active(true);
 
     workbook.push_worksheet(worksheet1);
