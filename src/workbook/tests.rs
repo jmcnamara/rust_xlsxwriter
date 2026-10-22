@@ -393,4 +393,33 @@ mod workbook_tests {
 
         assert_eq!(expected, got);
     }
+
+    #[test]
+    fn test_write_workbook_view_tab_ratio() {
+        let mut workbook = Workbook::default();
+        workbook.set_tab_ratio(50);
+        workbook.first_sheet = 1;
+        workbook.active_tab = 2;
+
+        workbook.write_workbook_view();
+
+        let got = xmlwriter::cursor_to_str(&workbook.writer);
+        let expected = r#"<workbookView xWindow="240" yWindow="15" windowWidth="16095" windowHeight="9660" tabRatio="500" firstSheet="1" activeTab="2"/>"#;
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_write_workbook_view_tab_ratio_out_of_range() {
+        let mut workbook = Workbook::default();
+        workbook.set_tab_ratio(101);
+
+        workbook.write_workbook_view();
+
+        let got = xmlwriter::cursor_to_str(&workbook.writer);
+        let expected =
+            r#"<workbookView xWindow="240" yWindow="15" windowWidth="16095" windowHeight="9660"/>"#;
+
+        assert_eq!(expected, got);
+    }
 }

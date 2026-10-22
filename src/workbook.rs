@@ -347,6 +347,7 @@ pub struct Workbook {
     dxf_indices: HashMap<Format, u32>,
     active_tab: u16,
     first_sheet: u16,
+    tab_ratio: u16,
     defined_names: Vec<DefinedName>,
     user_defined_names: Vec<DefinedName>,
     read_only_mode: u8,
@@ -423,6 +424,7 @@ impl Workbook {
             active_tab: 0,
             fill_count: 0,
             first_sheet: 0,
+            tab_ratio: 600,
             border_count: 0,
             num_formats: vec![],
             read_only_mode: 0,
@@ -2483,6 +2485,29 @@ impl Workbook {
         self
     }
 
+    /// Set the ratio between the worksheet tabs and the horizontal scroll bar.
+    ///
+    /// The `set_tab_ratio()` method can be used to set the width of the
+    /// worksheet tab bar as a percentage of the space that it shares with the
+    /// horizontal scroll bar at the bottom of the Excel window. The default is
+    /// 60%.
+    ///
+    /// # Parameters
+    ///
+    /// - `ratio`: The tab bar ratio as a percentage in the range 0 <= ratio <=
+    ///   100.
+    ///
+    pub fn set_tab_ratio(&mut self, ratio: u8) -> &mut Workbook {
+        if ratio > 100 {
+            eprintln!("Tab ratio {ratio} outside Excel range: 0 <= ratio <= 100.");
+            return self;
+        }
+
+        // Excel stores the ratio in units of 0.1%.
+        self.tab_ratio = u16::from(ratio) * 10;
+        self
+    }
+
     /// Set the order/index for the format.
     ///
     /// This is currently only used in testing to ensure the same format order
@@ -3559,6 +3584,11 @@ impl Workbook {
             ("windowWidth", "16095".to_string()),
             ("windowHeight", "9660".to_string()),
         ];
+
+        // Store the tabRatio attribute when it isn't the default.
+        if self.tab_ratio != 600 {
+            attributes.push(("tabRatio", self.tab_ratio.to_string()));
+        }
 
         // Store the firstSheet attribute when it isn't the first sheet.
         if self.first_sheet > 0 {

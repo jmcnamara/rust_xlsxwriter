@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.102.0] - Unreleased
 
+### Added
+
+- Added `Workbook::set_tab_ratio()` to set the ratio between the worksheet tabs
+  and the horizontal scroll bar.
+
 ### Fixed
 
 - Fixed conditional format rule priorities when a range is repeated after a
@@ -15,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #207]: https://github.com/jmcnamara/rust_xlsxwriter/issues/207
 
-- Fixed an off by one errro in `Worksheet::set_first_tab()`. See [Issue #208].
+- Fixed an off by one error in `Worksheet::set_first_tab()`. See [Issue #208].
 
   [Issue #208]: https://github.com/jmcnamara/rust_xlsxwriter/issues/208
 
