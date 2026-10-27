@@ -108,14 +108,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed issue where Excel 2010+ conditional formats, such as data bars, could
   be written in the wrong order or with the wrong priority when used with other
-  conditional formats. See [Issue #196].
-
-  [Issue #196]: https://github.com/jmcnamara/rust_xlsxwriter/issues/196
+  conditional formats.
 
 - Fixed issue where cell note author names could be assigned to the wrong
-  notes when there were multiple authors. See [Issue #198].
-
-  [Issue #198]: https://github.com/jmcnamara/rust_xlsxwriter/issues/198
+  notes when there were multiple authors.
 
 - Fixed an O(N^2) performance issue in "constant memory" mode when writing rows
   under a large vertical merged range. See [Issue #200].
@@ -742,7 +738,7 @@ This release adds several features related to setting themes and default fonts.
 
   [Request #127]
 
-- Added the [`Worksheet::autofit_to_max_width()`] method to enable autofitting
+- Added the `Worksheet::autofit_to_max_width()` method to enable autofitting
   long strings with an upper limit for readability.
 
 - Updated `polars` dependency to 0.45 to pick up latest Polars additions for
@@ -754,7 +750,6 @@ This release adds several features related to setting themes and default fonts.
   [`Decimal`]: https://docs.rs/rust_decimal/latest/rust_decimal/struct.Decimal.html
   [Request #127]: https://github.com/jmcnamara/rust_xlsxwriter/issues/127
   [`rust_decimal`]: https://docs.rs/rust_decimal/latest/rust_decimal
-  [`Worksheet::autofit_to_max_width()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit_to_max_width
 
 
 ## [0.80.0] - 2024-12-07

@@ -37,7 +37,7 @@ const UNIX_EPOCH_PLUS_400: i64 = 12_622_780_800;
 /// via the optional external crates [`Chrono`] and [`Jiff`] which have more
 /// comprehensive functionality for dealing with dates and times.
 ///
-/// [`Jiff`]: https://docs.rs/chrono/latest/jiff
+/// [`Jiff`]: https://docs.rs/jiff/latest/jiff
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
 ///
 /// Here is an example using `ExcelDateTime` to write some dates and times:

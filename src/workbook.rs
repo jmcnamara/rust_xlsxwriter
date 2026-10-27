@@ -2197,7 +2197,7 @@ impl Workbook {
     /// [zip.rs]: https://crates.io/crates/zip
     /// [ZIP64]: https://en.wikipedia.org/wiki/ZIP_(file_format)#ZIP64
     /// [`large_file()`]:
-    ///     https://docs.rs/zip/latest/zip/write/type.SimpleFileOptions.html#method.large_file
+    ///     https://docs.rs/zip/latest/zip/write/struct.FileOptions.html#method.large_file
     ///
     /// # Parameters
     ///

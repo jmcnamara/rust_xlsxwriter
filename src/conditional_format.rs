@@ -6596,7 +6596,7 @@ impl ConditionalFormatCustomIcon {
 ///
 /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
 /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-/// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/impl
+/// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
 ///
 /// [`jiff::civil::Date`]: https://docs.rs/jiff/latest/jiff/civil/struct.Date.html
 /// [`jiff::civil::Time`]: https://docs.rs/jiff/latest/jiff/civil/struct.Time.html
