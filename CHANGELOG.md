@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #208]: https://github.com/jmcnamara/rust_xlsxwriter/issues/208
 
+- Fixed in issue where a conditional format pattern fill without a background
+  color hid the cell's own background color. See [Issue #209].
+
+  [Issue #209]: https://github.com/jmcnamara/rust_xlsxwriter/issues/209
+
 - Fixed an O(N^2) performance issue when positioning a large number of notes,
   images, charts or other objects in a worksheet with user defined row heights
   or column widths. See [Issue #214].
@@ -143,7 +148,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Deprecated the `zlib` feature. It no longer gives better performance than the
   default native Rust zlib-rs backend and is now around 1.2 times slower.
-
 
 
 ## [0.99.1] - 2026-09-14

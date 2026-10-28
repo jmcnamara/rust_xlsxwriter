@@ -412,10 +412,16 @@ impl<'a> Styles<'a> {
             xml_empty_tag(&mut self.writer, "fgColor", &foreground_color_attributes);
         }
 
-        // Write the background color.
+        // Write the background color. Excel only writes a default background
+        // color for XF formats with a solid or no pattern. In a DXF format it
+        // would hide the cell's own fill.
         if fill.background_color == Color::Default || fill.background_color == Color::Automatic {
-            let attributes = [("indexed", "64")];
-            xml_empty_tag(&mut self.writer, "bgColor", &attributes);
+            if !dxf_format
+                && (fill.pattern == FormatPattern::None || fill.pattern == FormatPattern::Solid)
+            {
+                let attributes = [("indexed", "64")];
+                xml_empty_tag(&mut self.writer, "bgColor", &attributes);
+            }
         } else {
             xml_empty_tag(&mut self.writer, "bgColor", &background_color_attributes);
         }
