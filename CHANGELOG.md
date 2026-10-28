@@ -30,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #214]: https://github.com/jmcnamara/rust_xlsxwriter/issues/214
 
+- Fixed unescaped double quotes and non-ASCII string lengths in text
+  conditional formats. See [Issue #215].
+
+  [Issue #215]: https://github.com/jmcnamara/rust_xlsxwriter/issues/215
+
 
 ## [0.101.0] - 2026-10-21
 

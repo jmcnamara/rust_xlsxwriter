@@ -3002,23 +3002,33 @@ impl ConditionalFormatText {
         let mut attributes = vec![];
         let anchor = &range_to_anchor(range);
 
+        // Excel requires that double quotes in formula strings are doubly quoted.
+        let quoted = |text: &str| text.replace('"', "\"\"");
+
+        // Excel string lengths are in UTF-16 units.
+        let length = |text: &str| text.encode_utf16().count();
+
         // Set the rule attributes based on the criteria.
         let formula = match rule {
             ConditionalFormatTextRule::Contains(text) => {
+                let text = quoted(text);
                 attributes.push(("type", "containsText".to_string()));
                 format!(r#"NOT(ISERROR(SEARCH("{text}",{anchor})))"#)
             }
             ConditionalFormatTextRule::DoesNotContain(text) => {
+                let text = quoted(text);
                 attributes.push(("type", "notContainsText".to_string()));
                 format!(r#"ISERROR(SEARCH("{text}",{anchor}))"#)
             }
             ConditionalFormatTextRule::BeginsWith(text) => {
-                let length = text.len();
+                let length = length(text);
+                let text = quoted(text);
                 attributes.push(("type", "beginsWith".to_string()));
                 format!(r#"LEFT({anchor},{length})="{text}""#)
             }
             ConditionalFormatTextRule::EndsWith(text) => {
-                let length = text.len();
+                let length = length(text);
+                let text = quoted(text);
                 attributes.push(("type", "endsWith".to_string()));
                 format!(r#"RIGHT({anchor},{length})="{text}""#)
             }

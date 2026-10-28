@@ -830,6 +830,117 @@ mod conditional_format_tests {
     }
 
     #[test]
+    fn conditional_format_07c() -> Result<(), XlsxError> {
+        // Test quotes in the text and non-ASCII lengths.
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 10)?;
+        worksheet.write(1, 0, 20)?;
+        worksheet.write(2, 0, 30)?;
+        worksheet.write(3, 0, 40)?;
+
+        let conditional_format = ConditionalFormatText::new().set_rule(
+            ConditionalFormatTextRule::Contains(r#"say "hi""#.to_string()),
+        );
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatText::new().set_rule(
+            ConditionalFormatTextRule::DoesNotContain(r#"say "hi""#.to_string()),
+        );
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatText::new().set_rule(
+            ConditionalFormatTextRule::BeginsWith(r#"say "hi""#.to_string()),
+        );
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatText::new().set_rule(
+            ConditionalFormatTextRule::EndsWith(r#"say "hi""#.to_string()),
+        );
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatText::new()
+            .set_rule(ConditionalFormatTextRule::BeginsWith("café".to_string()));
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatText::new()
+            .set_rule(ConditionalFormatTextRule::EndsWith("a😀".to_string()));
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A4"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>20</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>30</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>40</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1:A4">
+                <cfRule type="containsText" priority="1" operator="containsText" text="say &quot;hi&quot;">
+                  <formula>NOT(ISERROR(SEARCH("say ""hi""",A1)))</formula>
+                </cfRule>
+                <cfRule type="notContainsText" priority="2" operator="notContains" text="say &quot;hi&quot;">
+                  <formula>ISERROR(SEARCH("say ""hi""",A1))</formula>
+                </cfRule>
+                <cfRule type="beginsWith" priority="3" operator="beginsWith" text="say &quot;hi&quot;">
+                  <formula>LEFT(A1,8)="say ""hi"""</formula>
+                </cfRule>
+                <cfRule type="endsWith" priority="4" operator="endsWith" text="say &quot;hi&quot;">
+                  <formula>RIGHT(A1,8)="say ""hi"""</formula>
+                </cfRule>
+                <cfRule type="beginsWith" priority="5" operator="beginsWith" text="café">
+                  <formula>LEFT(A1,4)="café"</formula>
+                </cfRule>
+                <cfRule type="endsWith" priority="6" operator="endsWith" text="a😀">
+                  <formula>RIGHT(A1,3)="a😀"</formula>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
     fn conditional_format_08() -> Result<(), XlsxError> {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
