@@ -1387,6 +1387,7 @@ use crate::format::Format;
 use crate::formula::Formula;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
+use crate::utility::utf16_len;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{
     xml_data_element, xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only,
@@ -5874,7 +5875,7 @@ impl Worksheet {
 
         //  Check that the string is < Excel limit of 32767 chars, - 54
         //  characters to allow for the author name prefix.
-        if note.text.chars().count() > MAX_STRING_LEN - 54 {
+        if utf16_len(&note.text) > MAX_STRING_LEN - 54 {
             return Err(XlsxError::MaxStringLengthExceeded);
         }
 
@@ -6167,7 +6168,7 @@ impl Worksheet {
     ///
     pub fn set_default_note_author(&mut self, name: impl Into<String>) -> &mut Worksheet {
         let name = name.into();
-        if name.chars().count() > 52 {
+        if utf16_len(&name) > 52 {
             eprintln!("Author string must be less than the Excel limit of 52 characters: {name}");
             return self;
         }
@@ -13588,7 +13589,7 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        if header_expanded.chars().count() > 255 {
+        if utf16_len(&header_expanded) > 255 {
             eprintln!("Header string exceeds Excel's limit of 255 characters.");
             return self;
         }
@@ -13622,7 +13623,7 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        if footer_expanded.chars().count() > 255 {
+        if utf16_len(&footer_expanded) > 255 {
             eprintln!("Footer string exceeds Excel's limit of 255 characters.");
             return self;
         }
@@ -15509,7 +15510,7 @@ impl Worksheet {
         }
 
         //  Check that the string is < Excel limit of 32767 chars.
-        if string.chars().count() > MAX_STRING_LEN {
+        if utf16_len(&string) > MAX_STRING_LEN {
             return Err(XlsxError::MaxStringLengthExceeded);
         }
 
@@ -15574,7 +15575,7 @@ impl Worksheet {
         }
 
         //  Check that the string is < Excel limit of 32767 chars.
-        if string.chars().count() > MAX_STRING_LEN {
+        if utf16_len(string) > MAX_STRING_LEN {
             return Err(XlsxError::MaxStringLengthExceeded);
         }
 

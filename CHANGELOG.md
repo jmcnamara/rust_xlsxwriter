@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #215]: https://github.com/jmcnamara/rust_xlsxwriter/issues/215
 
+- Fixed Excel string length limit checks for strings with characters such as
+  emojis, which Excel counts as 2 characters.
+
 
 ## [0.101.0] - 2026-10-21
 

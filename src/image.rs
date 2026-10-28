@@ -16,6 +16,7 @@ use std::io::Read;
 use std::path::Path;
 
 use crate::drawing::{DrawingObject, DrawingType};
+use crate::utility::utf16_len;
 use crate::vml::VmlInfo;
 use crate::{Url, XlsxError};
 
@@ -612,7 +613,7 @@ impl Image {
     ///
     pub fn set_alt_text(mut self, alt_text: impl Into<String>) -> Image {
         let alt_text = alt_text.into();
-        if alt_text.chars().count() > 255 {
+        if utf16_len(&alt_text) > 255 {
             eprintln!("Alternative text is greater than Excel's limit of 255 characters.");
             return self;
         }

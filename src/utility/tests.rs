@@ -377,6 +377,10 @@ mod utility_tests {
         let name_255 = "a".repeat(255);
         let name_256 = "a".repeat(256);
 
+        // Excel's limit is in UTF-16 units, so these emojis count as 2.
+        let utf16_name_255 = "\u{1F600}".repeat(127) + "a";
+        let utf16_name_256 = "\u{1F600}".repeat(128);
+
         let tests = vec![
             // Valid names.
             ("Sales", true),
@@ -391,6 +395,7 @@ mod utility_tests {
             ("A1048577", true),
             // At the 255 character limit.
             (name_255.as_str(), true),
+            (utf16_name_255.as_str(), true),
             // Excel allows a single underscore or backslash as a name.
             ("_", true),
             ("\\", true),
@@ -398,6 +403,7 @@ mod utility_tests {
             ("", false),
             // Exceeds the 255 character limit.
             (name_256.as_str(), false),
+            (utf16_name_256.as_str(), false),
             // Invalid first characters.
             ("1name", false),
             (".name", false),
@@ -627,6 +633,15 @@ mod utility_tests {
         let name = "name_that_is_longer_than_thirty_one_characters";
         let result = utility::check_sheet_name(name);
         assert!(matches!(result, Err(XlsxError::SheetnameLengthExceeded(_))));
+
+        // Excel's limit is in UTF-16 units, so these emojis count as 2.
+        let name = "\u{1F600}".repeat(16);
+        let result = utility::check_sheet_name(&name);
+        assert!(matches!(result, Err(XlsxError::SheetnameLengthExceeded(_))));
+
+        let name = "\u{1F600}".repeat(15) + "a";
+        let result = utility::check_sheet_name(&name);
+        assert!(result.is_ok());
 
         let name = "name_with_special_character_[";
         let result = utility::check_sheet_name(name);

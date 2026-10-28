@@ -7,6 +7,7 @@
 #![warn(missing_docs)]
 
 use crate::drawing::{DrawingObject, DrawingType};
+use crate::utility::utf16_len;
 use crate::vml::VmlInfo;
 use crate::ObjectMovement;
 
@@ -157,7 +158,7 @@ impl Button {
     ///
     pub fn set_caption(mut self, caption: impl Into<String>) -> Button {
         let caption = caption.into();
-        if caption.chars().count() > 255 {
+        if utf16_len(&caption) > 255 {
             eprintln!("Button caption is greater than Excel's limit of 255 characters.");
             return self;
         }
@@ -261,7 +262,7 @@ impl Button {
     ///
     pub fn set_alt_text(mut self, alt_text: impl Into<String>) -> Button {
         let alt_text = alt_text.into();
-        if alt_text.chars().count() > 255 {
+        if utf16_len(&alt_text) > 255 {
             eprintln!("Alternative text is greater than Excel's limit of 255 characters.");
             return self;
         }

@@ -8,6 +8,7 @@
 
 mod tests;
 
+use crate::utility::utf16_len;
 use crate::{XlsxError, MAX_PARAMETER_LEN};
 
 const MAX_URL_LEN: usize = 2_080;
@@ -364,14 +365,14 @@ impl Url {
 
         // Check the URL string lengths are within Excel's limits. The user text
         // length is checked by write_string_with_format().
-        if self.link.chars().count() > MAX_URL_LEN || self.anchor.chars().count() > MAX_URL_LEN {
+        if utf16_len(&self.link) > MAX_URL_LEN || utf16_len(&self.anchor) > MAX_URL_LEN {
             return Err(XlsxError::MaxUrlLengthExceeded);
         }
 
         // Escape hyperlink strings after length checks.
         self.escape_strings();
 
-        if self.tool_tip.chars().count() > MAX_PARAMETER_LEN {
+        if utf16_len(&self.tool_tip) > MAX_PARAMETER_LEN {
             return Err(XlsxError::ParameterError(
                 "Hyperlink tool tip must be less than or equal to Excel's limit of characters"
                     .to_string(),

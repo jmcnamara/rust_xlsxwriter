@@ -1116,7 +1116,7 @@ pub(crate) fn validate_sheetname(name: &str, message: &str) -> Result<(), XlsxEr
     }
 
     // Check that sheet sheetname is <= 31, an Excel limit.
-    if name.chars().count() > 31 {
+    if utf16_len(name) > 31 {
         return Err(XlsxError::SheetnameLengthExceeded(message.to_string()));
     }
 
@@ -1191,7 +1191,7 @@ pub fn check_name(name: &str) -> Result<(), XlsxError> {
     }
 
     // Check that the name doesn't exceed 255 characters, an Excel limit.
-    if name.chars().count() > 255 {
+    if utf16_len(name) > 255 {
         return Err(XlsxError::NameError(
             name.to_string(),
             "Name exceeds Excel limit of 255 characters".to_string(),
@@ -1280,7 +1280,7 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
     }
 
     // Check that name is <= 31, an Excel limit.
-    if name.chars().count() > 31 {
+    if utf16_len(name) > 31 {
         return Err(XlsxError::VbaNameError(
             "VBA name exceeds Excel limit of 31 characters: {name}".to_string(),
         ));
@@ -1450,6 +1450,12 @@ pub(crate) fn hash_password(password: &str) -> u16 {
     hash ^= 0xCE4B;
 
     hash
+}
+
+// Get the length of a string in UTF-16 units. Excel's string length limits
+// are in UTF-16 units, so characters above U+FFFF, such as emojis, count as 2.
+pub(crate) fn utf16_len(string: &str) -> usize {
+    string.encode_utf16().count()
 }
 
 // Clone and strip the leading '=' from formulas, if present.

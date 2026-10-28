@@ -700,6 +700,15 @@ mod worksheet_tests {
 
         let result = worksheet.write_string(0, 0, long_string.unwrap());
         assert!(matches!(result, Err(XlsxError::MaxStringLengthExceeded)));
+
+        // Excel's limit is in UTF-16 units, so these emojis count as 2.
+        let long_string = "\u{1F600}".repeat(16_384);
+        let result = worksheet.write_string(0, 0, &long_string);
+        assert!(matches!(result, Err(XlsxError::MaxStringLengthExceeded)));
+
+        let long_string = "\u{1F600}".repeat(16_383) + "a";
+        let result = worksheet.write_string(0, 0, &long_string);
+        assert!(result.is_ok());
     }
 
     #[test]

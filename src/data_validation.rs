@@ -11,6 +11,7 @@ mod tests;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
+use crate::utility::utf16_len;
 use crate::{ExcelDateTime, Formula, IntoExcelDateTime, XlsxError};
 use std::fmt;
 
@@ -561,7 +562,7 @@ impl DataValidation {
             .collect::<Vec<String>>()
             .join(",");
 
-        let length = joined_list.chars().count();
+        let length = utf16_len(&joined_list);
         if length > 255 {
             return Err(XlsxError::DataValidationError(
                 format!("Validation list length '{length}' including commas is greater than Excel's limit of 255 characters: {joined_list}")
@@ -1054,7 +1055,7 @@ impl DataValidation {
     ///
     pub fn set_input_title(mut self, text: impl Into<String>) -> Result<DataValidation, XlsxError> {
         let text = text.into();
-        let length = text.chars().count();
+        let length = utf16_len(&text);
 
         if length > 32 {
             return Err(XlsxError::DataValidationError(format!(
@@ -1125,7 +1126,7 @@ impl DataValidation {
         text: impl Into<String>,
     ) -> Result<DataValidation, XlsxError> {
         let text = text.into();
-        let length = text.chars().count();
+        let length = utf16_len(&text);
 
         if length > 255 {
             return Err(XlsxError::DataValidationError(format!(
@@ -1206,7 +1207,7 @@ impl DataValidation {
     ///
     pub fn set_error_title(mut self, text: impl Into<String>) -> Result<DataValidation, XlsxError> {
         let text = text.into();
-        let length = text.chars().count();
+        let length = utf16_len(&text);
 
         if length > 32 {
             return Err(XlsxError::DataValidationError(format!(
@@ -1276,7 +1277,7 @@ impl DataValidation {
         text: impl Into<String>,
     ) -> Result<DataValidation, XlsxError> {
         let text = text.into();
-        let length = text.chars().count();
+        let length = utf16_len(&text);
 
         if length > 255 {
             return Err(XlsxError::DataValidationError(format!(

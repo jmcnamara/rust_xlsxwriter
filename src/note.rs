@@ -7,6 +7,7 @@
 #![warn(missing_docs)]
 
 use crate::drawing::{DrawingObject, DrawingType};
+use crate::utility::utf16_len;
 use crate::vml::VmlInfo;
 use crate::{ColNum, Color, FontScheme, Format, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
 
@@ -221,7 +222,7 @@ impl Note {
     ///
     pub fn set_author(mut self, name: impl Into<String>) -> Note {
         let author = name.into();
-        if author.chars().count() > 52 {
+        if utf16_len(&author) > 52 {
             eprintln!("Author name is greater than Excel's limit of 52 characters.");
             return self;
         }
@@ -592,7 +593,7 @@ impl Note {
     ///
     pub fn set_alt_text(mut self, alt_text: impl Into<String>) -> Note {
         let alt_text = alt_text.into();
-        if alt_text.chars().count() > 255 {
+        if utf16_len(&alt_text) > 255 {
             eprintln!("Alternative text is greater than Excel's limit of 255 characters.");
             return self;
         }

@@ -744,7 +744,7 @@ use std::io::Cursor;
 use std::{fmt, mem, sync::OnceLock};
 
 use crate::drawing::{DrawingObject, DrawingType};
-use crate::utility::{self, ToXmlBoolean};
+use crate::utility::{self, utf16_len, ToXmlBoolean};
 use crate::xmlwriter::{
     xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only, xml_end_tag,
     xml_start_tag, xml_start_tag_only,
@@ -2622,7 +2622,7 @@ impl Chart {
     ///
     pub fn set_alt_text(&mut self, alt_text: impl Into<String>) -> &mut Chart {
         let alt_text = alt_text.into();
-        if alt_text.chars().count() > 255 {
+        if utf16_len(&alt_text) > 255 {
             eprintln!("Alternative text is greater than Excel's limit of 255 characters.");
             return self;
         }
