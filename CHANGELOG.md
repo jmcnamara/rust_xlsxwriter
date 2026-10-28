@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #208]: https://github.com/jmcnamara/rust_xlsxwriter/issues/208
 
+- Fixed an O(N^2) performance issue when positioning a large number of notes,
+  images, charts or other objects in a worksheet with user defined row heights
+  or column widths. See [Issue #214].
+
+  [Issue #214]: https://github.com/jmcnamara/rust_xlsxwriter/issues/214
+
 
 ## [0.101.0] - 2026-10-21
 

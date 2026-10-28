@@ -1562,6 +1562,8 @@ pub struct Worksheet {
     global_dxf_indices: Vec<u32>,
     changed_rows: HashMap<RowNum, RowOptions>,
     changed_cols: HashMap<ColNum, ColOptions>,
+    row_offset_checkpoints: [(RowNum, u32); 2],
+    col_offset_checkpoints: [(ColNum, u32); 2],
     page_setup_changed: bool,
     tab_color: Color,
     fit_to_page: bool,
@@ -1773,6 +1775,8 @@ impl Worksheet {
             global_dxf_indices: vec![],
             changed_rows: HashMap::new(),
             changed_cols: HashMap::new(),
+            row_offset_checkpoints: [(0, 0); 2],
+            col_offset_checkpoints: [(0, 0); 2],
             page_setup_changed: false,
             fit_to_page: false,
             tab_color: Color::Default,
@@ -17114,15 +17118,11 @@ impl Worksheet {
         let mut y_abs: u32 = 0; // Absolute distance to top  side of object.
 
         // Calculate the absolute x offset of the top-left vertex.
-        for col in 0..col_start {
-            x_abs += self.column_pixel_width(col, object.object_movement());
-        }
+        x_abs += self.column_pixel_offset(col_start, object.object_movement());
         x_abs += x1;
 
         // Calculate the absolute y offset of the top-left vertex.
-        for row in 0..row_start {
-            y_abs += self.row_pixel_height(row, object.object_movement());
-        }
+        y_abs += self.row_pixel_offset(row_start, object.object_movement());
         y_abs += y1;
 
         // Adjust start col for offsets that are greater than the col width.
@@ -17210,6 +17210,48 @@ impl Worksheet {
         }
     }
 
+    // Get the absolute pixel offset of a column by summing the widths of the
+    // columns before it. Objects are positioned in row/col order so, to avoid
+    // re-summing from the first column for each object, the sum restarts from
+    // the previously calculated column and offset. Hidden columns have a
+    // different width for MoveAndSizeWithCellsAfter objects so a separate
+    // checkpoint is stored for them.
+    fn column_pixel_offset(&mut self, col: ColNum, position: ObjectMovement) -> u32 {
+        let index = usize::from(position == ObjectMovement::MoveAndSizeWithCellsAfter);
+        let (mut prev_col, mut offset) = self.col_offset_checkpoints[index];
+
+        if col < prev_col {
+            (prev_col, offset) = (0, 0);
+        }
+
+        for col_id in prev_col..col {
+            offset += self.column_pixel_width(col_id, position);
+        }
+
+        self.col_offset_checkpoints[index] = (col, offset);
+
+        offset
+    }
+
+    // Get the absolute pixel offset of a row by summing the heights of the
+    // rows before it. See column_pixel_offset() above.
+    fn row_pixel_offset(&mut self, row: RowNum, position: ObjectMovement) -> u32 {
+        let index = usize::from(position == ObjectMovement::MoveAndSizeWithCellsAfter);
+        let (mut prev_row, mut offset) = self.row_offset_checkpoints[index];
+
+        if row < prev_row {
+            (prev_row, offset) = (0, 0);
+        }
+
+        for row_id in prev_row..row {
+            offset += self.row_pixel_height(row_id, position);
+        }
+
+        self.row_offset_checkpoints[index] = (row, offset);
+
+        offset
+    }
+
     // Get the default or user defined column width in pixels.
     fn column_pixel_width(&mut self, col: ColNum, position: ObjectMovement) -> u32 {
         match self.changed_cols.get(&col) {
@@ -17270,6 +17312,10 @@ impl Worksheet {
         self.table_relationships.clear();
         self.vml_drawing_relationships.clear();
         self.background_relationships.clear();
+
+        // The row and column sizes may have changed since the last save.
+        self.row_offset_checkpoints = [(0, 0); 2];
+        self.col_offset_checkpoints = [(0, 0); 2];
     }
 
     // Check if any external relationships are required.
