@@ -1679,6 +1679,9 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_set_default_row_height.rs` - Demonstrates setting the
   default row height for all rows in a worksheet.
 
+* `doc_worksheet_set_first_tab.rs` - Demonstrates setting the first visible
+  worksheet tab in a workbook with a large number of worksheets.
+
 * `doc_worksheet_set_formula_result_default.rs` - Demonstrates manually
   setting the default result for all non-calculated formulas in a
   worksheet.
