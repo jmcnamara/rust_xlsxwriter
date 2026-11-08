@@ -714,6 +714,10 @@ pub(crate) fn chart_error_range(
 /// // R1C1 style cell references need to be quoted.
 /// let result = quote_sheet_name("RC1");
 /// assert_eq!(result, "'RC1'");
+///
+/// // Boolean values need to be quoted.
+/// let result = quote_sheet_name("TRUE");
+/// assert_eq!(result, "'TRUE'");
 /// ```
 ///
 #[allow(clippy::if_same_then_else)]
@@ -811,6 +815,12 @@ pub fn quote_sheet_name(sheetname: &str) -> String {
             || uppercase_sheetname == "C"
             || uppercase_sheetname == "RC"
         {
+            requires_quoting = true;
+        }
+        // --------------------------------------------------------------------
+        // Rule 5. Sheet names that are boolean values must be quoted.
+        // --------------------------------------------------------------------
+        else if uppercase_sheetname == "TRUE" || uppercase_sheetname == "FALSE" {
             requires_quoting = true;
         }
     }
