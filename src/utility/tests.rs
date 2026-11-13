@@ -702,6 +702,19 @@ mod utility_tests {
             Err(XlsxError::SheetnameContainsInvalidCharacter(_))
         ));
 
+        // Excel doesn't allow the null character, even when it is escaped.
+        let name = "name_with_null_character_\0";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
+
+        // Other control characters are allowed and are escaped as _xHHHH_.
+        let name = "name_with_control_character_\u{1}";
+        let result = utility::check_sheet_name(name);
+        assert!(result.is_ok());
+
         let name = "'start with apostrophe";
         let result = utility::check_sheet_name(name);
         assert!(matches!(

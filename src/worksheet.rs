@@ -845,7 +845,8 @@
 //!
 //! * The name must be less than 32 characters.
 //! * The name cannot be blank.
-//! * The name cannot contain any of the characters: `[ ] : * ? / \`.
+//! * The name cannot contain any of the characters: `[ ] : * ? / \` or the
+//!   null character.
 //! * The name cannot start or end with an apostrophe.
 //! * The name shouldn't be "History" (case-insensitive) since that is reserved
 //!   by Excel.
@@ -2031,7 +2032,8 @@ impl Worksheet {
     ///
     /// - The name is less than 32 characters.
     /// - The name isn't blank.
-    /// - The name doesn't contain any of the characters: `[ ] : * ? / \`.
+    /// - The name doesn't contain any of the characters: `[ ] : * ? / \` or the
+    ///   null character.
     /// - The name doesn't start or end with an apostrophe.
     /// - The name shouldn't be "History" (case-insensitive) since that is
     ///   reserved by Excel.

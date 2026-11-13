@@ -474,8 +474,15 @@ impl Url {
 
         // Escape the link used in the relationship file, except for internal
         // links which are generally sheet/cell locations.
-        if self.link_type != HyperlinkType::Internal && !Self::is_escaped(&self.relationship_link) {
-            self.relationship_link = crate::xmlwriter::escape_url(&self.relationship_link).into();
+        if self.link_type != HyperlinkType::Internal {
+            if Self::is_escaped(&self.relationship_link) {
+                // Control characters aren't allowed and must be escaped.
+                self.relationship_link =
+                    crate::xmlwriter::escape_url_control_chars(&self.relationship_link).into();
+            } else {
+                self.relationship_link =
+                    crate::xmlwriter::escape_url(&self.relationship_link).into();
+            }
         }
 
         // Excel additionally escapes # to %23 in file paths.

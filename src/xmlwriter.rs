@@ -140,6 +140,11 @@ pub(crate) fn escape_url(data: &str) -> Cow<'_, str> {
     escape_string(data, match_url_char)
 }
 
+// Escape control characters in a hyperlink or URL that is already escaped.
+pub(crate) fn escape_url_control_chars(data: &str) -> Cow<'_, str> {
+    escape_string(data, match_url_control_char)
+}
+
 // -----------------------------------------------------------------------
 // Helper functions for XML, primarily for string escaping.
 // -----------------------------------------------------------------------
@@ -168,7 +173,9 @@ fn match_attribute_html_char(ch: char) -> Option<&'static str> {
         '<' => Some("&lt;"),
         '>' => Some("&gt;"),
         '\n' => Some("&#xA;"),
-        _ => None,
+
+        // Escapes control characters in attributes with _xHHHH_ (like strings).
+        _ => match_control_char(ch),
     }
 }
 
@@ -186,8 +193,16 @@ fn match_xml_char(ch: char) -> Option<&'static str> {
         '<' => Some("&lt;"),
         '>' => Some("&gt;"),
 
-        // Excel escapes control characters and other non-printing characters in
-        // the range '\x00' - '\x1F' with _xHHHH_.
+        // Excel also escapes carriage returns in strings.
+        '\x0D' => Some("_x000D_"),
+
+        _ => match_control_char(ch),
+    }
+}
+
+// Matching function for control characters.
+fn match_control_char(ch: char) -> Option<&'static str> {
+    match ch {
         '\x00' => Some("_x0000_"),
         '\x01' => Some("_x0001_"),
         '\x02' => Some("_x0002_"),
@@ -201,7 +216,7 @@ fn match_xml_char(ch: char) -> Option<&'static str> {
         // No escape required for '\x0A' = '\n'
         '\x0B' => Some("_x000B_"),
         '\x0C' => Some("_x000C_"),
-        '\x0D' => Some("_x000D_"),
+        // The '\x0D' = '\r' is escaped (or not) by the internal callers.
         '\x0E' => Some("_x000E_"),
         '\x0F' => Some("_x000F_"),
         '\x10' => Some("_x0010_"),
@@ -242,6 +257,47 @@ fn match_url_char(ch: char) -> Option<&'static str> {
         '`' => Some("%60"),
         '{' => Some("%7b"),
         '}' => Some("%7d"),
+        _ => match_url_control_char(ch),
+    }
+}
+
+// Match control characters in URLs.
+fn match_url_control_char(ch: char) -> Option<&'static str> {
+    match ch {
+        '\x00' => Some("%00"),
+        '\x01' => Some("%01"),
+        '\x02' => Some("%02"),
+        '\x03' => Some("%03"),
+        '\x04' => Some("%04"),
+        '\x05' => Some("%05"),
+        '\x06' => Some("%06"),
+        '\x07' => Some("%07"),
+        '\x08' => Some("%08"),
+        '\x09' => Some("%09"),
+        '\x0A' => Some("%0a"),
+        '\x0B' => Some("%0b"),
+        '\x0C' => Some("%0c"),
+        '\x0D' => Some("%0d"),
+        '\x0E' => Some("%0e"),
+        '\x0F' => Some("%0f"),
+        '\x10' => Some("%10"),
+        '\x11' => Some("%11"),
+        '\x12' => Some("%12"),
+        '\x13' => Some("%13"),
+        '\x14' => Some("%14"),
+        '\x15' => Some("%15"),
+        '\x16' => Some("%16"),
+        '\x17' => Some("%17"),
+        '\x18' => Some("%18"),
+        '\x19' => Some("%19"),
+        '\x1A' => Some("%1a"),
+        '\x1B' => Some("%1b"),
+        '\x1C' => Some("%1c"),
+        '\x1D' => Some("%1d"),
+        '\x1E' => Some("%1e"),
+        '\x1F' => Some("%1f"),
+        '\u{FFFE}' => Some("%ef%bf%be"),
+        '\u{FFFF}' => Some("%ef%bf%bf"),
         _ => None,
     }
 }

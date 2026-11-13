@@ -49,7 +49,8 @@ pub enum XlsxError {
     /// Worksheet name is already in use in the workbook.
     SheetnameReused(String),
 
-    /// Worksheet name cannot contain any of the following invalid characters: `[ ] : * ? / \`
+    /// Worksheet name cannot contain any of the following invalid characters:
+    /// `[ ] : * ? / \` or the null character.
     SheetnameContainsInvalidCharacter(String),
 
     /// Worksheet name cannot start or end with an apostrophe.
@@ -290,7 +291,7 @@ impl fmt::Display for XlsxError {
 
             XlsxError::SheetnameContainsInvalidCharacter(name) => write!(
                 f,
-                "Worksheet name '{name}' cannot contain invalid characters: '[ ] : * ? / \\'.",
+                "Worksheet name '{name}' cannot contain invalid characters: '[ ] : * ? / \\' or the null character.",
             ),
 
             XlsxError::SheetnameStartsOrEndsWithApostrophe(name) => {

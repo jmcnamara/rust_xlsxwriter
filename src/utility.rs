@@ -1061,7 +1061,8 @@ fn is_cell_reference(name: &str) -> bool {
 ///
 /// - The name is less than 32 characters.
 /// - The name isn't blank.
-/// - The name doesn't contain any of the characters: `[ ] : * ? / \`.
+/// - The name doesn't contain any of the characters: `[ ] : * ? / \` or the
+///   null character.
 /// - The name doesn't start or end with an apostrophe.
 ///
 /// The worksheet name "History" isn't allowed in English versions of Excel
@@ -1130,8 +1131,9 @@ pub(crate) fn validate_sheetname(name: &str, message: &str) -> Result<(), XlsxEr
         return Err(XlsxError::SheetnameLengthExceeded(message.to_string()));
     }
 
-    // Check that the sheet name doesn't contain any invalid characters.
-    if name.contains(['*', '?', ':', '[', ']', '\\', '/']) {
+    // Check that the sheet name doesn't contain any invalid characters or a
+    // null character.
+    if name.contains(['*', '?', ':', '[', ']', '\\', '/', '\0']) {
         return Err(XlsxError::SheetnameContainsInvalidCharacter(
             message.to_string(),
         ));

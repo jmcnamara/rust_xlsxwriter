@@ -105,6 +105,30 @@ mod xmlwriter_tests {
     }
 
     #[test]
+    fn test_xml_empty_tag_with_control_characters() {
+        let test_data = [
+            ("a\u{0}b", r#"<foo span="a_x0000_b"/>"#),
+            ("a\u{1}b", r#"<foo span="a_x0001_b"/>"#),
+            ("a\u{1F}b", r#"<foo span="a_x001F_b"/>"#),
+            ("a\u{FFFE}b", r#"<foo span="a_xFFFE_b"/>"#),
+            ("a\u{FFFF}b", r#"<foo span="a_xFFFF_b"/>"#),
+            ("a\tb", "<foo span=\"a\tb\"/>"),
+            ("a\nb", r#"<foo span="a&#xA;b"/>"#),
+            ("a\rb", "<foo span=\"a\rb\"/>"),
+        ];
+
+        for (attribute, expected) in test_data {
+            let mut writer = Cursor::new(Vec::with_capacity(2048));
+            let attributes = [("span", attribute)];
+
+            xml_empty_tag(&mut writer, "foo", &attributes);
+
+            let got = xmlwriter::cursor_to_str(&writer);
+            assert_eq!(expected, got, "for attribute {attribute:?}");
+        }
+    }
+
+    #[test]
     fn test_xml_data_element() {
         let mut writer = Cursor::new(Vec::with_capacity(2048));
 

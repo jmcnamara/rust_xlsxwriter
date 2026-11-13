@@ -57,4 +57,30 @@ mod url_tests {
         assert!(!Url::is_escaped("http://example.com/test%FF"));
         assert!(!Url::is_escaped("discount%off"));
     }
+
+    #[test]
+    fn test_escape_control_characters() {
+        // Test control character escaping in URLs.
+        let test_data = [
+            // Input link.                  Output link.
+            ("https://example.com/a\u{1}b", "https://example.com/a%01b"),
+            ("https://example.com/a\tb", "https://example.com/a%09b"),
+            (
+                "https://example.com/a\u{FFFF}b",
+                "https://example.com/a%ef%bf%bfb",
+            ),
+            // Check that already escaped URLs still have control characters escaped.
+            (
+                "https://example.com/a%20\u{1}b",
+                "https://example.com/a%20%01b",
+            ),
+            ("file:///C:/a\u{1}b.xlsx", "file:///C:/a%01b.xlsx"),
+        ];
+
+        for (link, expected) in test_data {
+            let mut url = Url::new(link);
+            url.initialize().unwrap();
+            assert_eq!(expected, url.target(), "for link {link:?}");
+        }
+    }
 }

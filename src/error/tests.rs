@@ -39,7 +39,7 @@ mod error_tests {
         );
         assert_eq!(
             XlsxError::SheetnameContainsInvalidCharacter(name.to_string()).to_string(),
-            "Worksheet name 'ERROR' cannot contain invalid characters: '[ ] : * ? / \\'."
+            "Worksheet name 'ERROR' cannot contain invalid characters: '[ ] : * ? / \\' or the null character."
         );
         assert_eq!(
             XlsxError::SheetnameStartsOrEndsWithApostrophe(name.to_string()).to_string(),
