@@ -5018,6 +5018,26 @@ impl Worksheet {
             return Err(XlsxError::MergeRangeSingleCell);
         }
 
+        // Create a cell range for storage and range testing.
+        let cell_range = CellRange::new(first_row, first_col, last_row, last_col);
+
+        // Check if the merged range overlaps any previous merged range. This is
+        // a major error in Excel. Note, the ranges are stored in a separate Vec
+        // to the cells to cut down on storage size. The check is done before
+        // any cells are written or stored so that a rejected range doesn't
+        // change the worksheet.
+        for row in first_row..=last_row {
+            for col in first_col..=last_col {
+                if let Some(index) = self.merged_cells.get(&(row, col)) {
+                    let previous_cell_range = &self.merged_ranges[*index];
+                    return Err(XlsxError::MergeRangeOverlaps(
+                        cell_range.to_error_string(),
+                        previous_cell_range.to_error_string(),
+                    ));
+                }
+            }
+        }
+
         // Write the first cell in the range.
         self.write_string_with_format(first_row, first_col, string, format)?;
 
@@ -5036,25 +5056,11 @@ impl Worksheet {
         }
         self.set_writing_ahead(false);
 
-        // Create a cell range for storage and range testing.
-        let cell_range = CellRange::new(first_row, first_col, last_row, last_col);
-
-        // Check if the merged range overlaps any previous merged range. This is
-        // a major error in Excel. Note, the ranges are stored in a separate Vec
-        // to the cells to cut down on storage size.
+        // Store the merged cells for overlap testing.
         let new_index = self.merged_ranges.len();
         for row in first_row..=last_row {
             for col in first_col..=last_col {
-                match self.merged_cells.get_mut(&(row, col)) {
-                    Some(index) => {
-                        let previous_cell_range = self.merged_ranges.get(*index).unwrap();
-                        return Err(XlsxError::MergeRangeOverlaps(
-                            cell_range.to_error_string(),
-                            previous_cell_range.to_error_string(),
-                        ));
-                    }
-                    None => self.merged_cells.insert((row, col), new_index),
-                };
+                self.merged_cells.insert((row, col), new_index);
             }
         }
 
@@ -8678,23 +8684,12 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
-        // Store the defined name information.
-        self.autofilter_defined_name.in_use = true;
-        self.autofilter_defined_name.name_type = DefinedNameType::Autofilter;
-        self.autofilter_defined_name.first_row = first_row;
-        self.autofilter_defined_name.first_col = first_col;
-        self.autofilter_defined_name.last_row = last_row;
-        self.autofilter_defined_name.last_col = last_col;
-
         let autofilter_area = CellRange::new(first_row, first_col, last_row, last_col);
 
-        // Clear any previous filters.
-        self.filter_conditions = BTreeMap::new();
-
-        // Store the cells with the autofilter dropdown for the autofit calc.
+        // Check that the worksheet autofilter doesn't overlap a table
+        // autofilter. This is done before any data is stored so that a rejected
+        // autofilter doesn't change the worksheet.
         for col in first_col..=last_col {
-            // Check that the worksheet autofilter doesn't overlap a table
-            // autofilter.
             let filter_data = self.cells_with_autofilter.get(&(first_row, col));
             if let Some((filter_type, filter_range)) = filter_data {
                 if *filter_type == FilterType::Table {
@@ -8704,7 +8699,21 @@ impl Worksheet {
                     ));
                 }
             }
+        }
 
+        // Store the defined name information.
+        self.autofilter_defined_name.in_use = true;
+        self.autofilter_defined_name.name_type = DefinedNameType::Autofilter;
+        self.autofilter_defined_name.first_row = first_row;
+        self.autofilter_defined_name.first_col = first_col;
+        self.autofilter_defined_name.last_row = last_row;
+        self.autofilter_defined_name.last_col = last_col;
+
+        // Clear any previous filters.
+        self.filter_conditions = BTreeMap::new();
+
+        // Store the cells with the autofilter dropdown for the autofit calc.
+        for col in first_col..=last_col {
             self.cells_with_autofilter.insert(
                 (first_row, col),
                 (FilterType::Worksheet, autofilter_area.clone()),
@@ -9040,6 +9049,42 @@ impl Worksheet {
         table.cell_range = CellRange::new(first_row, first_col, last_row, last_col);
         table.initialize_columns(&default_headers)?;
 
+        // Create a cell range for storage and range testing.
+        let cell_range = CellRange::new(first_row, first_col, last_row, last_col);
+
+        // Check if the table range overlaps any previous table range. This is a
+        // major error in Excel. Note, the ranges are stored in a separate Vec
+        // to the cells to cut down on storage size. The overlap checks are done
+        // before any cells are written or stored so that a rejected table
+        // doesn't change the worksheet.
+        for row in first_row..=last_row {
+            for col in first_col..=last_col {
+                if let Some(index) = self.table_cells.get(&(row, col)) {
+                    let previous_cell_range = &self.table_ranges[*index];
+                    return Err(XlsxError::TableRangeOverlaps(
+                        cell_range.to_error_string(),
+                        previous_cell_range.to_error_string(),
+                    ));
+                }
+            }
+        }
+
+        // Check that the table autofilter doesn't overlap the worksheet
+        // autofilter.
+        if table.show_autofilter {
+            for col in first_col..=last_col {
+                let filter_data = self.cells_with_autofilter.get(&(first_row, col));
+                if let Some((filter_type, filter_range)) = filter_data {
+                    if *filter_type == FilterType::Worksheet {
+                        return Err(XlsxError::AutofilterRangeOverlaps(
+                            cell_range.to_error_string(),
+                            filter_range.to_error_string(),
+                        ));
+                    }
+                }
+            }
+        }
+
         let first_data_row = table.first_data_row();
         let last_data_row = table.last_data_row();
 
@@ -9105,43 +9150,17 @@ impl Worksheet {
             self.set_writing_ahead(false);
         }
 
-        // Create a cell range for storage and range testing.
-        let cell_range = CellRange::new(first_row, first_col, last_row, last_col);
-
-        // Check if the table range overlaps any previous table range. This is a
-        // major error in Excel. Note, the ranges are stored in a separate Vec
-        // to the cells to cut down on storage size.
+        // Store the table cells for overlap testing.
         let new_index = self.table_ranges.len();
         for row in first_row..=last_row {
             for col in first_col..=last_col {
-                match self.table_cells.get_mut(&(row, col)) {
-                    Some(index) => {
-                        let previous_cell_range = self.table_ranges.get(*index).unwrap();
-                        return Err(XlsxError::TableRangeOverlaps(
-                            cell_range.to_error_string(),
-                            previous_cell_range.to_error_string(),
-                        ));
-                    }
-                    None => self.table_cells.insert((row, col), new_index),
-                };
+                self.table_cells.insert((row, col), new_index);
             }
         }
 
         // Store the cells with the autofilter dropdown for the autofit calc.
         if table.show_autofilter {
             for col in first_col..=last_col {
-                // Check that the table autofilter doesn't overlap the worksheet
-                // autofilter.
-                let filter_data = self.cells_with_autofilter.get(&(first_row, col));
-                if let Some((filter_type, filter_range)) = filter_data {
-                    if *filter_type == FilterType::Worksheet {
-                        return Err(XlsxError::AutofilterRangeOverlaps(
-                            table.cell_range.to_error_string(),
-                            filter_range.to_error_string(),
-                        ));
-                    }
-                }
-
                 self.cells_with_autofilter.insert(
                     (first_row, col),
                     (FilterType::Table, table.cell_range.clone()),

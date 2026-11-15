@@ -10,7 +10,8 @@ mod worksheet_tests {
     use crate::test_functions::xml_to_vec;
     use crate::worksheet::*;
     use crate::{
-        DataValidation, FilterCondition, FilterCriteria, Format, Sparkline, Url, XlsxError,
+        DataValidation, FilterCondition, FilterCriteria, Format, Sparkline, Table, TableColumn,
+        Url, XlsxError,
     };
     use pretty_assertions::assert_eq;
     use std::collections::HashMap;
@@ -717,6 +718,92 @@ mod worksheet_tests {
         // Test out reversed values
         let result = worksheet.merge_range(5, 1, 1, 1, "Foo", &format);
         assert!(matches!(result, Err(XlsxError::RowColumnOrderError)));
+    }
+
+    #[test]
+    fn test_merge_range_with_rejected_overlap() {
+        let mut worksheet = Worksheet::new();
+        let format = Format::default();
+
+        // B1:B2.
+        worksheet.merge_range(0, 1, 1, 1, "Foo", &format).unwrap();
+
+        // A partially overlapping range, A1:B2, shouldn't change the worksheet.
+        let result = worksheet.merge_range(0, 0, 1, 1, "Bar", &format);
+        assert!(matches!(result, Err(XlsxError::MergeRangeOverlaps(_, _))));
+        assert!(!worksheet.data_table[&0].contains_key(&0));
+        assert_eq!(worksheet.merged_cells.len(), 2);
+
+        // The cells that didn't overlap, A1:A2, should still be available.
+        worksheet.merge_range(0, 0, 1, 0, "Bar", &format).unwrap();
+    }
+
+    #[test]
+    fn test_add_table_with_rejected_overlap() {
+        let mut worksheet = Worksheet::new();
+        let columns = [
+            TableColumn::new().set_header("Foo"),
+            TableColumn::new().set_header("Bar"),
+        ];
+        let table = Table::new();
+        let table2 = Table::new().set_columns(&columns);
+
+        // B1:B3.
+        worksheet.add_table(0, 1, 2, 1, &table).unwrap();
+
+        // A partially overlapping range, A1:B3, shouldn't change the worksheet.
+        let result = worksheet.add_table(0, 0, 2, 1, &table2);
+        assert!(matches!(result, Err(XlsxError::TableRangeOverlaps(_, _))));
+        assert!(!worksheet.data_table[&0].contains_key(&0));
+        assert_eq!(worksheet.table_cells.len(), 3);
+        assert_eq!(worksheet.tables.len(), 1);
+
+        // The cells that didn't overlap, A1:A3, should still be available.
+        worksheet.add_table(0, 0, 2, 0, &table).unwrap();
+    }
+
+    #[test]
+    fn test_add_table_with_rejected_autofilter_overlap() {
+        let mut worksheet = Worksheet::new();
+        let table = Table::new();
+
+        // A1:A6.
+        worksheet.autofilter(0, 0, 5, 0).unwrap();
+
+        // A table, A1:B3, that overlaps the autofilter shouldn't change the
+        // worksheet.
+        let result = worksheet.add_table(0, 0, 2, 1, &table);
+        assert!(matches!(
+            result,
+            Err(XlsxError::AutofilterRangeOverlaps(_, _))
+        ));
+        assert!(worksheet.data_table.is_empty());
+        assert!(worksheet.table_cells.is_empty());
+        assert_eq!(worksheet.cells_with_autofilter.len(), 1);
+        assert!(worksheet.tables.is_empty());
+
+        // A table outside the autofilter, B2:B4, should still be allowed.
+        worksheet.add_table(1, 1, 3, 1, &table).unwrap();
+    }
+
+    #[test]
+    fn test_autofilter_with_rejected_table_overlap() {
+        let mut worksheet = Worksheet::new();
+        let table = Table::new();
+
+        // B1:B3.
+        worksheet.add_table(0, 1, 2, 1, &table).unwrap();
+
+        // An autofilter, A1:B6, that overlaps the table shouldn't change the
+        // worksheet.
+        let result = worksheet.autofilter(0, 0, 5, 1);
+        assert!(matches!(
+            result,
+            Err(XlsxError::AutofilterRangeOverlaps(_, _))
+        ));
+        assert!(!worksheet.autofilter_defined_name.in_use);
+        assert!(worksheet.autofilter_area.is_empty());
+        assert_eq!(worksheet.cells_with_autofilter.len(), 1);
     }
 
     #[test]

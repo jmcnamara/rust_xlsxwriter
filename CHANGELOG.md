@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #218]: https://github.com/jmcnamara/rust_xlsxwriter/issues/218
 
+- Fixed an issue where a range overlap that causes a rejected table, merged
+  range or autofilter could leave reserved cells behind that could cause a panic
+  later.
+
 
 ## [0.102.0] - 2026-10-29
 
