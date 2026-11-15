@@ -1392,7 +1392,8 @@ use crate::utility::utf16_len;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{
     xml_data_element, xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only,
-    xml_end_tag, xml_raw_string, xml_start_tag, xml_start_tag_only, XML_WRITE_ERROR,
+    xml_end_tag, xml_formula_element_only, xml_raw_string, xml_start_tag, xml_start_tag_only,
+    XML_WRITE_ERROR,
 };
 use crate::{
     utility, xmlwriter, Button, Chart, ChartEmptyCells, ChartRangeCacheData,
@@ -15936,15 +15937,18 @@ impl Worksheet {
                 vec![]
             };
 
+            // Excel escapes literal _xHHHH_ strings in each run separately.
+            let escaped_string = xmlwriter::escape_xml_escapes(string);
+
             // First segment doesn't require a font run for the default format.
             if format.is_default() && first_segment {
                 xml_start_tag_only(&mut styler.writer, "r");
-                xml_data_element(&mut styler.writer, "t", string, &attributes);
+                xml_data_element(&mut styler.writer, "t", &escaped_string, &attributes);
                 xml_end_tag(&mut styler.writer, "r");
             } else {
                 xml_start_tag_only(&mut styler.writer, "r");
                 styler.write_font(&format.font, false);
-                xml_data_element(&mut styler.writer, "t", string, &attributes);
+                xml_data_element(&mut styler.writer, "t", &escaped_string, &attributes);
                 xml_end_tag(&mut styler.writer, "r");
             }
             first_segment = false;
@@ -18737,12 +18741,12 @@ impl Worksheet {
             | DataValidationRuleInternal::GreaterThanOrEqualTo(value)
             | DataValidationRuleInternal::ListSource(value)
             | DataValidationRuleInternal::CustomFormula(value) => {
-                xml_data_element_only(&mut self.writer, "formula1", value);
+                xml_formula_element_only(&mut self.writer, "formula1", value);
             }
             DataValidationRuleInternal::Between(min, max)
             | DataValidationRuleInternal::NotBetween(min, max) => {
-                xml_data_element_only(&mut self.writer, "formula1", min);
-                xml_data_element_only(&mut self.writer, "formula2", max);
+                xml_formula_element_only(&mut self.writer, "formula1", min);
+                xml_formula_element_only(&mut self.writer, "formula2", max);
             }
         }
         xml_end_tag(&mut self.writer, "dataValidation");
@@ -19027,7 +19031,8 @@ impl Worksheet {
 
     // Write the <filter> element.
     fn write_filter(&mut self, value: String) {
-        let attributes = [("val", value)];
+        let value = crate::xmlwriter::escape_attribute_escapes(&value);
+        let attributes = [("val", value.as_ref())];
 
         xml_empty_tag(&mut self.writer, "filter", &attributes);
     }
@@ -19060,7 +19065,8 @@ impl Worksheet {
             attributes.push(("operator", data.criteria.operator()));
         }
 
-        attributes.push(("val", data.value()));
+        let value = crate::xmlwriter::escape_attribute_escapes(&data.value()).into_owned();
+        attributes.push(("val", value));
 
         xml_empty_tag(&mut self.writer, "customFilter", &attributes);
     }
@@ -19819,8 +19825,10 @@ impl Worksheet {
             ""
         };
 
-        let formula = crate::xmlwriter::escape_xml_data(formula);
-        let mut result = crate::xmlwriter::escape_xml_data(result);
+        let formula = crate::xmlwriter::escape_xml_escapes(formula);
+        let formula = crate::xmlwriter::escape_xml_data(&formula);
+        let result = crate::xmlwriter::escape_xml_escapes(result);
+        let mut result = crate::xmlwriter::escape_xml_data(&result);
 
         if result == "TRUE" {
             result = Cow::Owned("1".to_string());
@@ -19874,8 +19882,10 @@ impl Worksheet {
             ""
         };
 
-        let formula = crate::xmlwriter::escape_xml_data(formula);
-        let mut result = crate::xmlwriter::escape_xml_data(result);
+        let formula = crate::xmlwriter::escape_xml_escapes(formula);
+        let formula = crate::xmlwriter::escape_xml_data(&formula);
+        let result = crate::xmlwriter::escape_xml_escapes(result);
+        let mut result = crate::xmlwriter::escape_xml_data(&result);
 
         if result == "TRUE" {
             result = Cow::Owned("1".to_string());
@@ -20091,7 +20101,11 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        xml_data_element_only(&mut self.writer, "oddHeader", &header);
+        xml_data_element_only(
+            &mut self.writer,
+            "oddHeader",
+            &crate::xmlwriter::escape_xml_escapes(&header),
+        );
     }
 
     // Write the <oddFooter> element.
@@ -20107,7 +20121,11 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        xml_data_element_only(&mut self.writer, "oddFooter", &footer);
+        xml_data_element_only(
+            &mut self.writer,
+            "oddFooter",
+            &crate::xmlwriter::escape_xml_escapes(&footer),
+        );
     }
 
     // Write the <drawing> element.
@@ -20484,7 +20502,7 @@ impl Worksheet {
         self.write_sparkline_color("x14:colorLow", sparkline.low_point_color);
 
         if sparkline.date_range.has_data() {
-            xml_data_element_only(&mut self.writer, "xm:f", &sparkline.date_range.formula());
+            xml_formula_element_only(&mut self.writer, "xm:f", &sparkline.date_range.formula());
         }
 
         // Write the x14:sparklines element.
@@ -20505,7 +20523,7 @@ impl Worksheet {
         for range in &sparkline.ranges {
             xml_start_tag_only(&mut self.writer, "x14:sparkline");
 
-            xml_data_element_only(&mut self.writer, "xm:f", &range.1);
+            xml_formula_element_only(&mut self.writer, "xm:f", &range.1);
             xml_data_element_only(&mut self.writer, "xm:sqref", &range.0);
 
             xml_end_tag(&mut self.writer, "x14:sparkline");

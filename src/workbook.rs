@@ -3658,12 +3658,9 @@ impl Workbook {
                 attributes.push(("hidden", "1".to_string()));
             }
 
-            xml_data_element(
-                &mut self.writer,
-                "definedName",
-                &defined_name.range,
-                &attributes,
-            );
+            // Excel decodes _xHHHH_ escapes in the range formula.
+            let range = xmlwriter::escape_xml_escapes(&defined_name.range);
+            xml_data_element(&mut self.writer, "definedName", &range, &attributes);
         }
 
         xml_end_tag(&mut self.writer, "definedNames");

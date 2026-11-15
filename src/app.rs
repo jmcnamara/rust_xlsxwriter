@@ -203,13 +203,21 @@ impl App {
     // Write the <Manager> element.
     fn write_manager(&mut self) {
         if !self.properties.manager.is_empty() {
-            xml_data_element_only(&mut self.writer, "Manager", &self.properties.manager);
+            xml_data_element_only(
+                &mut self.writer,
+                "Manager",
+                &escape_attribute_escapes(&self.properties.manager),
+            );
         }
     }
 
     // Write the <Company> element.
     fn write_company(&mut self) {
-        xml_data_element_only(&mut self.writer, "Company", &self.properties.company);
+        xml_data_element_only(
+            &mut self.writer,
+            "Company",
+            &escape_attribute_escapes(&self.properties.company),
+        );
     }
 
     // Write the <LinksUpToDate> element.

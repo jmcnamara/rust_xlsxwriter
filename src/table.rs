@@ -11,11 +11,12 @@ mod tests;
 use std::io::Cursor;
 use std::{collections::HashSet, fmt};
 
+use crate::utility::{utf16_len, ToXmlBoolean};
 use crate::xmlwriter::{
-    escape_attribute_escapes, xml_data_element_only, xml_declaration, xml_empty_tag, xml_end_tag,
-    xml_start_tag, xml_start_tag_only,
+    escape_attribute_escapes, xml_declaration, xml_empty_tag, xml_end_tag,
+    xml_formula_element_only, xml_start_tag, xml_start_tag_only,
 };
-use crate::{utility::ToXmlBoolean, CellRange, Format, Formula, RowNum, XlsxError};
+use crate::{CellRange, Format, Formula, RowNum, XlsxError};
 
 /// The `Table` struct represents a worksheet table.
 ///
@@ -1246,6 +1247,13 @@ impl Table {
                 column.name.clone_from(&default_headers[index]);
             }
 
+            if utf16_len(&column.name) > 255 {
+                return Err(XlsxError::TableError(format!(
+                    "Column name exceeds Excel's limit of 255 characters in Table at {}",
+                    self.cell_range.to_error_string()
+                )));
+            }
+
             if seen_column_names.contains(&column.name.to_lowercase()) {
                 return Err(XlsxError::TableError(format!(
                     "Column name '{}' already exists in Table at {}",
@@ -1406,12 +1414,12 @@ impl Table {
 
     // Write the <calculatedColumnFormula> element.
     fn write_calculated_column_formula(&mut self, formula: &str) {
-        xml_data_element_only(&mut self.writer, "calculatedColumnFormula", formula);
+        xml_formula_element_only(&mut self.writer, "calculatedColumnFormula", formula);
     }
 
     // Write the <totalsRowFormula> element.
     fn write_totals_row_formula(&mut self, formula: &str) {
-        xml_data_element_only(&mut self.writer, "totalsRowFormula", formula);
+        xml_formula_element_only(&mut self.writer, "totalsRowFormula", formula);
     }
 
     // Write the <tableStyleInfo> element.
@@ -1581,14 +1589,15 @@ impl TableColumn {
     /// the headers on a worksheet table. These can be set to a user-defined
     /// value using the `set_header()` method.
     ///
-    /// The column header names in a table must be different from each other.
-    /// Non-unique names will raise a validation error when using
+    /// The column header names in a table must be different from each other
+    /// and must be 255 characters or less. Names that don't meet these rules
+    /// will raise a validation error when using
     /// [`Worksheet::add_table()`](crate::Worksheet::add_table).
     ///
     /// # Parameters
     ///
     /// - `caption`: The caption/name of the column header. It must be unique
-    ///   for the table.
+    ///   for the table and 255 characters or less.
     ///
     /// # Examples
     ///

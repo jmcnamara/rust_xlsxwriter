@@ -5689,4 +5689,33 @@ mod conditional_format_tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_rules_with_escapes() {
+        // Excel escapes literal _xHHHH_ strings in formulas but not in the text attribute.
+        let conditional_format = ConditionalFormatFormula::new().set_rule(r#"=A1="a_x0041_b""#);
+
+        let got = conditional_format.rule(None, 1, "A1", "");
+        let expected = r#"<cfRule type="expression" priority="1"><formula>A1="a_x005F_x0041_b"</formula></cfRule>"#;
+
+        assert_eq!(expected, got);
+
+        let conditional_format = ConditionalFormatText::new()
+            .set_rule(ConditionalFormatTextRule::Contains("a_x0041_b".to_string()));
+
+        let got = conditional_format.rule(None, 1, "A1", "");
+        let expected = r#"<cfRule type="containsText" priority="1" operator="containsText" text="a_x0041_b"><formula>NOT(ISERROR(SEARCH("a_x005F_x0041_b",A1)))</formula></cfRule>"#;
+
+        assert_eq!(expected, got);
+
+        let conditional_format = ConditionalFormat2ColorScale::new().set_minimum(
+            ConditionalFormatType::Formula,
+            Formula::new("a_x0041_b!$A$1"),
+        );
+
+        let got = conditional_format.rule(None, 1, "A1", "");
+        let expected = r#"<cfRule type="colorScale" priority="1"><colorScale><cfvo type="formula" val="a_x005f_x0041_b!$A$1"/><cfvo type="max" val="0"/><color rgb="FFFFEF9C"/><color rgb="FF63BE7B"/></colorScale></cfRule>"#;
+
+        assert_eq!(expected, got);
+    }
 }

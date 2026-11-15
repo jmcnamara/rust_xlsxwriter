@@ -10,6 +10,7 @@ mod app_tests {
     use crate::app::App;
     use crate::test_functions::xml_to_vec;
     use crate::xmlwriter;
+    use crate::DocProperties;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -200,6 +201,57 @@ mod app_tests {
                 </TitlesOfParts>
                 <Company>
                 </Company>
+                <LinksUpToDate>false</LinksUpToDate>
+                <SharedDoc>false</SharedDoc>
+                <HyperlinksChanged>false</HyperlinksChanged>
+                <AppVersion>12.0000</AppVersion>
+                </Properties>
+                "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_assemble_with_escapes() {
+        let mut app = App::new();
+
+        app.properties = DocProperties::new()
+            .set_manager("a_x0041_b")
+            .set_company("a_x0041_b");
+
+        app.add_heading_pair("Worksheets", 1);
+        app.add_part_name("a_x0041_b");
+
+        app.assemble_xml_file();
+
+        let got = xmlwriter::cursor_to_str(&app.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+                <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+                <Application>Microsoft Excel</Application>
+                <DocSecurity>0</DocSecurity>
+                <ScaleCrop>false</ScaleCrop>
+                <HeadingPairs>
+                    <vt:vector size="2" baseType="variant">
+                    <vt:variant>
+                        <vt:lpstr>Worksheets</vt:lpstr>
+                    </vt:variant>
+                    <vt:variant>
+                        <vt:i4>1</vt:i4>
+                    </vt:variant>
+                    </vt:vector>
+                </HeadingPairs>
+                <TitlesOfParts>
+                    <vt:vector size="1" baseType="lpstr">
+                    <vt:lpstr>a_x005f_x0041_b</vt:lpstr>
+                    </vt:vector>
+                </TitlesOfParts>
+                <Manager>a_x005f_x0041_b</Manager>
+                <Company>a_x005f_x0041_b</Company>
                 <LinksUpToDate>false</LinksUpToDate>
                 <SharedDoc>false</SharedDoc>
                 <HyperlinksChanged>false</HyperlinksChanged>

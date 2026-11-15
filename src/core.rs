@@ -9,7 +9,8 @@ mod tests;
 use std::io::Cursor;
 
 use crate::xmlwriter::{
-    xml_data_element, xml_data_element_only, xml_declaration, xml_end_tag, xml_start_tag,
+    escape_attribute_escapes, xml_data_element, xml_data_element_only, xml_declaration,
+    xml_end_tag, xml_start_tag,
 };
 use crate::DocProperties;
 
@@ -102,33 +103,53 @@ impl Core {
     // Write the <dc:title> element.
     fn write_dc_title(&mut self) {
         if !self.properties.title.is_empty() {
-            xml_data_element_only(&mut self.writer, "dc:title", &self.properties.title);
+            xml_data_element_only(
+                &mut self.writer,
+                "dc:title",
+                &escape_attribute_escapes(&self.properties.title),
+            );
         }
     }
 
     // Write the <dc:subject> element.
     fn write_dc_subject(&mut self) {
         if !self.properties.subject.is_empty() {
-            xml_data_element_only(&mut self.writer, "dc:subject", &self.properties.subject);
+            xml_data_element_only(
+                &mut self.writer,
+                "dc:subject",
+                &escape_attribute_escapes(&self.properties.subject),
+            );
         }
     }
 
     // Write the <dc:creator> element.
     fn write_dc_creator(&mut self) {
-        xml_data_element_only(&mut self.writer, "dc:creator", &self.properties.author);
+        xml_data_element_only(
+            &mut self.writer,
+            "dc:creator",
+            &escape_attribute_escapes(&self.properties.author),
+        );
     }
 
     // Write the <cp:keywords> element.
     fn write_cp_keywords(&mut self) {
         if !self.properties.keywords.is_empty() {
-            xml_data_element_only(&mut self.writer, "cp:keywords", &self.properties.keywords);
+            xml_data_element_only(
+                &mut self.writer,
+                "cp:keywords",
+                &escape_attribute_escapes(&self.properties.keywords),
+            );
         }
     }
 
     // Write the <dc:description> element.
     fn write_dc_description(&mut self) {
         if !self.properties.comment.is_empty() {
-            xml_data_element_only(&mut self.writer, "dc:description", &self.properties.comment);
+            xml_data_element_only(
+                &mut self.writer,
+                "dc:description",
+                &escape_attribute_escapes(&self.properties.comment),
+            );
         }
     }
 
@@ -137,7 +158,7 @@ impl Core {
         xml_data_element_only(
             &mut self.writer,
             "cp:lastModifiedBy",
-            &self.properties.author,
+            &escape_attribute_escapes(&self.properties.author),
         );
     }
 
@@ -160,7 +181,11 @@ impl Core {
     // Write the <cp:category> element.
     fn write_cp_category(&mut self) {
         if !self.properties.category.is_empty() {
-            xml_data_element_only(&mut self.writer, "cp:category", &self.properties.category);
+            xml_data_element_only(
+                &mut self.writer,
+                "cp:category",
+                &escape_attribute_escapes(&self.properties.category),
+            );
         }
     }
 
@@ -170,7 +195,7 @@ impl Core {
             xml_data_element_only(
                 &mut self.writer,
                 "cp:contentStatus",
-                &self.properties.status,
+                &escape_attribute_escapes(&self.properties.status),
             );
         }
     }

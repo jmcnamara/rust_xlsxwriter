@@ -9,9 +9,12 @@ mod worksheet_tests {
 
     use crate::test_functions::xml_to_vec;
     use crate::worksheet::*;
-    use crate::XlsxError;
+    use crate::{
+        DataValidation, FilterCondition, FilterCriteria, Format, Sparkline, Url, XlsxError,
+    };
     use pretty_assertions::assert_eq;
     use std::collections::HashMap;
+    use std::io::Cursor;
 
     #[test]
     fn test_assemble() {
@@ -1054,5 +1057,184 @@ mod worksheet_tests {
         );
 
         assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_formulas_with_escapes() {
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
+
+        Worksheet::write_formula_cell(&mut writer, 1, "A", r#""a_x0041_b""#, 0, "a_x0041_b");
+        Worksheet::write_array_formula_cell(
+            &mut writer,
+            2,
+            "A",
+            r#""a_x0041_b""#,
+            0,
+            "a_x0041_b",
+            false,
+            "A2",
+        );
+
+        let got = xmlwriter::cursor_to_str(&writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <c r="A1" t="str"><f>"a_x005F_x0041_b"</f><v>a_x005F_x0041_b</v></c>
+            <c r="A2" t="str"><f t="array" ref="A2">"a_x005F_x0041_b"</f><v>a_x005F_x0041_b</v></c>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_rich_string_with_escapes() {
+        let bold = Format::new().set_bold();
+        let default = Format::default();
+
+        // Excel escapes each run separately.
+        let segments = [(&bold, "a_x0041_b"), (&default, "a_x00"), (&bold, "41_b")];
+
+        let (got, _) = Worksheet::get_rich_string(&segments).unwrap();
+        let got = xml_to_vec(&got);
+
+        let expected = xml_to_vec(
+            r#"
+            <r><rPr><b/><sz val="11"/><color theme="1"/><rFont val="Calibri"/><family val="2"/><scheme val="minor"/></rPr><t>a_x005F_x0041_b</t></r>
+            <r><rPr><sz val="11"/><color theme="1"/><rFont val="Calibri"/><family val="2"/><scheme val="minor"/></rPr><t>a_x00</t></r>
+            <r><rPr><b/><sz val="11"/><color theme="1"/><rFont val="Calibri"/><family val="2"/><scheme val="minor"/></rPr><t>41_b</t></r>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_header_footer_with_escapes() {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_header("&Ca_x0041_b");
+        worksheet.set_footer("&Ca_x0041_b");
+
+        worksheet.write_header_footer();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <headerFooter>
+              <oddHeader>&amp;Ca_x005F_x0041_b</oddHeader>
+              <oddFooter>&amp;Ca_x005F_x0041_b</oddFooter>
+            </headerFooter>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_autofilter_with_escapes() {
+        let mut worksheet = Worksheet::new();
+        worksheet.autofilter(0, 0, 3, 1).unwrap();
+
+        let filter = FilterCondition::new().add_list_filter("a_x0041_b");
+        worksheet.filter_column(0, &filter).unwrap();
+
+        let filter =
+            FilterCondition::new().add_custom_filter(FilterCriteria::NotEqualTo, "a_x0041_b");
+        worksheet.filter_column(1, &filter).unwrap();
+
+        worksheet.write_auto_filter();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <autoFilter ref="A1:B4">
+              <filterColumn colId="0">
+                <filters>
+                  <filter val="a_x005f_x0041_b"/>
+                </filters>
+              </filterColumn>
+              <filterColumn colId="1">
+                <customFilters>
+                  <customFilter operator="notEqual" val="a_x005f_x0041_b"/>
+                </customFilters>
+              </filterColumn>
+            </autoFilter>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_data_validation_with_escapes() {
+        let mut worksheet = Worksheet::new();
+
+        let data_validation = DataValidation::new()
+            .allow_custom(r#"A1="a_x0041_b""#.into())
+            .set_input_title("a_x0041_b")
+            .unwrap();
+
+        worksheet
+            .add_data_validation(0, 0, 0, 0, &data_validation)
+            .unwrap();
+
+        worksheet.write_data_validations();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <dataValidations count="1">
+              <dataValidation type="custom" allowBlank="1" showInputMessage="1" showErrorMessage="1" promptTitle="a_x005f_x0041_b" sqref="A1">
+                <formula1>A1="a_x005F_x0041_b"</formula1>
+              </dataValidation>
+            </dataValidations>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_hyperlink_with_escapes() {
+        let mut worksheet = Worksheet::new();
+
+        let url = Url::new("internal:a_x0041_b!A1").set_tip("a_x0041_b");
+        worksheet.write_url(0, 0, &url).unwrap();
+
+        worksheet.write_hyperlinks();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <hyperlinks>
+              <hyperlink ref="A1" location="a_x005f_x0041_b!A1" tooltip="a_x005f_x0041_b" display="a_x005f_x0041_b!A1"/>
+            </hyperlinks>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_sparkline_with_escapes() {
+        let mut worksheet = Worksheet::new();
+
+        let sparkline = Sparkline::new().set_range(("a_x0041_b", 0, 0, 0, 4));
+        worksheet.add_sparkline(0, 5, &sparkline).unwrap();
+
+        worksheet.write_sparkline_groups();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+
+        assert!(got.contains("<xm:f>a_x005F_x0041_b!A1:E1</xm:f>"), "{got}");
     }
 }

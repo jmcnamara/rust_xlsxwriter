@@ -4,11 +4,15 @@
 //
 // Copyright 2022-2026, John McNamara, jmcnamara@cpan.org
 
+mod tests;
+
 use std::io::Cursor;
 
 use crate::Image;
 
-use crate::xmlwriter::{xml_data_element_only, xml_declaration, xml_end_tag, xml_start_tag};
+use crate::xmlwriter::{
+    escape_xml_escapes, xml_data_element_only, xml_declaration, xml_end_tag, xml_start_tag,
+};
 
 pub struct RichValue<'a> {
     pub(crate) writer: Cursor<Vec<u8>>,
@@ -79,7 +83,7 @@ impl RichValue<'_> {
         self.write_v(value);
 
         if !image.alt_text.is_empty() {
-            self.write_v(&image.alt_text);
+            self.write_v(&escape_xml_escapes(&image.alt_text));
         }
 
         xml_end_tag(&mut self.writer, "rv");

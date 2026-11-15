@@ -99,4 +99,31 @@ mod custom_tests {
 
         assert_eq!(expected, got);
     }
+
+    #[test]
+    fn test_assemble_with_escapes() {
+        let mut custom = Custom::new();
+
+        let properties = DocProperties::new().set_custom_property("a_x0041_b", "a_x0041_b");
+
+        custom.properties = properties;
+
+        custom.assemble_xml_file();
+
+        let got = xmlwriter::cursor_to_str(&custom.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+              <property fmtid="{D5CDD505-2E9C-101B-9397-08002B2CF9AE}" pid="2" name="a_x005f_x0041_b">
+                <vt:lpwstr>a_x005f_x0041_b</vt:lpwstr>
+              </property>
+            </Properties>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
 }

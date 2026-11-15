@@ -122,6 +122,25 @@ mod table_tests {
         let result = table.initialize_columns(&default_headers);
 
         assert!(matches!(result, Err(XlsxError::TableError(_))));
+
+        // Column names are limited to 255 UTF-16 characters.
+        table.cell_range.last_col = 0;
+
+        let test_data = [
+            ("x".repeat(255), true),
+            ("x".repeat(256), false),
+            ("😀".repeat(127), true),
+            ("😀".repeat(128), false),
+        ];
+
+        for (header, is_ok) in test_data {
+            let columns = vec![TableColumn::new().set_header(&header)];
+
+            table = table.set_columns(&columns);
+            let result = table.initialize_columns(&default_headers);
+
+            assert_eq!(result.is_ok(), is_ok, "for header length {}", header.len());
+        }
     }
 
     #[test]
@@ -622,6 +641,62 @@ mod table_tests {
                     <tableColumn id="2" name="Column2"/>
                     <tableColumn id="3" name="Column3"/>
                     <tableColumn id="4" name="Column4"/>
+                </tableColumns>
+                <tableStyleInfo name="TableStyleMedium9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/>
+                </table>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_assemble_with_escapes() {
+        let mut table = Table::new().set_name("t_x0041_b");
+        let worksheet = Worksheet::new();
+
+        table.cell_range.first_row = 2;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 13;
+        table.cell_range.last_col = 4;
+        table.index = 1;
+
+        let columns = vec![
+            TableColumn::new()
+                .set_header("a_x0041_b")
+                .set_total_label("a_x0041_b"),
+            TableColumn::new().set_formula(r#"="a_x0041_b""#),
+            TableColumn::new().set_total_function(TableFunction::Custom(r#"="a_x0041_b""#.into())),
+        ];
+
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
+        table = table.set_columns(&columns).set_total_row(true);
+
+        table.initialize_columns(&default_headers).unwrap();
+        table.assemble_xml_file();
+
+        let got = xmlwriter::cursor_to_str(&table.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+                <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                <table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="1" name="t_x005f_x0041_b" displayName="t_x005f_x0041_b" ref="C3:E14" totalsRowCount="1">
+                <autoFilter ref="C3:E13"/>
+                <tableColumns count="3">
+                    <tableColumn id="1" name="a_x005f_x0041_b" totalsRowLabel="a_x005f_x0041_b"/>
+                    <tableColumn id="2" name="Column2">
+                        <calculatedColumnFormula>"a_x005F_x0041_b"</calculatedColumnFormula>
+                    </tableColumn>
+                    <tableColumn id="3" name="Column3" totalsRowFunction="custom">
+                        <totalsRowFormula>"a_x005F_x0041_b"</totalsRowFormula>
+                    </tableColumn>
                 </tableColumns>
                 <tableStyleInfo name="TableStyleMedium9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/>
                 </table>

@@ -19,6 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   worksheet names, defined names, font names and table headers.
   See [Issue #216].
 
+- Fixed the escaping of tabs and carriage returns in table column headers, and
+  added a check for headers over Excel's 255 character limit. See [Issue #217].
+
+  [Issue #217]: https://github.com/jmcnamara/rust_xlsxwriter/issues/217
+
+- Fixed the escaping of literal `_xHHHH_` strings in formulas, defined names,
+  rich strings, notes, headers, autofilters and document properties.
+  See [Issue #217].
+
 - Fixed an error in the the `IgnoreError::TwoDigitTextYear` attribute name. See
   [Issue #218].
 

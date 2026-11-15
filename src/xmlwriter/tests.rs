@@ -112,9 +112,9 @@ mod xmlwriter_tests {
             ("a\u{1F}b", r#"<foo span="a_x001F_b"/>"#),
             ("a\u{FFFE}b", r#"<foo span="a_xFFFE_b"/>"#),
             ("a\u{FFFF}b", r#"<foo span="a_xFFFF_b"/>"#),
-            ("a\tb", "<foo span=\"a\tb\"/>"),
+            ("a\tb", r#"<foo span="a&#x9;b"/>"#),
             ("a\nb", r#"<foo span="a&#xA;b"/>"#),
-            ("a\rb", "<foo span=\"a\rb\"/>"),
+            ("a\rb", r#"<foo span="a&#xD;b"/>"#),
         ];
 
         for (attribute, expected) in test_data {
@@ -317,6 +317,24 @@ mod xmlwriter_tests {
         // Multibyte chars that might look like hex bytes
         let input = "test_xäöüü_end"; // Not valid hex
         assert_eq!(escape_xml_escapes(input), input);
+    }
+
+    #[test]
+    fn test_escape_xml_escapes_formula_prefixes() {
+        // Future function prefixes aren't escapes and shouldn't be changed.
+        let input = "_xlfn.STDEV.S(A1:A10)+_xlws.FILTER(A1:A2,B1:B2)";
+        assert_eq!(escape_xml_escapes(input), input);
+
+        // Repeated underscores before a pattern.
+        let input = "a__x0041_b";
+        assert_eq!(escape_xml_escapes(input), "a__x005F_x0041_b");
+
+        // Future function prefix and a pattern in the same string.
+        let input = r#"_xlfn.CONCAT("a_x0041_b",A1)"#;
+        assert_eq!(
+            escape_xml_escapes(input),
+            r#"_xlfn.CONCAT("a_x005F_x0041_b",A1)"#
+        );
     }
 
     #[test]

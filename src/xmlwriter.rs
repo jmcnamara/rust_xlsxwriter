@@ -76,6 +76,11 @@ pub(crate) fn xml_data_element_only<W: Write>(writer: &mut W, tag: &str, data: &
     write!(writer, "<{}>{}</{}>", tag, escape_xml_data(data), tag).expect(XML_WRITE_ERROR);
 }
 
+// Write an XML element containing a formula.
+pub(crate) fn xml_formula_element_only<W: Write>(writer: &mut W, tag: &str, formula: &str) {
+    xml_data_element_only(writer, tag, &escape_xml_escapes(formula));
+}
+
 // Write an XML element with data and specified attributes.
 pub(crate) fn xml_data_element<W, T>(writer: &mut W, tag: &str, data: &str, attributes: &[T])
 where
@@ -173,6 +178,11 @@ fn match_attribute_html_char(ch: char) -> Option<&'static str> {
         '<' => Some("&lt;"),
         '>' => Some("&gt;"),
         '\n' => Some("&#xA;"),
+
+        // Tabs and carriage returns must also be escaped since XML parsers
+        // convert them to spaces in attributes.
+        '\t' => Some("&#x9;"),
+        '\r' => Some("&#xD;"),
 
         // Escapes control characters in attributes with _xHHHH_ (like strings).
         _ => match_control_char(ch),
@@ -343,7 +353,13 @@ pub(crate) fn escape_attribute_escapes(original: &str) -> Cow<'_, str> {
 
 // Escape literal _xHHHH_ strings with the given encoded underscore prefix.
 fn escape_literal_escapes<'a>(original: &'a str, prefix: &str) -> Cow<'a, str> {
-    if !original.contains("_x") {
+    // Skip the conversion if there are no "_x" strings, but also excludesthe
+    // "_xlfn." prefix in formulas.
+    let bytes = original.as_bytes();
+    if !original.match_indices('_').any(|(index, _)| {
+        bytes.get(index + 1) == Some(&b'x')
+            && bytes.get(index + 2).is_some_and(u8::is_ascii_hexdigit)
+    }) {
         return Cow::Borrowed(original);
     }
 

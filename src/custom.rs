@@ -8,7 +8,9 @@ mod tests;
 
 use std::io::Cursor;
 
-use crate::xmlwriter::{xml_data_element_only, xml_declaration, xml_end_tag, xml_start_tag};
+use crate::xmlwriter::{
+    escape_attribute_escapes, xml_data_element_only, xml_declaration, xml_end_tag, xml_start_tag,
+};
 use crate::{CustomProperty, CustomPropertyType, DocProperties};
 
 pub struct Custom {
@@ -69,7 +71,10 @@ impl Custom {
         let attributes = [
             ("fmtid", fmtid),
             ("pid", pid.to_string()),
-            ("name", property.name.clone()),
+            (
+                "name",
+                escape_attribute_escapes(&property.name).into_owned(),
+            ),
         ];
 
         xml_start_tag(&mut self.writer, "property", &attributes);
@@ -87,7 +92,11 @@ impl Custom {
 
     // Write the <vt:lpwstr> element.
     fn write_vt_lpwstr(&mut self, text: &str) {
-        xml_data_element_only(&mut self.writer, "vt:lpwstr", text);
+        xml_data_element_only(
+            &mut self.writer,
+            "vt:lpwstr",
+            &escape_attribute_escapes(text),
+        );
     }
 
     // Write the <vt:filetime> element.

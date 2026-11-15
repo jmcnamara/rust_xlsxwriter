@@ -922,8 +922,8 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use std::{borrow::Cow, fmt, io::Cursor};
 
 use crate::xmlwriter::{
-    cursor_to_string, xml_data_element_only, xml_empty_tag, xml_end_tag, xml_start_tag,
-    xml_start_tag_only,
+    cursor_to_string, escape_attribute_escapes, xml_data_element_only, xml_empty_tag, xml_end_tag,
+    xml_formula_element_only, xml_start_tag, xml_start_tag_only,
 };
 use crate::{Color, ExcelDateTime, Format, Formula, XlsxError};
 
@@ -1445,12 +1445,12 @@ impl ConditionalFormatCell {
             | ConditionalFormatCellRule::LessThanOrEqualTo(value)
             | ConditionalFormatCellRule::GreaterThan(value)
             | ConditionalFormatCellRule::GreaterThanOrEqualTo(value) => {
-                xml_data_element_only(&mut writer, "formula", &value.value);
+                xml_formula_element_only(&mut writer, "formula", &value.value);
             }
             ConditionalFormatCellRule::Between(min, max)
             | ConditionalFormatCellRule::NotBetween(min, max) => {
-                xml_data_element_only(&mut writer, "formula", &min.value);
-                xml_data_element_only(&mut writer, "formula", &max.value);
+                xml_formula_element_only(&mut writer, "formula", &min.value);
+                xml_formula_element_only(&mut writer, "formula", &max.value);
             }
         }
 
@@ -1646,7 +1646,7 @@ impl ConditionalFormatBlank {
 
         // Write the rule.
         xml_start_tag(&mut writer, "cfRule", &attributes);
-        xml_data_element_only(&mut writer, "formula", &formula);
+        xml_formula_element_only(&mut writer, "formula", &formula);
         xml_end_tag(&mut writer, "cfRule");
 
         cursor_to_string(&writer)
@@ -1847,7 +1847,7 @@ impl ConditionalFormatError {
 
         // Write the rule.
         xml_start_tag(&mut writer, "cfRule", &attributes);
-        xml_data_element_only(&mut writer, "formula", &formula);
+        xml_formula_element_only(&mut writer, "formula", &formula);
         xml_end_tag(&mut writer, "cfRule");
 
         cursor_to_string(&writer)
@@ -2320,7 +2320,7 @@ impl ConditionalFormatFormula {
 
         // Write the rule.
         xml_start_tag(&mut writer, "cfRule", &attributes);
-        xml_data_element_only(&mut writer, "formula", &self.formula.formula_string);
+        xml_formula_element_only(&mut writer, "formula", &self.formula.formula_string);
         xml_end_tag(&mut writer, "cfRule");
 
         cursor_to_string(&writer)
@@ -3060,7 +3060,7 @@ impl ConditionalFormatText {
         }
 
         xml_start_tag(&mut writer, "cfRule", &attributes);
-        xml_data_element_only(&mut writer, "formula", &formula);
+        xml_formula_element_only(&mut writer, "formula", &formula);
         xml_end_tag(&mut writer, "cfRule");
 
         cursor_to_string(&writer)
@@ -3326,7 +3326,7 @@ impl ConditionalFormatDate {
         attributes.push(("timePeriod", self.rule.to_string()));
 
         xml_start_tag(&mut writer, "cfRule", &attributes);
-        xml_data_element_only(&mut writer, "formula", &formula);
+        xml_formula_element_only(&mut writer, "formula", &formula);
         xml_end_tag(&mut writer, "cfRule");
 
         cursor_to_string(&writer)
@@ -3774,7 +3774,7 @@ impl ConditionalFormat2ColorScale {
             ConditionalFormatType::Automatic => {}
         }
 
-        attributes.push(("val", value.to_string()));
+        attributes.push(("val", escape_attribute_escapes(value).into_owned()));
 
         xml_empty_tag(writer, "cfvo", &attributes);
     }
@@ -4311,7 +4311,7 @@ impl ConditionalFormat3ColorScale {
             ConditionalFormatType::Automatic => {}
         }
 
-        attributes.push(("val", value.to_string()));
+        attributes.push(("val", escape_attribute_escapes(value).into_owned()));
 
         xml_empty_tag(writer, "cfvo", &attributes);
     }
@@ -5341,29 +5341,29 @@ impl ConditionalFormatDataBar {
             ConditionalFormatType::Lowest => {
                 attributes.push(("type", "min".to_string()));
                 if !has_x14_extensions {
-                    attributes.push(("val", value.to_string()));
+                    attributes.push(("val", escape_attribute_escapes(value).into_owned()));
                 }
             }
             ConditionalFormatType::Number => {
                 attributes.push(("type", "num".to_string()));
-                attributes.push(("val", value.to_string()));
+                attributes.push(("val", escape_attribute_escapes(value).into_owned()));
             }
             ConditionalFormatType::Percent => {
                 attributes.push(("type", "percent".to_string()));
-                attributes.push(("val", value.to_string()));
+                attributes.push(("val", escape_attribute_escapes(value).into_owned()));
             }
             ConditionalFormatType::Formula => {
                 attributes.push(("type", "formula".to_string()));
-                attributes.push(("val", value.to_string()));
+                attributes.push(("val", escape_attribute_escapes(value).into_owned()));
             }
             ConditionalFormatType::Percentile => {
                 attributes.push(("type", "percentile".to_string()));
-                attributes.push(("val", value.to_string()));
+                attributes.push(("val", escape_attribute_escapes(value).into_owned()));
             }
             ConditionalFormatType::Highest => {
                 attributes.push(("type", "max".to_string()));
                 if !has_x14_extensions {
-                    attributes.push(("val", value.to_string()));
+                    attributes.push(("val", escape_attribute_escapes(value).into_owned()));
                 }
             }
         }
@@ -5515,25 +5515,25 @@ impl ConditionalFormatDataBar {
             ConditionalFormatType::Number => {
                 attributes.push(("type", "num".to_string()));
                 xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_data_element_only(writer, "xm:f", value);
+                xml_formula_element_only(writer, "xm:f", value);
                 xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Percent => {
                 attributes.push(("type", "percent".to_string()));
                 xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_data_element_only(writer, "xm:f", value);
+                xml_formula_element_only(writer, "xm:f", value);
                 xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Formula => {
                 attributes.push(("type", "formula".to_string()));
                 xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_data_element_only(writer, "xm:f", value);
+                xml_formula_element_only(writer, "xm:f", value);
                 xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Percentile => {
                 attributes.push(("type", "percentile".to_string()));
                 xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_data_element_only(writer, "xm:f", value);
+                xml_formula_element_only(writer, "xm:f", value);
                 xml_end_tag(writer, "x14:cfvo");
             }
         }
@@ -6232,7 +6232,10 @@ impl ConditionalFormatIconSet {
             }
         }
 
-        attributes.push(("val", icon.value.value.clone()));
+        attributes.push((
+            "val",
+            escape_attribute_escapes(&icon.value.value).into_owned(),
+        ));
 
         if icon.greater_than {
             attributes.push(("gte", "0".to_string()));
@@ -6252,25 +6255,25 @@ impl ConditionalFormatIconSet {
             ConditionalFormatType::Number => {
                 attributes.push(("type", "num".to_string()));
                 xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_data_element_only(writer, "xm:f", value);
+                xml_formula_element_only(writer, "xm:f", value);
                 xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Percent => {
                 attributes.push(("type", "percent".to_string()));
                 xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_data_element_only(writer, "xm:f", value);
+                xml_formula_element_only(writer, "xm:f", value);
                 xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Formula => {
                 attributes.push(("type", "formula".to_string()));
                 xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_data_element_only(writer, "xm:f", value);
+                xml_formula_element_only(writer, "xm:f", value);
                 xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Percentile => {
                 attributes.push(("type", "percentile".to_string()));
                 xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_data_element_only(writer, "xm:f", value);
+                xml_formula_element_only(writer, "xm:f", value);
                 xml_end_tag(writer, "x14:cfvo");
             }
         }

@@ -6,12 +6,14 @@
 
 #![warn(missing_docs)]
 
+mod tests;
+
 use std::collections::BTreeMap;
 use std::io::Cursor;
 
 use crate::xmlwriter::{
-    xml_data_element, xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only,
-    xml_end_tag, xml_start_tag, xml_start_tag_only,
+    escape_xml_escapes, xml_data_element, xml_data_element_only, xml_declaration, xml_empty_tag,
+    xml_empty_tag_only, xml_end_tag, xml_start_tag, xml_start_tag_only,
 };
 use crate::{utility, ColNum, Note, RowNum};
 
@@ -90,7 +92,7 @@ impl Comment {
 
     // Write the <author> element.
     fn write_author(&mut self, author: &str) {
-        xml_data_element_only(&mut self.writer, "author", author);
+        xml_data_element_only(&mut self.writer, "author", &escape_xml_escapes(author));
     }
 
     // Write the <commentList> element.
@@ -216,6 +218,11 @@ impl Comment {
             vec![]
         };
 
-        xml_data_element(&mut self.writer, "t", text, &attributes);
+        xml_data_element(
+            &mut self.writer,
+            "t",
+            &escape_xml_escapes(text),
+            &attributes,
+        );
     }
 }
