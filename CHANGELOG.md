@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   worksheet names, defined names, font names and table headers.
   See [Issue #216].
 
+- Fixed an error in the the `IgnoreError::TwoDigitTextYear` attribute name. See
+  [Issue #218].
+
+  [Issue #218]: https://github.com/jmcnamara/rust_xlsxwriter/issues/218
+
 
 ## [0.102.0] - 2026-10-29
 

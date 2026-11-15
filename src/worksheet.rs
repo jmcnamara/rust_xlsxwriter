@@ -21542,7 +21542,7 @@ impl fmt::Display for IgnoreError {
         match self {
             Self::FormulaError => write!(f, "evalError"),
             Self::FormulaDiffers => write!(f, "formula"),
-            Self::TwoDigitTextYear => write!(f, "TwoDigitTextYear"),
+            Self::TwoDigitTextYear => write!(f, "twoDigitTextYear"),
             Self::FormulaOmitsCells => write!(f, "formulaRange"),
             Self::DataValidationError => write!(f, "listDataValidation"),
             Self::NumberStoredAsText => write!(f, "numberStoredAsText"),

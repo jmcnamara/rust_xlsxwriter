@@ -738,6 +738,7 @@ mod ignore_error03;
 mod ignore_error04;
 mod ignore_error05;
 mod ignore_error06;
+mod ignore_error07;
 mod image01;
 mod image02;
 mod image03;
