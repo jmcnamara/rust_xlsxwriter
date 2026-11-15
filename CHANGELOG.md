@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #216]: https://github.com/jmcnamara/rust_xlsxwriter/issues/216
 
+- Fixed the escaping of literal `_xHHHH_` strings in XML attributes such as
+  worksheet names, defined names, font names and table headers.
+  See [Issue #216].
+
+
 ## [0.102.0] - 2026-10-29
 
 ### Added

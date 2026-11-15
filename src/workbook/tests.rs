@@ -422,4 +422,47 @@ mod workbook_tests {
 
         assert_eq!(expected, got);
     }
+
+    #[test]
+    fn test_write_sheets_with_escapes() {
+        let mut workbook = Workbook::new();
+        workbook.add_worksheet().set_name("a_x0041_b").unwrap();
+
+        workbook.write_sheets();
+
+        let got = xmlwriter::cursor_to_str(&workbook.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheets>
+              <sheet name="a_x005f_x0041_b" sheetId="1" r:id="rId1"/>
+            </sheets>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_write_defined_names_with_escapes() {
+        let mut workbook = Workbook::new();
+        workbook.define_name("a_x0041_b", "=Sheet1!$A$1").unwrap();
+        workbook.defined_names = workbook.user_defined_names.clone();
+
+        workbook.write_defined_names();
+
+        let got = xmlwriter::cursor_to_str(&workbook.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <definedNames>
+              <definedName name="a_x005f_x0041_b">Sheet1!$A$1</definedName>
+            </definedNames>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
 }

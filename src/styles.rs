@@ -11,8 +11,8 @@ use std::mem;
 
 use crate::format::Format;
 use crate::xmlwriter::{
-    xml_declaration, xml_empty_tag, xml_empty_tag_only, xml_end_tag, xml_start_tag,
-    xml_start_tag_only,
+    escape_attribute_escapes, xml_declaration, xml_empty_tag, xml_empty_tag_only, xml_end_tag,
+    xml_start_tag, xml_start_tag_only,
 };
 use crate::{
     Alignment, Border, Color, Fill, Font, FontScheme, FormatAlign, FormatBorder,
@@ -246,7 +246,8 @@ impl<'a> Styles<'a> {
 
     // Write the <name> element.
     fn write_font_name(&mut self, font: &Font) {
-        let attributes = [("val", font.name.as_ref())];
+        let name = escape_attribute_escapes(&font.name);
+        let attributes = [("val", name.as_ref())];
 
         if self.is_rich_string_style {
             xml_empty_tag(&mut self.writer, "rFont", &attributes);
@@ -873,7 +874,10 @@ impl<'a> Styles<'a> {
     fn write_num_fmt(&mut self, num_format_index: u16, num_format: &str) {
         let attributes = [
             ("numFmtId", num_format_index.to_string()),
-            ("formatCode", num_format.to_string()),
+            (
+                "formatCode",
+                escape_attribute_escapes(num_format).into_owned(),
+            ),
         ];
 
         xml_empty_tag(&mut self.writer, "numFmt", &attributes);

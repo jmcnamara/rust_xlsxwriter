@@ -9,7 +9,8 @@ mod tests;
 use std::io::Cursor;
 
 use crate::xmlwriter::{
-    xml_data_element_only, xml_declaration, xml_end_tag, xml_start_tag, xml_start_tag_only,
+    escape_attribute_escapes, xml_data_element_only, xml_declaration, xml_end_tag, xml_start_tag,
+    xml_start_tag_only,
 };
 use crate::DocProperties;
 
@@ -183,7 +184,7 @@ impl App {
         xml_start_tag(&mut self.writer, "vt:vector", &attributes);
 
         for part_name in self.table_parts.clone() {
-            self.write_vt_lpstr(&part_name);
+            self.write_vt_lpstr(&escape_attribute_escapes(&part_name));
         }
 
         xml_end_tag(&mut self.writer, "vt:vector");

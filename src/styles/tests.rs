@@ -84,4 +84,37 @@ mod styles_tests {
 
         assert_eq!(expected, got);
     }
+
+    #[test]
+    fn test_font_and_num_format_with_escapes() {
+        let format = Format::new().set_font_name("a_x0041_b");
+        let xf_formats = vec![format.clone()];
+        let dxf_formats = vec![];
+        let mut styles = Styles::new(
+            &xf_formats,
+            &dxf_formats,
+            1,
+            2,
+            1,
+            vec![],
+            false,
+            false,
+            false,
+        );
+
+        styles.write_font_name(&format.font);
+        styles.write_num_fmt(164, r#"0.0" a_x0041_b""#);
+
+        let got = xmlwriter::cursor_to_str(&styles.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <name val="a_x005f_x0041_b"/>
+            <numFmt numFmtId="164" formatCode="0.0&quot; a_x005f_x0041_b&quot;"/>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
 }

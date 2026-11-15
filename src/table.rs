@@ -12,8 +12,8 @@ use std::io::Cursor;
 use std::{collections::HashSet, fmt};
 
 use crate::xmlwriter::{
-    xml_data_element_only, xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag,
-    xml_start_tag_only,
+    escape_attribute_escapes, xml_data_element_only, xml_declaration, xml_empty_tag, xml_end_tag,
+    xml_start_tag, xml_start_tag_only,
 };
 use crate::{utility::ToXmlBoolean, CellRange, Format, Formula, RowNum, XlsxError};
 
@@ -1316,7 +1316,7 @@ impl Table {
         let name = if self.name.is_empty() {
             format!("Table{}", self.index)
         } else {
-            self.name.clone()
+            escape_attribute_escapes(&self.name).into_owned()
         };
 
         let mut attributes = vec![
@@ -1369,10 +1369,14 @@ impl Table {
 
     // Write the <tableColumn> element.
     fn write_column(&mut self, index: usize, column: &TableColumn) {
-        let mut attributes = vec![("id", index.to_string()), ("name", column.name.clone())];
+        let name = escape_attribute_escapes(&column.name).into_owned();
+        let mut attributes = vec![("id", index.to_string()), ("name", name)];
 
         if !column.total_label.is_empty() {
-            attributes.push(("totalsRowLabel", column.total_label.clone()));
+            attributes.push((
+                "totalsRowLabel",
+                escape_attribute_escapes(&column.total_label).into_owned(),
+            ));
         } else if column.total_function != TableFunction::None {
             attributes.push(("totalsRowFunction", column.total_function.to_string()));
         }

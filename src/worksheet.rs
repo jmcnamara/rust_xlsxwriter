@@ -18692,19 +18692,35 @@ impl Worksheet {
         }
 
         if !data_validation.error_title.is_empty() {
-            attributes.push(("errorTitle", data_validation.error_title.clone()));
+            attributes.push((
+                "errorTitle",
+                crate::xmlwriter::escape_attribute_escapes(&data_validation.error_title)
+                    .into_owned(),
+            ));
         }
 
         if !data_validation.error_message.is_empty() {
-            attributes.push(("error", data_validation.error_message.clone()));
+            attributes.push((
+                "error",
+                crate::xmlwriter::escape_attribute_escapes(&data_validation.error_message)
+                    .into_owned(),
+            ));
         }
 
         if !data_validation.input_title.is_empty() {
-            attributes.push(("promptTitle", data_validation.input_title.clone()));
+            attributes.push((
+                "promptTitle",
+                crate::xmlwriter::escape_attribute_escapes(&data_validation.input_title)
+                    .into_owned(),
+            ));
         }
 
         if !data_validation.input_message.is_empty() {
-            attributes.push(("prompt", data_validation.input_message.clone()));
+            attributes.push((
+                "prompt",
+                crate::xmlwriter::escape_attribute_escapes(&data_validation.input_message)
+                    .into_owned(),
+            ));
         }
 
         attributes.push(("sqref", range.to_string()));
@@ -18753,19 +18769,35 @@ impl Worksheet {
         }
 
         if !data_validation.error_title.is_empty() {
-            attributes.push(("errorTitle", data_validation.error_title.clone()));
+            attributes.push((
+                "errorTitle",
+                crate::xmlwriter::escape_attribute_escapes(&data_validation.error_title)
+                    .into_owned(),
+            ));
         }
 
         if !data_validation.error_message.is_empty() {
-            attributes.push(("error", data_validation.error_message.clone()));
+            attributes.push((
+                "error",
+                crate::xmlwriter::escape_attribute_escapes(&data_validation.error_message)
+                    .into_owned(),
+            ));
         }
 
         if !data_validation.input_title.is_empty() {
-            attributes.push(("promptTitle", data_validation.input_title.clone()));
+            attributes.push((
+                "promptTitle",
+                crate::xmlwriter::escape_attribute_escapes(&data_validation.input_title)
+                    .into_owned(),
+            ));
         }
 
         if !data_validation.input_message.is_empty() {
-            attributes.push(("prompt", data_validation.input_message.clone()));
+            attributes.push((
+                "prompt",
+                crate::xmlwriter::escape_attribute_escapes(&data_validation.input_message)
+                    .into_owned(),
+            ));
         }
 
         attributes.push(("sqref", range.to_string()));
@@ -18796,15 +18828,25 @@ impl Worksheet {
                 attributes.push(("r:id", format!("rId{rel_id}")));
 
                 if !hyperlink.anchor.is_empty() {
-                    attributes.push(("location", hyperlink.anchor.clone()));
+                    attributes.push((
+                        "location",
+                        crate::xmlwriter::escape_attribute_escapes(&hyperlink.anchor).into_owned(),
+                    ));
                 }
 
                 if hyperlink.is_object_link {
-                    attributes.push(("display", hyperlink.link.clone()));
+                    attributes.push((
+                        "display",
+                        crate::xmlwriter::escape_attribute_escapes(&hyperlink.link).into_owned(),
+                    ));
                 }
 
                 if !hyperlink.tool_tip.is_empty() {
-                    attributes.push(("tooltip", hyperlink.tool_tip.clone()));
+                    attributes.push((
+                        "tooltip",
+                        crate::xmlwriter::escape_attribute_escapes(&hyperlink.tool_tip)
+                            .into_owned(),
+                    ));
                 }
 
                 // Store the linkage to the worksheets rels file.
@@ -18816,13 +18858,23 @@ impl Worksheet {
             }
             HyperlinkType::Internal => {
                 // Internal links don't use the rel file reference id.
-                attributes.push(("location", hyperlink.anchor.clone()));
+                attributes.push((
+                    "location",
+                    crate::xmlwriter::escape_attribute_escapes(&hyperlink.anchor).into_owned(),
+                ));
 
                 if !hyperlink.tool_tip.is_empty() {
-                    attributes.push(("tooltip", hyperlink.tool_tip.clone()));
+                    attributes.push((
+                        "tooltip",
+                        crate::xmlwriter::escape_attribute_escapes(&hyperlink.tool_tip)
+                            .into_owned(),
+                    ));
                 }
 
-                attributes.push(("display", hyperlink.text.clone()));
+                attributes.push((
+                    "display",
+                    crate::xmlwriter::escape_attribute_escapes(&hyperlink.text).into_owned(),
+                ));
             }
             HyperlinkType::Unknown => {}
         }

@@ -33,6 +33,56 @@ mod table_tests {
     }
 
     #[test]
+    fn test_assemble_with_escaped_names() {
+        let mut table = Table::new().set_name("t_x0041_b");
+        let worksheet = Worksheet::new();
+
+        table.cell_range.first_row = 2;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 13;
+        table.cell_range.last_col = 3;
+        table.index = 1;
+
+        let columns = vec![
+            TableColumn::new()
+                .set_header("a_x0041_b")
+                .set_total_label("a_x0041_b"),
+            TableColumn::default(),
+        ];
+
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
+        table = table.set_columns(&columns).set_total_row(true);
+
+        table.initialize_columns(&default_headers).unwrap();
+        table.assemble_xml_file();
+
+        let got = xmlwriter::cursor_to_str(&table.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+                <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                <table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="1" name="t_x005f_x0041_b" displayName="t_x005f_x0041_b" ref="C3:D14" totalsRowCount="1">
+                <autoFilter ref="C3:D13"/>
+                <tableColumns count="2">
+                    <tableColumn id="1" name="a_x005f_x0041_b" totalsRowLabel="a_x005f_x0041_b"/>
+                    <tableColumn id="2" name="Column2"/>
+                </tableColumns>
+                <tableStyleInfo name="TableStyleMedium9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/>
+                </table>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
     fn test_column_validation() {
         // Test the table column validation and checks.
         let mut table = Table::new();

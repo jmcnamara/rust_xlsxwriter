@@ -44,6 +44,69 @@ mod worksheet_tests {
     }
 
     #[test]
+    fn test_data_validation_with_escaped_strings() {
+        let mut worksheet = Worksheet::new();
+
+        let data_validation = crate::DataValidation::new()
+            .allow_whole_number(crate::DataValidationRule::Between(1, 5))
+            .set_input_title("a_x0041_b")
+            .unwrap()
+            .set_input_message("a_x0041_b")
+            .unwrap()
+            .set_error_title("a_x0041_b")
+            .unwrap()
+            .set_error_message("a_x0041_b")
+            .unwrap();
+
+        worksheet
+            .add_data_validation(0, 0, 0, 0, &data_validation)
+            .unwrap();
+
+        worksheet.write_data_validations();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <dataValidations count="1">
+              <dataValidation type="whole" allowBlank="1" showInputMessage="1" showErrorMessage="1" errorTitle="a_x005f_x0041_b" error="a_x005f_x0041_b" promptTitle="a_x005f_x0041_b" prompt="a_x005f_x0041_b" sqref="A1">
+                <formula1>1</formula1>
+                <formula2>5</formula2>
+              </dataValidation>
+            </dataValidations>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_hyperlink_with_escaped_strings() {
+        let mut worksheet = Worksheet::new();
+
+        let url = crate::Url::new("internal:Sheet1!A1")
+            .set_text("a_x0041_b")
+            .set_tip("a_x0041_b");
+        worksheet.write_url(0, 0, &url).unwrap();
+
+        worksheet.write_hyperlinks();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <hyperlinks>
+              <hyperlink ref="A1" location="Sheet1!A1" tooltip="a_x005f_x0041_b" display="a_x005f_x0041_b"/>
+            </hyperlinks>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
     fn verify_header_footer_images() {
         let strings = [
             ("", HeaderImagePosition::Left, false),

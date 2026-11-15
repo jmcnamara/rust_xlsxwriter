@@ -3625,7 +3625,8 @@ impl Workbook {
         let sheet_id = format!("{index}");
         let rel_id = format!("rId{index}");
 
-        let mut attributes = vec![("name", name.to_string()), ("sheetId", sheet_id)];
+        let name = xmlwriter::escape_attribute_escapes(name).into_owned();
+        let mut attributes = vec![("name", name), ("sheetId", sheet_id)];
 
         match visible {
             Visible::Default => {}
@@ -3643,7 +3644,8 @@ impl Workbook {
         xml_start_tag_only(&mut self.writer, "definedNames");
 
         for defined_name in &self.defined_names {
-            let mut attributes = vec![("name", defined_name.name())];
+            let name = xmlwriter::escape_attribute_escapes(&defined_name.name()).into_owned();
+            let mut attributes = vec![("name", name)];
 
             match defined_name.name_type {
                 DefinedNameType::Global => {}

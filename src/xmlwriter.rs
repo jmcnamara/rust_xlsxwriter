@@ -331,6 +331,18 @@ where
 // As a result, it also escapes any literal strings of that type by encoding the
 // leading underscore. For example, "_x0000_" becomes "_x005F_x0000_".
 pub(crate) fn escape_xml_escapes(original: &str) -> Cow<'_, str> {
+    escape_literal_escapes(original, "_x005F")
+}
+
+// The same as escape_xml_escapes() but for attributes and docProps strings,
+// where Excel uses a lowercase prefix. For example, "_x0000_" becomes
+// "_x005f_x0000_".
+pub(crate) fn escape_attribute_escapes(original: &str) -> Cow<'_, str> {
+    escape_literal_escapes(original, "_x005f")
+}
+
+// Escape literal _xHHHH_ strings with the given encoded underscore prefix.
+fn escape_literal_escapes<'a>(original: &'a str, prefix: &str) -> Cow<'a, str> {
     if !original.contains("_x") {
         return Cow::Borrowed(original);
     }
@@ -361,7 +373,7 @@ pub(crate) fn escape_xml_escapes(original: &str) -> Cow<'_, str> {
             .chars()
             .all(|c| c.is_ascii_hexdigit())
         {
-            escaped_string.replace_range(index..index, "_x005F");
+            escaped_string.replace_range(index..index, prefix);
         }
     }
 

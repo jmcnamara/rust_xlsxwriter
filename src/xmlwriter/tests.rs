@@ -11,9 +11,9 @@ mod xmlwriter_tests {
     use std::io::Cursor;
 
     use crate::xmlwriter::{
-        self, escape_xml_data, escape_xml_escapes, xml_data_element, xml_data_element_only,
-        xml_declaration, xml_empty_tag, xml_empty_tag_only, xml_end_tag, xml_si_element,
-        xml_start_tag, xml_start_tag_only,
+        self, escape_attribute_escapes, escape_xml_data, escape_xml_escapes, xml_data_element,
+        xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only, xml_end_tag,
+        xml_si_element, xml_start_tag, xml_start_tag_only,
     };
 
     use pretty_assertions::assert_eq;
@@ -324,6 +324,17 @@ mod xmlwriter_tests {
         // Two patterns right next to each other
         let input = "_x0000__x0001_";
         assert_eq!(escape_xml_escapes(input), "_x005F_x0000__x005F_x0001_");
+    }
+
+    #[test]
+    fn test_escape_attribute_escapes() {
+        // Excel uses a lowercase prefix for attribute escapes.
+        assert_eq!(escape_attribute_escapes("hello world"), "hello world");
+        assert_eq!(escape_attribute_escapes("test_x00GG_end"), "test_x00GG_end");
+        assert_eq!(
+            escape_attribute_escapes("_x0000_middle_x0041_"),
+            "_x005f_x0000_middle_x005f_x0041_"
+        );
     }
 
     #[test]
