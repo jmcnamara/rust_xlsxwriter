@@ -23,6 +23,17 @@ mod data_validation_tests {
     use pretty_assertions::assert_eq;
 
     #[test]
+    fn test_data_validation_on_chartsheet() {
+        // Check for a data validation added to a chartsheet.
+        let mut chartsheet = Worksheet::new_chartsheet();
+        let data_validation =
+            DataValidation::new().allow_whole_number(DataValidationRule::Between(1, 10));
+
+        let result = chartsheet.add_data_validation(0, 0, 9, 0, &data_validation);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+    }
+
+    #[test]
     fn data_validation_01() -> Result<(), XlsxError> {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);

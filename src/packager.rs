@@ -197,6 +197,8 @@ impl<W: Write + Send> Packager<W> {
         self.write_image_files(workbook)?;
         self.write_chart_files(workbook)?;
         self.write_table_files(workbook)?;
+        self.write_pivot_table_files(workbook)?;
+        self.write_pivot_cache_files(workbook)?;
         self.write_vba_project(workbook)?;
 
         let mut rel_index = 0;
@@ -277,6 +279,14 @@ impl<W: Write + Send> Packager<W> {
 
         for i in 0..options.num_tables {
             content_types.add_table_name(i + 1);
+        }
+
+        for i in 0..options.num_pivot_tables {
+            content_types.add_pivot_table_name(i + 1);
+        }
+
+        for i in 0..options.num_pivot_caches {
+            content_types.add_pivot_cache_name(i + 1);
         }
 
         for i in 0..options.num_comments {
@@ -384,6 +394,14 @@ impl<W: Write + Send> Packager<W> {
 
                 worksheet_index += 1;
             }
+        }
+
+        for i in 1..=options.num_pivot_caches {
+            rels.add_document_relationship(
+                "pivotCacheDefinition",
+                format!("pivotCache/pivotCacheDefinition{i}.xml").as_str(),
+                "",
+            );
         }
 
         rels.add_document_relationship("theme", "theme/theme1.xml", "");
@@ -522,6 +540,10 @@ impl<W: Write + Send> Packager<W> {
         }
 
         for relationship in &worksheet.comment_relationships {
+            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+        }
+
+        for relationship in &worksheet.pivot_table_relationships {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 
@@ -1058,6 +1080,52 @@ impl<W: Write + Send> Packager<W> {
         Ok(())
     }
 
+    // Write the pivot table files and associated rel files.
+    fn write_pivot_table_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        let mut index = 1;
+
+        for worksheet in &mut workbook.worksheets {
+            for pivot_table in &mut worksheet.pivot_tables {
+                let filename = format!("xl/pivotTables/pivotTable{index}.xml");
+                self.zip.start_file(filename, self.zip_options)?;
+                pivot_table.assemble_xml_file();
+                self.zip.write_all(pivot_table.writer.get_ref())?;
+
+                let mut rels = Relationship::new();
+                rels.add_document_relationship(
+                    "pivotCacheDefinition",
+                    format!(
+                        "../pivotCache/pivotCacheDefinition{}.xml",
+                        pivot_table.cache_id
+                    )
+                    .as_str(),
+                    "",
+                );
+
+                let filename = format!("xl/pivotTables/_rels/pivotTable{index}.xml.rels");
+                self.zip.start_file(filename, self.zip_options)?;
+                rels.assemble_xml_file();
+                self.zip.write_all(rels.writer.get_ref())?;
+
+                index += 1;
+            }
+        }
+
+        Ok(())
+    }
+
+    // Write the pivot cache definition files.
+    fn write_pivot_cache_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        for (index, pivot_cache) in workbook.pivot_caches.iter_mut().enumerate() {
+            let filename = format!("xl/pivotCache/pivotCacheDefinition{}.xml", index + 1);
+            self.zip.start_file(filename, self.zip_options)?;
+            pivot_cache.assemble_xml_file();
+            self.zip.write_all(pivot_cache.writer.get_ref())?;
+        }
+
+        Ok(())
+    }
+
     // Write the VBA project file.
     fn write_vba_project(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         if !workbook.is_xlsm_file {
@@ -1126,6 +1194,8 @@ pub(crate) struct PackagerOptions {
     pub(crate) num_drawings: u16,
     pub(crate) num_charts: u16,
     pub(crate) num_tables: u16,
+    pub(crate) num_pivot_tables: u16,
+    pub(crate) num_pivot_caches: u16,
     pub(crate) num_comments: u16,
     pub(crate) doc_security: u8,
     pub(crate) worksheet_names: Vec<String>,
@@ -1153,6 +1223,8 @@ impl PackagerOptions {
             num_drawings: 0,
             num_charts: 0,
             num_tables: 0,
+            num_pivot_tables: 0,
+            num_pivot_caches: 0,
             num_comments: 0,
             doc_security: 0,
             worksheet_names: vec![],

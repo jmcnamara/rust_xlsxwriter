@@ -14,6 +14,15 @@ mod comment_tests {
     use std::collections::BTreeMap;
 
     #[test]
+    fn test_note_on_chartsheet() {
+        // Check for a note added to a chartsheet.
+        let mut chartsheet = crate::Worksheet::new_chartsheet();
+
+        let result = chartsheet.insert_note(0, 0, &Note::new("Note"));
+        assert!(matches!(result, Err(crate::XlsxError::ParameterError(_))));
+    }
+
+    #[test]
     fn test_assemble_with_escapes() {
         let mut comment = Comment::new();
 

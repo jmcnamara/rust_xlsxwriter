@@ -238,6 +238,7 @@ use crate::feature_property_bag::FeaturePropertyBagTypes;
 use crate::format::Format;
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
+use crate::pivot_cache::PivotCache;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::theme::{THEME_XML_2007, THEME_XML_2023};
 use crate::worksheet::Worksheet;
@@ -342,6 +343,7 @@ pub struct Workbook {
     pub(crate) string_table: Arc<Mutex<SharedStringsTable>>,
     pub(crate) feature_property_bags: HashSet<FeaturePropertyBagTypes>,
     pub(crate) theme_xml: String,
+    pub(crate) pivot_caches: Vec<PivotCache>,
 
     xf_indices: Arc<RwLock<HashMap<Format, u32>>>,
     dxf_indices: HashMap<Format, u32>,
@@ -456,6 +458,7 @@ impl Workbook {
             max_digit_width: 7,
             max_col_width: 1790,
             theme_xml: String::from(THEME_XML_2007),
+            pivot_caches: vec![],
             default_theme_version: String::from("124226"),
 
             #[cfg(feature = "constant_memory")]
@@ -2788,6 +2791,9 @@ impl Workbook {
         // Prepare worksheet tables.
         self.prepare_tables();
 
+        // Prepare the pivot tables and pivot caches.
+        self.prepare_pivot_tables()?;
+
         // Check the table and defined names for duplicates.
         self.prepare_names()?;
 
@@ -2973,6 +2979,99 @@ impl Workbook {
                 table_id = worksheet.prepare_worksheet_tables(table_id);
             }
         }
+    }
+
+    // Set the pivot table ids and create a pivot cache for each unique pivot
+    // table source range. The cache field names are read from the header row
+    // of the source data.
+    fn prepare_pivot_tables(&mut self) -> Result<(), XlsxError> {
+        let mut pivot_table_id = 1;
+        let mut cache_sources = vec![];
+
+        for worksheet in &mut self.worksheets {
+            if !worksheet.pivot_tables.is_empty() {
+                pivot_table_id =
+                    worksheet.prepare_worksheet_pivot_tables(pivot_table_id, &mut cache_sources);
+            }
+        }
+
+        self.pivot_caches.clear();
+
+        for source in cache_sources {
+            let Ok(worksheet) = self.worksheet_from_name(&source.sheet_name) else {
+                let range = utility::chart_range_abs(
+                    &source.sheet_name,
+                    source.first_row,
+                    source.first_col,
+                    source.last_row,
+                    source.last_col,
+                );
+
+                let error = format!(
+                    "Unknown worksheet name '{}' in pivot table data source '{range}'",
+                    source.sheet_name
+                );
+
+                return Err(XlsxError::UnknownWorksheetNameOrIndex(error));
+            };
+
+            // Read the field names from the header row of the source data. The
+            // header row of a constant memory worksheet has already been
+            // written to disk so the user must define the field names instead.
+            let field_names = if worksheet.use_constant_memory {
+                if source.field_names.is_empty() {
+                    return Err(XlsxError::PivotTableError(format!(
+                        "Pivot tables can't reference a constant_memory worksheet ('{}') without specifying the headers with PivotTable::set_field_names()",
+                        source.sheet_name
+                    )));
+                }
+
+                source.field_names.clone()
+            } else {
+                let header_names = worksheet.pivot_table_headers(
+                    source.first_row,
+                    source.first_col,
+                    source.last_col,
+                )?;
+
+                if !source.field_names.is_empty() && source.field_names != header_names {
+                    return Err(XlsxError::PivotTableError(format!(
+                        "Field names {:?} set with PivotTable::set_field_names() don't match the source data headers {:?}",
+                        source.field_names, header_names
+                    )));
+                }
+
+                header_names
+            };
+
+            let mut pivot_cache = PivotCache::new(source);
+            pivot_cache.field_names = field_names;
+            pivot_cache.validate_field_names()?;
+            self.pivot_caches.push(pivot_cache);
+        }
+
+        // Pass the field names back to the pivot tables so that they can map
+        // the field names to indices.
+        let xf_indices = self.xf_indices.read().expect("RwLock poisoned");
+        for worksheet in &mut self.worksheets {
+            for pivot_table in &mut worksheet.pivot_tables {
+                let pivot_cache = &self.pivot_caches[pivot_table.cache_id as usize - 1];
+                pivot_table.field_names.clone_from(&pivot_cache.field_names);
+                pivot_table.validate_field_names()?;
+
+                // Set the number format index of any value field formats.
+                for value_field in &mut pivot_table.value_fields {
+                    if let Some(format) = &value_field.format {
+                        if let Some(xf_index) = xf_indices.get(format) {
+                            value_field.num_format_index =
+                                self.xf_formats[*xf_index as usize].num_format_index;
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(())
     }
 
     // Check the Table and Defined names in the workbook for duplicates. Defined
@@ -3375,6 +3474,7 @@ impl Workbook {
     ) -> Result<PackagerOptions, XlsxError> {
         package_options.doc_security = self.read_only_mode;
         package_options.num_embedded_images = self.embedded_images.len() as u32;
+        package_options.num_pivot_caches = self.pivot_caches.len() as u16;
 
         let mut defined_names = self.user_defined_names.clone();
         let mut sheet_names: HashMap<String, u16> = HashMap::new();
@@ -3435,6 +3535,10 @@ impl Workbook {
 
             if !worksheet.tables.is_empty() {
                 package_options.num_tables += worksheet.tables.len() as u16;
+            }
+
+            if !worksheet.pivot_tables.is_empty() {
+                package_options.num_pivot_tables += worksheet.pivot_tables.len() as u16;
             }
 
             if !worksheet.notes.is_empty() {
@@ -3541,6 +3645,11 @@ impl Workbook {
 
         // Write the calcPr element.
         self.write_calc_pr();
+
+        // Write the pivotCaches element.
+        if !self.pivot_caches.is_empty() {
+            self.write_pivot_caches();
+        }
 
         // Close the workbook tag.
         xml_end_tag(&mut self.writer, "workbook");
@@ -3692,6 +3801,26 @@ impl Workbook {
         }
 
         xml_end_tag(&mut self.writer, "definedNames");
+    }
+
+    // Write the <pivotCaches> element.
+    fn write_pivot_caches(&mut self) {
+        xml_start_tag_only(&mut self.writer, "pivotCaches");
+
+        // The pivot cache rel ids follow the worksheet rel ids.
+        let num_sheets = self.worksheets.len();
+
+        for index in 1..=self.pivot_caches.len() {
+            // Write the pivotCache element.
+            let attributes = [
+                ("cacheId", index.to_string()),
+                ("r:id", format!("rId{}", num_sheets + index)),
+            ];
+
+            xml_empty_tag(&mut self.writer, "pivotCache", &attributes);
+        }
+
+        xml_end_tag(&mut self.writer, "pivotCaches");
     }
 
     // Write the <calcPr> element.

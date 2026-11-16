@@ -161,6 +161,17 @@ mod conditional_format_tests {
     }
 
     #[test]
+    fn test_conditional_format_on_chartsheet() {
+        // Check for a conditional format added to a chartsheet.
+        let mut chartsheet = Worksheet::new_chartsheet();
+        let conditional_format =
+            ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::EqualTo(5));
+
+        let result = chartsheet.add_conditional_format(0, 0, 9, 0, &conditional_format);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+    }
+
+    #[test]
     fn conditional_format_01() -> Result<(), XlsxError> {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);

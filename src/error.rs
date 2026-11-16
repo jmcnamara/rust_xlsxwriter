@@ -25,6 +25,7 @@ use serde::de;
 use serde::ser;
 
 #[derive(Debug)]
+#[non_exhaustive]
 /// The `XlsxError` enum defines the error values for the `rust_xlsxwriter`
 /// library.
 pub enum XlsxError {
@@ -158,6 +159,10 @@ pub enum XlsxError {
     /// A general error that is raised when a table parameter is incorrect, or a
     /// table is configured incorrectly.
     TableError(String),
+
+    /// A general error that is raised when a pivot table parameter is
+    /// incorrect, or a pivot table is configured incorrectly.
+    PivotTableError(String),
 
     /// A Worksheet and Table autofilter range overlap. This is strictly
     /// prohibited by Excel.
@@ -376,6 +381,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::TableError(error) => {
                 write!(f, "Table error: '{error}'.")
+            }
+
+            XlsxError::PivotTableError(error) => {
+                write!(f, "Pivot table error: '{error}'.")
             }
 
             XlsxError::ConditionalFormatError(error) => {
