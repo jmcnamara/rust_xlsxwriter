@@ -112,6 +112,24 @@ impl ContentTypes {
         self.add_override(&part_name, content_type);
     }
 
+    // Add the name of a pivot table to the ContentTypes overrides.
+    pub(crate) fn add_pivot_table_name(&mut self, index: u16) {
+        let content_type =
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotTable+xml";
+        let part_name = format!("/xl/pivotTables/pivotTable{index}.xml");
+
+        self.add_override(&part_name, content_type);
+    }
+
+    // Add the name of a pivot cache definition to the ContentTypes overrides.
+    pub(crate) fn add_pivot_cache_name(&mut self, index: u16) {
+        let content_type =
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheDefinition+xml";
+        let part_name = format!("/xl/pivotCache/pivotCacheDefinition{index}.xml");
+
+        self.add_override(&part_name, content_type);
+    }
+
     // Add the name of a comment file to the ContentTypes overrides.
     pub(crate) fn add_comments_name(&mut self, index: u16) {
         let content_type =

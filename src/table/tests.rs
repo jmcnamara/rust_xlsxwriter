@@ -9,7 +9,7 @@ mod table_tests {
 
     use crate::table::Table;
     use crate::test_functions::xml_to_vec;
-    use crate::{xmlwriter, TableColumn, TableFunction, Worksheet, XlsxError};
+    use crate::{xmlwriter, TableColumn, TableFunction, Workbook, Worksheet, XlsxError};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -30,6 +30,16 @@ mod table_tests {
         table = table.set_header_row(false);
         assert_eq!(0, table.first_data_row());
         assert_eq!(8, table.last_data_row());
+    }
+
+    #[test]
+    fn test_table_on_chartsheet() {
+        // Check for a table added to a chartsheet.
+        let mut workbook = Workbook::new();
+        let chartsheet = workbook.add_chartsheet();
+
+        let result = chartsheet.add_table(0, 0, 8, 3, &Table::new());
+        assert!(matches!(result, Err(XlsxError::TableError(_))));
     }
 
     #[test]

@@ -1386,6 +1386,7 @@ use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject, Dr
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::formula::Formula;
+use crate::pivot_table::PivotTableSource;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::utility::utf16_len;
@@ -1400,7 +1401,8 @@ use crate::{
     ChartRangeCacheDataType, Color, ConditionalFormat, DataValidation, DataValidationErrorStyle,
     DataValidationRuleInternal, DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria,
     FilterData, FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoExcelDateTime, Note,
-    ObjectMovement, ProtectionOptions, Shape, Sparkline, SparklineType, Table, TableFunction, Url,
+    ObjectMovement, PivotTable, ProtectionOptions, Shape, Sparkline, SparklineType, Table,
+    TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -1522,6 +1524,7 @@ pub struct Worksheet {
     pub(crate) notes: BTreeMap<RowNum, BTreeMap<ColNum, Note>>,
     pub(crate) shapes: BTreeMap<(RowNum, ColNum, u32, u32), Shape>,
     pub(crate) tables: Vec<Table>,
+    pub(crate) pivot_tables: Vec<PivotTable>,
     pub(crate) has_embedded_image_descriptions: bool,
     pub(crate) embedded_images: Vec<Image>,
     pub(crate) global_embedded_image_indices: Vec<u32>,
@@ -1548,6 +1551,7 @@ pub struct Worksheet {
     pub(crate) header_footer_vml_info: Vec<VmlInfo>,
     pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
     pub(crate) table_relationships: Vec<(String, String, String)>,
+    pub(crate) pivot_table_relationships: Vec<(String, String, String)>,
     pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
     pub(crate) background_relationships: Vec<(String, String, String)>,
 
@@ -1767,6 +1771,7 @@ impl Worksheet {
             merged_ranges: vec![],
             merged_cells: HashMap::new(),
             tables: vec![],
+            pivot_tables: vec![],
             table_ranges: vec![],
             table_cells: HashMap::new(),
             default_format: Format::default(),
@@ -1887,6 +1892,7 @@ impl Worksheet {
             header_footer_vml_info: vec![],
             hyperlink_relationships: vec![],
             table_relationships: vec![],
+            pivot_table_relationships: vec![],
             vml_drawing_relationships: vec![],
             background_relationships: vec![],
             is_chartsheet: false,
@@ -5218,6 +5224,8 @@ impl Worksheet {
         x_offset: u32,
         y_offset: u32,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Images")?;
+
         // Check row and columns are in the allowed range.
         if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -5475,6 +5483,8 @@ impl Worksheet {
         image: &Image,
         keep_aspect_ratio: bool,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Images")?;
+
         // Check row and columns are in the allowed range.
         if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -5532,6 +5542,8 @@ impl Worksheet {
         col: ColNum,
         image: &Image,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Images")?;
+
         // Check row and columns are in the allowed range.
         if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -5621,7 +5633,11 @@ impl Worksheet {
     /// src="https://rustxlsxwriter.github.io/images/app_background_image.png">
     ///
     pub fn insert_background_image(&mut self, image: &Image) -> &mut Worksheet {
-        self.background_image = Some(image.clone());
+        // Chartsheets don't support background images (in this way).
+        if !self.is_chartsheet {
+            self.background_image = Some(image.clone());
+        }
+
         self
     }
 
@@ -5877,6 +5893,8 @@ impl Worksheet {
         col: ColNum,
         note: &Note,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Notes")?;
+
         // Check row and columns are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -6051,6 +6069,8 @@ impl Worksheet {
         x_offset: u32,
         y_offset: u32,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Shapes")?;
+
         // Check row and columns are in the allowed range.
         if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -6291,6 +6311,8 @@ impl Worksheet {
         x_offset: u32,
         y_offset: u32,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Buttons")?;
+
         // Check row and columns are in the allowed range.
         if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -9029,6 +9051,12 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
+        if self.is_chartsheet {
+            return Err(XlsxError::TableError(
+                "Tables can't be added to a chartsheet".to_string(),
+            ));
+        }
+
         // Check that the table has at least one valid row.
         if first_row == last_row && table.show_header_row {
             return Err(XlsxError::TableError(
@@ -9067,6 +9095,17 @@ impl Worksheet {
                     ));
                 }
             }
+        }
+
+        // Check that the table doesn't overlap a pivot table.
+        if self.pivot_tables.iter().any(|pivot_table| {
+            (first_row..=last_row)
+                .any(|row| (first_col..=last_col).any(|col| pivot_table.overlaps_anchor(row, col)))
+        }) {
+            return Err(XlsxError::TableError(format!(
+                "Table range {} overlaps a pivot table",
+                cell_range.to_error_string()
+            )));
         }
 
         // Check that the table autofilter doesn't overlap the worksheet
@@ -9171,6 +9210,109 @@ impl Worksheet {
         // Store the table if everything was okay.
         self.table_ranges.push(cell_range);
         self.tables.push(table);
+
+        Ok(self)
+    }
+
+    /// Add a pivot table to a worksheet.
+    ///
+    /// This feature is a work in progress.
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number of the top left cell of the pivot
+    ///   table.
+    /// - `col`: The zero indexed column number of the top left cell of the
+    ///   pivot table.
+    /// - `pivot_table`: A [`PivotTable`] struct reference.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    pub fn add_pivot_table(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        pivot_table: &PivotTable,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        if self.is_chartsheet {
+            return Err(XlsxError::PivotTableError(
+                "Pivot tables can't be added to a chartsheet".to_string(),
+            ));
+        }
+
+        pivot_table.validate()?;
+
+        let mut pivot_table = pivot_table.clone();
+        pivot_table.row = row;
+        pivot_table.col = col;
+
+        // Filter fields move the pivot table body down, below the filters.
+        // Check that the pivot table is still within the worksheet row limit.
+        if pivot_table.body_row() >= ROW_MAX {
+            return Err(XlsxError::PivotTableError(format!(
+                "Pivot table filter fields move the pivot table body past Excel's row limit (first body row: {})",
+                pivot_table.body_row() + 1
+            )));
+        }
+
+        // Check that the pivot table doesn't overlap a worksheet table, merged
+        // range, other pivot table or its own source data. The full size of
+        // the pivot table isn't known until Excel refreshes it, so only the
+        // cells from the anchor down to the first body row are checked.
+        let pivot_cell = utility::row_col_to_cell(row, col);
+        for pivot_row in row..=pivot_table.body_row() {
+            if let Some(index) = self.table_cells.get(&(pivot_row, col)) {
+                return Err(XlsxError::PivotTableError(format!(
+                    "Pivot table at '{pivot_cell}' overlaps worksheet table range {}",
+                    self.table_ranges[*index].to_error_string()
+                )));
+            }
+
+            if let Some(index) = self.merged_cells.get(&(pivot_row, col)) {
+                return Err(XlsxError::PivotTableError(format!(
+                    "Pivot table at '{pivot_cell}' overlaps merged range {}",
+                    self.merged_ranges[*index].to_error_string()
+                )));
+            }
+
+            if self
+                .pivot_tables
+                .iter()
+                .any(|other| other.overlaps_anchor(pivot_row, col))
+            {
+                return Err(XlsxError::PivotTableError(format!(
+                    "Pivot table at '{pivot_cell}' overlaps a previous pivot table"
+                )));
+            }
+
+            let source = &pivot_table.source;
+            if source.sheet_name == self.name
+                && (source.first_row..=source.last_row).contains(&pivot_row)
+                && (source.first_col..=source.last_col).contains(&col)
+            {
+                return Err(XlsxError::PivotTableError(format!(
+                    "Pivot table at '{pivot_cell}' overlaps its source data"
+                )));
+            }
+        }
+
+        // Store any value field formats with the cell formats so that they
+        // share the same number format indices.
+        for value_field in &pivot_table.value_fields {
+            if let Some(format) = &value_field.format {
+                self.format_xf_index(format);
+            }
+        }
+
+        self.pivot_tables.push(pivot_table);
 
         Ok(self)
     }
@@ -9292,6 +9434,8 @@ impl Worksheet {
     where
         T: ConditionalFormat + Send + Sync,
     {
+        self.allow_for_worksheet_only("Conditional formats")?;
+
         // Check rows and cols are in the allowed range.
         if !self.check_dimensions_only(first_row, first_col)
             || !self.check_dimensions_only(last_row, last_col)
@@ -9459,6 +9603,8 @@ impl Worksheet {
         last_col: ColNum,
         data_validation: &DataValidation,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Data validations")?;
+
         // Check rows and cols are in the allowed range.
         if !self.check_dimensions_only(first_row, first_col)
             || !self.check_dimensions_only(last_row, last_col)
@@ -9568,6 +9714,8 @@ impl Worksheet {
         col: ColNum,
         sparkline: &Sparkline,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Sparklines")?;
+
         // Check row and col are in the allowed range.
         if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -9702,6 +9850,8 @@ impl Worksheet {
         last_col: ColNum,
         sparkline: &Sparkline,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Sparklines")?;
+
         // Check rows and cols are in the allowed range.
         if !self.check_dimensions_only(first_row, first_col)
             || !self.check_dimensions_only(last_row, last_col)
@@ -15851,6 +16001,8 @@ impl Worksheet {
         image: &Image,
         format: Option<&Format>,
     ) -> Result<&mut Worksheet, XlsxError> {
+        self.allow_for_worksheet_only("Images")?;
+
         // Check row and columns are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -16472,6 +16624,18 @@ impl Worksheet {
         true
     }
 
+    // Check that an object isn't being added to a chartsheet, where it would
+    // be ignored or would create an invalid file.
+    fn allow_for_worksheet_only(&self, object: &str) -> Result<(), XlsxError> {
+        if self.is_chartsheet {
+            return Err(XlsxError::ParameterError(format!(
+                "{object} can't be added to a chartsheet"
+            )));
+        }
+
+        Ok(())
+    }
+
     // Check that row and col are within the allowed Excel range but don't
     // modify the worksheet cell range.
     #[allow(clippy::unused_self)]
@@ -17033,6 +17197,43 @@ impl Worksheet {
         }
     }
 
+    // Set the default name and pivot cache id for each pivot table and also
+    // set the rel linkages between the worksheet and pivot table xml files.
+    pub(crate) fn prepare_worksheet_pivot_tables(
+        &mut self,
+        mut pivot_table_id: u32,
+        cache_sources: &mut Vec<PivotTableSource>,
+    ) -> u32 {
+        for (index, pivot_table) in self.pivot_tables.iter_mut().enumerate() {
+            if pivot_table.name.is_empty() {
+                pivot_table.name = format!("PivotTable{}", index + 1);
+            }
+
+            // Pivot tables with the same source data share a pivot cache.
+            let cache_index = if let Some(cache_index) = cache_sources
+                .iter()
+                .position(|source| *source == pivot_table.source)
+            {
+                cache_index
+            } else {
+                cache_sources.push(pivot_table.source.clone());
+                cache_sources.len() - 1
+            };
+
+            pivot_table.cache_id = cache_index as u32 + 1;
+
+            self.pivot_table_relationships.push((
+                "pivotTable".to_string(),
+                format!("../pivotTables/pivotTable{pivot_table_id}.xml"),
+                String::new(),
+            ));
+
+            pivot_table_id += 1;
+        }
+
+        pivot_table_id
+    }
+
     // Set a unique table id for each table and also set the rel linkages
     // between the worksheet and table xml files.
     pub(crate) fn prepare_worksheet_tables(&mut self, mut table_id: u32) -> u32 {
@@ -17327,6 +17528,10 @@ impl Worksheet {
             xmlwriter::reset(&mut table.writer);
         }
 
+        for pivot_table in &mut self.pivot_tables {
+            xmlwriter::reset(&mut pivot_table.writer);
+        }
+
         self.rel_count = 0;
         self.comment_relationships.clear();
         self.drawing_object_relationships.clear();
@@ -17336,6 +17541,7 @@ impl Worksheet {
         self.header_footer_vml_info.clear();
         self.hyperlink_relationships.clear();
         self.table_relationships.clear();
+        self.pivot_table_relationships.clear();
         self.vml_drawing_relationships.clear();
         self.background_relationships.clear();
 
@@ -17349,6 +17555,7 @@ impl Worksheet {
         !self.hyperlink_relationships.is_empty()
             || !self.drawing_object_relationships.is_empty()
             || !self.table_relationships.is_empty()
+            || !self.pivot_table_relationships.is_empty()
             || !self.background_relationships.is_empty()
     }
 
@@ -17473,6 +17680,59 @@ impl Worksheet {
 
         cache.data = data;
         cache
+    }
+
+    // Get the header names of a pivot table data source. These are almost
+    // always strings but we try to handle other types as well.
+    pub(crate) fn pivot_table_headers(
+        &self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_col: ColNum,
+    ) -> Result<Vec<String>, XlsxError> {
+        let mut headers = vec![];
+
+        for col_num in first_col..=last_col {
+            let header = match self
+                .data_table
+                .get(&first_row)
+                .and_then(|columns| columns.get(&col_num))
+            {
+                Some(
+                    CellType::String { string, .. }
+                    | CellType::InlineString { string, .. }
+                    | CellType::RichString {
+                        raw_string: string, ..
+                    },
+                ) => string.to_string(),
+
+                Some(CellType::Number { number, .. } | CellType::DateTime { number, .. }) => {
+                    number.to_string()
+                }
+
+                Some(CellType::Boolean { boolean, .. }) => {
+                    if *boolean { "TRUE" } else { "FALSE" }.to_string()
+                }
+
+                Some(CellType::Formula { result, .. } | CellType::ArrayFormula { result, .. }) => {
+                    if result.is_empty() {
+                        let cell = utility::row_col_to_cell(first_row, col_num);
+                        return Err(XlsxError::PivotTableError(format!(
+                            "Header cell '{}!{cell}' is a formula without a result. Set one with Formula::set_result() or set the headers with PivotTable::set_field_names()",
+                            self.name
+                        )));
+                    }
+
+                    result.to_string()
+                }
+
+                _ => String::new(),
+            };
+
+            headers.push(header);
+        }
+
+        Ok(headers)
     }
 
     // Get the default header names for a worksheet table. These are generally

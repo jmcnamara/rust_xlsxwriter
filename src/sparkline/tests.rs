@@ -52,6 +52,19 @@ mod sparkline_tests {
     }
 
     #[test]
+    fn test_sparkline_on_chartsheet() {
+        // Check for a sparkline added to a chartsheet.
+        let mut chartsheet = Worksheet::new_chartsheet();
+        let sparkline = Sparkline::new().set_range(("Sheet1", 0, 0, 0, 4));
+
+        let result = chartsheet.add_sparkline(0, 5, &sparkline);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+
+        let result = chartsheet.add_sparkline_group(0, 5, 2, 5, &sparkline);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+    }
+
+    #[test]
     fn sparkline02_1() -> Result<(), XlsxError> {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);

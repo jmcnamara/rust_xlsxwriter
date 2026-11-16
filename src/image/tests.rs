@@ -220,4 +220,20 @@ mod image_tests {
         let image = Image::new_from_buffer(&tmp_bmp(i32::MIN));
         assert!(matches!(image, Err(XlsxError::ImageDimensionError)));
     }
+
+    #[test]
+    fn test_image_on_chartsheet() {
+        // Check for an inserted or embedded image added to a chartsheet.
+        let mut chartsheet = crate::Worksheet::new_chartsheet();
+        let image = Image::new("tests/input/images/red.png").unwrap();
+
+        let result = chartsheet.insert_image(0, 0, &image);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+
+        let result = chartsheet.insert_image_fit_to_cell(0, 0, &image, false);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+
+        let result = chartsheet.embed_image(0, 0, &image);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+    }
 }
