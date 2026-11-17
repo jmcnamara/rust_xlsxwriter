@@ -30,7 +30,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         worksheet.write_string(row, 3, data.3)?;
     }
 
-    let pivot_table = PivotTable::new().set_data_source("Sheet1", 0, 0, 50, 3);
+    let pivot_table = PivotTable::new().set_data_source(("Sheet1", 0, 0, 50, 3));
 
     let worksheet = workbook.add_worksheet();
     worksheet.add_pivot_table(2, 0, &pivot_table)?;

@@ -47,6 +47,7 @@ pub struct PivotTable {
     pub(crate) name: String,
     pub(crate) cache_id: u32,
     pub(crate) source: PivotTableSource,
+    source_error: Option<String>,
     pub(crate) field_names: Vec<String>,
 
     pub(crate) row: RowNum,
@@ -79,6 +80,7 @@ impl PivotTable {
             name: String::new(),
             cache_id: 0,
             source: PivotTableSource::default(),
+            source_error: None,
             field_names: vec![],
             row: 0,
             col: 0,
@@ -95,26 +97,151 @@ impl PivotTable {
 
     /// Set the worksheet range of the source data for the pivot table.
     ///
-    /// The first row of the range should contain the field names.
+    /// The first row of the range should contain the field names. The data
+    /// source is required since you can't create a pivot table without it. All
+    /// of the other pivot table settings are optional.
+    ///
+    /// The range is checked when the pivot table is added to a worksheet with
+    /// [`Worksheet::add_pivot_table()`](crate::Worksheet::add_pivot_table). The
+    /// sheet name and header row are checked when the file is saved.
     ///
     /// # Parameters
     ///
-    /// - `sheet_name`: The worksheet name of the source data.
-    /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first column of the range.
-    /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last column of the range.
+    /// - `source`: The source data range. This can be a string like
+    ///   `"Sheet1!A1:D9"` or a tuple like `("Sheet1", 0, 0, 8, 3)`. See
+    ///   [`IntoPivotTableSource`] for details.
     ///
-    pub fn set_data_source(
-        mut self,
-        sheet_name: &str,
-        first_row: RowNum,
-        first_col: ColNum,
-        last_row: RowNum,
-        last_col: ColNum,
-    ) -> PivotTable {
+    /// # Examples
+    ///
+    /// Example of creating a simple pivot table and setting the data source.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_pivot_table_set_data_source.rs
+    /// #
+    /// # use rust_xlsxwriter::{PivotTable, PivotTableValueField, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet for the source data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data to summarize.
+    /// #     let data = [
+    /// #         ("East", "Apple", 9000, "July"),
+    /// #         ("West", "Pear", 5000, "July"),
+    /// #         ("North", "Apple", 3000, "August"),
+    /// #         ("East", "Grape", 8000, "August"),
+    /// #         ("West", "Apple", 6000, "September"),
+    /// #         ("North", "Pear", 4000, "September"),
+    /// #         ("East", "Pear", 7000, "October"),
+    /// #         ("South", "Grape", 2000, "October"),
+    /// #     ];
+    /// #
+    /// #     // Write the header row and the data.
+    /// #     worksheet.write_row(0, 0, ["Region", "Item", "Volume", "Month"])?;
+    /// #     for (row, (region, item, volume, month)) in data.iter().enumerate() {
+    /// #         let row = row as u32 + 1;
+    /// #         worksheet.write(row, 0, *region)?;
+    /// #         worksheet.write(row, 1, *item)?;
+    /// #         worksheet.write(row, 2, *volume)?;
+    /// #         worksheet.write(row, 3, *month)?;
+    /// #     }
+    /// #
+    ///     // Create a pivot table that sums the "Volume" by "Region". Set the data
+    ///     // source to point to the data on the first worksheet.
+    ///     let pivot_table = PivotTable::new()
+    ///         .set_data_source("Sheet1!A1:D9")
+    ///         .add_row_field("Region")
+    ///         .add_value_field(&PivotTableValueField::new("Volume"));
+    /// #
+    /// #     // Add a worksheet for the pivot table and add the pivot table to it.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #     worksheet.add_pivot_table(2, 0, &pivot_table)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("pivot_table.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/pivot_table_set_data_source.png">
+    ///
+    /// The data source can also be specified as a tuple. This will generate the
+    /// same results as the previous example.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_pivot_table_set_data_source_tuple.rs
+    /// #
+    /// # use rust_xlsxwriter::{PivotTable, PivotTableValueField, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet for the source data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data to summarize.
+    /// #     let data = [
+    /// #         ("East", "Apple", 9000, "July"),
+    /// #         ("West", "Pear", 5000, "July"),
+    /// #         ("North", "Apple", 3000, "August"),
+    /// #         ("East", "Grape", 8000, "August"),
+    /// #         ("West", "Apple", 6000, "September"),
+    /// #         ("North", "Pear", 4000, "September"),
+    /// #         ("East", "Pear", 7000, "October"),
+    /// #         ("South", "Grape", 2000, "October"),
+    /// #     ];
+    /// #
+    /// #     // Write the header row and the data.
+    /// #     worksheet.write_row(0, 0, ["Region", "Item", "Volume", "Month"])?;
+    /// #     for (row, (region, item, volume, month)) in data.iter().enumerate() {
+    /// #         let row = row as u32 + 1;
+    /// #         worksheet.write(row, 0, *region)?;
+    /// #         worksheet.write(row, 1, *item)?;
+    /// #         worksheet.write(row, 2, *volume)?;
+    /// #         worksheet.write(row, 3, *month)?;
+    /// #     }
+    /// #
+    ///     // Create a pivot table that sums the "Volume" by "Region". Set the data
+    ///     // source to point to the data on the first worksheet, using a tuple.
+    ///     let pivot_table = PivotTable::new()
+    ///         .set_data_source(("Sheet1", 0, 0, 8, 3))
+    ///         .add_row_field("Region")
+    ///         .add_value_field(&PivotTableValueField::new("Volume"));
+    /// #
+    /// #    // Add a worksheet for the pivot table and add the pivot table to it.
+    /// #   let worksheet = workbook.add_worksheet();
+    /// #   worksheet.add_pivot_table(2, 0, &pivot_table)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("pivot_table.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn set_data_source<T>(mut self, source: T) -> PivotTable
+    where
+        T: IntoPivotTableSource,
+    {
+        let (sheet_name, first_row, first_col, last_row, last_col) =
+            match source.new_pivot_table_source() {
+                Ok(range) => range,
+                Err(range_string) => {
+                    self.source_error = Some(range_string);
+                    return self;
+                }
+            };
+
+        self.source_error = None;
         self.source = PivotTableSource {
-            sheet_name: sheet_name.to_string(),
+            sheet_name,
             first_row,
             first_col,
             last_row,
@@ -260,6 +387,12 @@ impl PivotTable {
     // - Custom value field names must be unique, ignoring case.
     //
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        if let Some(range) = &self.source_error {
+            return Err(XlsxError::PivotTableError(format!(
+                "The pivot table data source '{range}' isn't a valid range like 'Sheet1!A1:D9'"
+            )));
+        }
+
         let source = &self.source;
 
         if source.sheet_name.is_empty() {
@@ -1419,6 +1552,86 @@ impl fmt::Display for PivotTableFunction {
             Self::CountNumbers => write!(f, "countNums"),
         }
     }
+}
+
+// -----------------------------------------------------------------------
+// Traits.
+// -----------------------------------------------------------------------
+
+/// Trait to map types into a pivot table data source range.
+///
+/// The [`PivotTable::set_data_source()`] method accepts the following types:
+///
+/// - A string with an Excel like range such as `"Sheet1!A1:D9"`. The range
+///   can also use absolute `$` references and a quoted sheet name, like
+///   `"'Sales Data'!$A$1:$D$9"`.
+/// - A 5 value tuple that can be used to create the range programmatically
+///   using a sheet name and zero indexed row and column values like:
+///   `("Sheet1", 0, 0, 8, 3)` (this gives the same range as the first string
+///   value above).
+///
+pub trait IntoPivotTableSource {
+    /// Trait function to turn a type into a sheet name and a zero indexed
+    /// `(first_row, first_col, last_row, last_col)` range. It returns the
+    /// original range string as an error if it isn't valid.
+    fn new_pivot_table_source(&self) -> Result<(String, RowNum, ColNum, RowNum, ColNum), String>;
+}
+
+impl IntoPivotTableSource for &str {
+    fn new_pivot_table_source(&self) -> Result<(String, RowNum, ColNum, RowNum, ColNum), String> {
+        parse_source_range(self).ok_or_else(|| self.to_string())
+    }
+}
+
+impl IntoPivotTableSource for &String {
+    fn new_pivot_table_source(&self) -> Result<(String, RowNum, ColNum, RowNum, ColNum), String> {
+        parse_source_range(self).ok_or_else(|| self.to_string())
+    }
+}
+
+impl IntoPivotTableSource for (&str, RowNum, ColNum, RowNum, ColNum) {
+    fn new_pivot_table_source(&self) -> Result<(String, RowNum, ColNum, RowNum, ColNum), String> {
+        Ok((self.0.to_string(), self.1, self.2, self.3, self.4))
+    }
+}
+
+// Parse a range string like "Sheet1!A1:D9" or "'Sheet 1'!$A$1:$D$9" into a
+// sheet name and a zero indexed range.
+fn parse_source_range(range_string: &str) -> Option<(String, RowNum, ColNum, RowNum, ColNum)> {
+    let range_string = range_string.strip_prefix('=').unwrap_or(range_string);
+
+    let (sheet_name, range) = utility::split_local_name(range_string)?;
+    let sheet_name = utility::unquote_sheetname(sheet_name);
+    if sheet_name.is_empty() {
+        return None;
+    }
+
+    let range = range.replace('$', "").to_uppercase();
+    if !utility::is_valid_range(&range) {
+        return None;
+    }
+
+    let (first_cell, last_cell) = range.split_once(':')?;
+    let (first_row, first_col) = parse_cell(first_cell)?;
+    let (last_row, last_col) = parse_cell(last_cell)?;
+
+    Some((sheet_name, first_row, first_col, last_row, last_col))
+}
+
+// Parse an "A1" style cell reference into zero indexed row and column values.
+fn parse_cell(cell: &str) -> Option<(RowNum, ColNum)> {
+    let (col_string, row_string) = utility::split_cell_reference(cell);
+
+    // Limit the column name length to avoid an overflow. Columns beyond the
+    // Excel limit are rejected in validate().
+    if col_string.is_empty() || col_string.len() > 3 {
+        return None;
+    }
+
+    let row = row_string.parse::<RowNum>().ok()?.checked_sub(1)?;
+    let col = utility::column_name_to_number(&col_string);
+
+    Some((row, col))
 }
 
 // -----------------------------------------------------------------------

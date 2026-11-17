@@ -31,7 +31,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     }
 
     let pivot_table = PivotTable::new()
-        .set_data_source("Sheet1", 0, 0, 50, 3)
+        .set_data_source(("Sheet1", 0, 0, 50, 3))
         .add_row_field("Region")
         .add_value_field(&PivotTableValueField::new("Volume"));
 
@@ -67,7 +67,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     }
 
     let pivot_table = PivotTable::new()
-        .set_data_source("Sheet1", 0, 0, 50, 3)
+        .set_data_source(("Sheet1", 0, 0, 50, 3))
         .set_field_names(&["Region", "Item", "Volume", "Month"])
         .add_row_field("Region")
         .add_value_field(&PivotTableValueField::new("Volume"));
