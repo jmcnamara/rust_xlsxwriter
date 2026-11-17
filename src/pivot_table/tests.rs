@@ -7,6 +7,7 @@
 #[cfg(test)]
 mod pivot_table_tests {
 
+    use crate::pivot_table::parse_source_range;
     use crate::worksheet::{COL_MAX, ROW_MAX};
     use crate::{
         Format, Formula, PivotTable, PivotTableValueField, Table, Workbook, Worksheet, XlsxError,
@@ -18,7 +19,7 @@ mod pivot_table_tests {
 
         // Check that a field can't be used twice in the same axis.
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_row_field("Region")
             .add_row_field("Region");
 
@@ -28,7 +29,7 @@ mod pivot_table_tests {
         // Check that a field can't be used in more than one of the row, column
         // and filter axes.
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_row_field("Region")
             .add_column_field("Region");
 
@@ -36,7 +37,7 @@ mod pivot_table_tests {
         assert!(matches!(result, Err(XlsxError::PivotTableError(_))));
 
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_column_field("Item")
             .add_filter_field("Item");
 
@@ -46,7 +47,7 @@ mod pivot_table_tests {
         // Check that a field can be used as a row field and a value field, and
         // in several value fields.
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_row_field("Volume")
             .add_value_field(&PivotTableValueField::new("Volume"))
             .add_value_field(&PivotTableValueField::new("Volume"));
@@ -66,7 +67,7 @@ mod pivot_table_tests {
         assert!(matches!(result, Err(XlsxError::PivotTableError(_))));
 
         // Check for a data source with a header row but no data rows.
-        let pivot_table = PivotTable::new().set_data_source("Sheet1", 0, 0, 0, 3);
+        let pivot_table = PivotTable::new().set_data_source(("Sheet1", 0, 0, 0, 3));
 
         let result = worksheet.add_pivot_table(2, 0, &pivot_table);
         assert!(matches!(result, Err(XlsxError::PivotTableError(_))));
@@ -74,30 +75,30 @@ mod pivot_table_tests {
         // Check for user defined field names that don't match the number of
         // source columns.
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .set_field_names(&["Region", "Item", "Volume"]);
 
         let result = worksheet.add_pivot_table(2, 0, &pivot_table);
         assert!(matches!(result, Err(XlsxError::PivotTableError(_))));
 
         // Check for a data source with the rows or columns reversed.
-        let pivot_table = PivotTable::new().set_data_source("Sheet1", 50, 0, 0, 3);
+        let pivot_table = PivotTable::new().set_data_source(("Sheet1", 50, 0, 0, 3));
 
         let result = worksheet.add_pivot_table(2, 0, &pivot_table);
         assert!(matches!(result, Err(XlsxError::RowColumnOrderError)));
 
-        let pivot_table = PivotTable::new().set_data_source("Sheet1", 0, 3, 50, 0);
+        let pivot_table = PivotTable::new().set_data_source(("Sheet1", 0, 3, 50, 0));
 
         let result = worksheet.add_pivot_table(2, 0, &pivot_table);
         assert!(matches!(result, Err(XlsxError::RowColumnOrderError)));
 
         // Check for a data source outside Excel's row or column limits.
-        let pivot_table = PivotTable::new().set_data_source("Sheet1", 0, 0, ROW_MAX, 3);
+        let pivot_table = PivotTable::new().set_data_source(("Sheet1", 0, 0, ROW_MAX, 3));
 
         let result = worksheet.add_pivot_table(2, 0, &pivot_table);
         assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        let pivot_table = PivotTable::new().set_data_source("Sheet1", 0, 0, 50, COL_MAX);
+        let pivot_table = PivotTable::new().set_data_source(("Sheet1", 0, 0, 50, COL_MAX));
 
         let result = worksheet.add_pivot_table(2, 0, &pivot_table);
         assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
@@ -112,7 +113,7 @@ mod pivot_table_tests {
         worksheet.write(1, 0, "East").unwrap();
 
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet3", 0, 0, 1, 0)
+            .set_data_source(("Sheet3", 0, 0, 1, 0))
             .add_row_field("Region");
         let worksheet = workbook.add_worksheet();
         worksheet.add_pivot_table(2, 0, &pivot_table).unwrap();
@@ -140,7 +141,7 @@ mod pivot_table_tests {
             worksheet.write(1, 0, "East").unwrap();
 
             let pivot_table = PivotTable::new()
-                .set_data_source("Sheet1", 0, 0, 1, 0)
+                .set_data_source(("Sheet1", 0, 0, 1, 0))
                 .add_row_field("Region");
             let worksheet = workbook.add_worksheet();
             worksheet.add_pivot_table(2, 0, &pivot_table).unwrap();
@@ -156,7 +157,7 @@ mod pivot_table_tests {
         worksheet.write(1, 0, "East").unwrap();
 
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 1, 0)
+            .set_data_source(("Sheet1", 0, 0, 1, 0))
             .set_field_names(&["Region"])
             .add_row_field("Region");
         let worksheet = workbook.add_worksheet();
@@ -179,7 +180,7 @@ mod pivot_table_tests {
             worksheet.write(1, 1, 100).unwrap();
 
             let pivot_table = PivotTable::new()
-                .set_data_source("Sheet1", 0, 0, 1, 1)
+                .set_data_source(("Sheet1", 0, 0, 1, 1))
                 .set_field_names(&field_names)
                 .add_row_field("Region");
             let worksheet = workbook.add_worksheet();
@@ -201,7 +202,7 @@ mod pivot_table_tests {
         // Check for filter fields that move the pivot table body past the last
         // row. The body is below the filters and a blank row.
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_row_field("Region")
             .add_filter_field("Month");
 
@@ -216,7 +217,7 @@ mod pivot_table_tests {
     #[test]
     fn test_validate_overlap() {
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_row_field("Region");
 
         // Check for a pivot table on a worksheet table.
@@ -281,7 +282,7 @@ mod pivot_table_tests {
         let chartsheet = workbook.add_chartsheet();
 
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_row_field("Region");
 
         let result = chartsheet.add_pivot_table(0, 0, &pivot_table);
@@ -307,7 +308,7 @@ mod pivot_table_tests {
             worksheet.write(1, 0, "East").unwrap();
             worksheet.write(1, 1, 100).unwrap();
 
-            let pivot_table = pivot_table.set_data_source("Sheet1", 0, 0, 1, 1);
+            let pivot_table = pivot_table.set_data_source(("Sheet1", 0, 0, 1, 1));
             let worksheet = workbook.add_worksheet();
             worksheet.add_pivot_table(2, 0, &pivot_table).unwrap();
 
@@ -322,7 +323,7 @@ mod pivot_table_tests {
 
         // Check for two value fields with the same custom name.
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_value_field(&PivotTableValueField::new("Volume").set_custom_name("Total"))
             .add_value_field(&PivotTableValueField::new("Volume").set_custom_name("Total"));
 
@@ -331,7 +332,7 @@ mod pivot_table_tests {
 
         // Check for two value fields with custom names that differ only by case.
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_value_field(&PivotTableValueField::new("Volume").set_custom_name("Total"))
             .add_value_field(&PivotTableValueField::new("Volume").set_custom_name("TOTAL"));
 
@@ -340,7 +341,7 @@ mod pivot_table_tests {
 
         // Check for a custom name that is the same as a default name.
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_value_field(&PivotTableValueField::new("Volume"))
             .add_value_field(&PivotTableValueField::new("Volume").set_custom_name("Sum of Volume"));
 
@@ -350,7 +351,7 @@ mod pivot_table_tests {
         // Check that repeated default names are allowed since they are made
         // unique.
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 50, 3)
+            .set_data_source(("Sheet1", 0, 0, 50, 3))
             .add_value_field(&PivotTableValueField::new("Volume"))
             .add_value_field(&PivotTableValueField::new("Volume"));
 
@@ -366,7 +367,7 @@ mod pivot_table_tests {
         worksheet.write(1, 1, 100).unwrap();
 
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 1, 1)
+            .set_data_source(("Sheet1", 0, 0, 1, 1))
             .add_row_field("Region")
             .add_value_field(&PivotTableValueField::new("Volume").set_custom_name("VOLUME"));
         let worksheet = workbook.add_worksheet();
@@ -394,7 +395,7 @@ mod pivot_table_tests {
         worksheet.write(1, 0, "East").unwrap();
 
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 1, 3)
+            .set_data_source(("Sheet1", 0, 0, 1, 3))
             .add_row_field("Region")
             .add_column_field("TRUE")
             .add_filter_field("2024")
@@ -414,7 +415,7 @@ mod pivot_table_tests {
         worksheet.write(1, 0, "East").unwrap();
 
         let pivot_table = PivotTable::new()
-            .set_data_source("Sheet1", 0, 0, 1, 0)
+            .set_data_source(("Sheet1", 0, 0, 1, 0))
             .add_row_field("Region");
         let worksheet = workbook.add_worksheet();
         worksheet.add_pivot_table(2, 0, &pivot_table).unwrap();
@@ -444,7 +445,7 @@ mod pivot_table_tests {
             worksheet.write(1, 0, "East").unwrap();
 
             let pivot_table = PivotTable::new()
-                .set_data_source("Sheet1", 0, 0, 1, 2)
+                .set_data_source(("Sheet1", 0, 0, 1, 2))
                 .add_row_field("Region");
             let worksheet = workbook.add_worksheet();
             worksheet.add_pivot_table(2, 0, &pivot_table).unwrap();
@@ -452,5 +453,80 @@ mod pivot_table_tests {
             let result = workbook.save_to_buffer();
             assert!(matches!(result, Err(XlsxError::PivotTableError(_))));
         }
+    }
+
+    #[test]
+    fn test_parse_source_range() {
+        // Check for valid range strings.
+        let ranges = [
+            ("Sheet1!A1:D9", "Sheet1", 0, 0, 8, 3),
+            ("Sheet1!$A$1:$D$9", "Sheet1", 0, 0, 8, 3),
+            ("=Sheet1!A1:D9", "Sheet1", 0, 0, 8, 3),
+            ("Sheet1!a1:d9", "Sheet1", 0, 0, 8, 3),
+            ("'Sales Data'!B3:AA100", "Sales Data", 2, 1, 99, 26),
+            ("'Bob''s Data'!A1:B2", "Bob's Data", 0, 0, 1, 1),
+            ("Sheet1!A1:XFD1048576", "Sheet1", 0, 0, 1_048_575, 16_383),
+        ];
+
+        for (range, sheet_name, first_row, first_col, last_row, last_col) in ranges {
+            assert_eq!(
+                parse_source_range(range),
+                Some((
+                    sheet_name.to_string(),
+                    first_row,
+                    first_col,
+                    last_row,
+                    last_col
+                )),
+                "{range}"
+            );
+        }
+
+        // Check for invalid range strings.
+        let ranges = [
+            "",
+            "A1:D9",
+            "!A1:D9",
+            "Sheet1!",
+            "Sheet1!A1",
+            "Sheet1!A:D",
+            "Sheet1!A0:D9",
+            "Sheet1!A1:D9:E10",
+            "Sheet1!AAAA1:D9",
+            "'Sheet 1!A1:D9",
+            "Sheet1!Table1",
+        ];
+
+        for range in ranges {
+            assert_eq!(parse_source_range(range), None, "{range}");
+        }
+    }
+
+    #[test]
+    fn test_validate_source_range_string() {
+        let mut worksheet = Worksheet::new();
+
+        // Check for an invalid data source range string.
+        let pivot_table = PivotTable::new()
+            .set_data_source("Sheet1!A1")
+            .add_row_field("Region");
+
+        let result = worksheet.add_pivot_table(2, 0, &pivot_table);
+        assert!(matches!(result, Err(XlsxError::PivotTableError(_))));
+
+        // Check that a valid range string replaces an earlier invalid one.
+        let pivot_table = PivotTable::new()
+            .set_data_source("Sheet1!A1")
+            .set_data_source("Sheet1!A1:D9")
+            .add_row_field("Region");
+
+        let result = worksheet.add_pivot_table(2, 0, &pivot_table);
+        assert!(result.is_ok());
+
+        // Check for a column beyond the Excel limit.
+        let pivot_table = PivotTable::new().set_data_source("Sheet1!A1:XFE9");
+
+        let result = worksheet.add_pivot_table(20, 0, &pivot_table);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
     }
 }

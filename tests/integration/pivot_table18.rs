@@ -31,7 +31,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let pivot_table = PivotTable::new()
-        .set_data_source("Sheet1", 0, 0, 50, 3)
+        .set_data_source(("Sheet1", 0, 0, 50, 3))
         .add_filter_field("Month");
 
     let worksheet = workbook.add_worksheet();

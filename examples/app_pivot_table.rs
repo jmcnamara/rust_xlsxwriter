@@ -26,7 +26,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
 
     // Create a pivot table based on the worksheet data.
-    let pivot_table = PivotTable::new().set_data_source("Data", 0, 0, 50, 3);
+    let pivot_table = PivotTable::new().set_data_source("Data!A1:D51");
 
     // Add the pivot table to a new worksheet.
     let worksheet = workbook.add_worksheet().set_name("Pivot1")?;
@@ -37,9 +37,10 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
 
     // Create a pivot table based on the worksheet data and summarize the
-    // "Volume" data by "Region".
+    // "Volume" data by "Region". Note that the data source can also be
+    // specified as a tuple.
     let pivot_table = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source(("Data", 0, 0, 50, 3))
         .add_row_field("Region")
         .add_value_field(&PivotTableValueField::new("Volume"));
 
@@ -54,7 +55,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a pivot table based on the worksheet data and summarize the
     // "Volume" data by "Region" and "Item".
     let pivot_table = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source("Data!A1:D51")
         .add_row_field("Region")
         .add_column_field("Item")
         .add_value_field(&PivotTableValueField::new("Volume"));
@@ -70,7 +71,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a pivot table based on the worksheet data and summarize the
     // "Volume" data by "Region", with a filter on "Month".
     let pivot_table = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source("Data!A1:D51")
         .add_row_field("Region")
         .add_value_field(&PivotTableValueField::new("Volume"))
         .add_filter_field("Month");
@@ -87,7 +88,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a pivot table based on the worksheet data and summarize the
     // "Volume" data by "Region" and then by "Item" within each region.
     let pivot_table = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source("Data!A1:D51")
         .add_row_field("Region")
         .add_row_field("Item")
         .add_value_field(&PivotTableValueField::new("Volume"));
@@ -103,7 +104,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a pivot table based on the worksheet data and summarize the
     // "Volume" data by "Region" using different functions.
     let pivot_table = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source("Data!A1:D51")
         .add_row_field("Region")
         .add_value_field(&PivotTableValueField::new("Volume"))
         .add_value_field(
@@ -124,7 +125,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a pivot table based on the worksheet data and summarize the
     // "Volume" data by "Region", with a custom name and number format.
     let pivot_table = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source("Data!A1:D51")
         .add_row_field("Region")
         .add_value_field(
             &PivotTableValueField::new("Volume")
@@ -143,7 +144,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a pivot table based on the worksheet data and summarize the
     // "Volume" data by "Region" and "Item", without grand totals.
     let pivot_table = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source("Data!A1:D51")
         .add_row_field("Region")
         .add_column_field("Item")
         .add_value_field(&PivotTableValueField::new("Volume"))
@@ -163,7 +164,7 @@ fn main() -> Result<(), XlsxError> {
     // "Volume" data by "Region" and "Item", with each row field in its own
     // column.
     let pivot_table = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source("Data!A1:D51")
         .add_row_field("Region")
         .add_row_field("Item")
         .add_value_field(&PivotTableValueField::new("Volume"))
@@ -180,12 +181,12 @@ fn main() -> Result<(), XlsxError> {
     // Create two pivot tables based on the worksheet data and summarize the
     // "Volume" data by "Region" in one and by "Item" in the other.
     let pivot_table1 = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source("Data!A1:D51")
         .add_row_field("Region")
         .add_value_field(&PivotTableValueField::new("Volume"));
 
     let pivot_table2 = PivotTable::new()
-        .set_data_source("Data", 0, 0, 50, 3)
+        .set_data_source("Data!A1:D51")
         .add_row_field("Item")
         .add_value_field(&PivotTableValueField::new("Volume"));
 
@@ -205,7 +206,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a pivot table based on the data in the same worksheet and
     // summarize the "Volume" data by "Region".
     let pivot_table = PivotTable::new()
-        .set_data_source("Pivot11", 0, 0, 50, 3)
+        .set_data_source("Pivot11!A1:D51")
         .add_row_field("Region")
         .add_value_field(&PivotTableValueField::new("Volume"));
 
