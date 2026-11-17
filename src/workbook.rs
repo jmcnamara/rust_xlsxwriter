@@ -1291,6 +1291,13 @@ impl Workbook {
     /// container so for performance reasons you shouldn't call it
     /// unnecessarily.
     ///
+    /// The workbook data is checked before the file is created, so an error in
+    /// the workbook data won't create an empty file or overwrite an existing
+    /// file. However, if there is an IO error while the file is being written,
+    /// such as a full disk, it can leave a partial file. If you need to guard
+    /// against that you can use [`Workbook::save_to_writer()`] to write to a
+    /// temporary file and then rename it to the target path.
+    ///
     /// # Parameters
     ///
     /// - `path`: The path of the new Excel file to create as a `&str` or as a
@@ -1357,8 +1364,12 @@ impl Workbook {
             self.save_internal(file)?;
         }
 
+        // Prepare and check the workbook before creating the file so that an
+        // error doesn't leave an empty file or overwrite an existing file.
+        let package_options = self.prepare_save()?;
+
         let file = std::fs::File::create(path)?;
-        self.save_internal(file)?;
+        self.write_package(file, &package_options)?;
         Ok(())
     }
 
@@ -2616,11 +2627,19 @@ impl Workbook {
         read_to_string(&path).map_err(XlsxError::IoError)
     }
 
-    // Internal function to prepare the workbook and other component files for
-    // writing to the xlsx file.
-    #[allow(clippy::similar_names)]
-    #[allow(clippy::too_many_lines)]
+    // Internal function to prepare the workbook and write it to the xlsx file.
     fn save_internal<W: Write + Send>(&mut self, writer: W) -> Result<(), XlsxError> {
+        let package_options = self.prepare_save()?;
+        self.write_package(writer, &package_options)?;
+        Ok(())
+    }
+
+    // Internal function to prepare and check the workbook and other component
+    // files for writing to the xlsx file. Any errors in the workbook data are
+    // raised here, before anything is written.
+    #[allow(clippy::similar_names)] // For worksheet_[d]xf_formats.
+    #[allow(clippy::too_many_lines)]
+    fn prepare_save(&mut self) -> Result<PackagerOptions, XlsxError> {
         // Reset workbook and worksheet state data between saves.
         self.reset();
 
@@ -2784,9 +2803,18 @@ impl Workbook {
         let mut package_options = PackagerOptions::new();
         package_options = self.set_package_options(package_options)?;
 
+        Ok(package_options)
+    }
+
+    // Internal function to write the prepared workbook to the xlsx file.
+    fn write_package<W: Write + Send>(
+        &mut self,
+        writer: W,
+        package_options: &PackagerOptions,
+    ) -> Result<(), XlsxError> {
         // Create the Packager object that will assemble the zip/xlsx file.
         let packager = Packager::new(writer, self.use_large_file, self.zip_compression_level);
-        packager.assemble_file(self, &package_options)?;
+        packager.assemble_file(self, package_options)?;
 
         Ok(())
     }

@@ -37,10 +37,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   range or autofilter could leave reserved cells behind that could cause a panic
   later.
 
-- Fixed issue in `constant_memory` mode where rows with formats, heights or
+- Fixed an issue in `constant_memory` mode where rows with formats, heights or
   hidden flags could be duplicated or omitted. See [Issue #219].
 
   [Issue #219]: https://github.com/jmcnamara/rust_xlsxwriter/issues/219
+
+- Fixed an issue where a failed `Workbook::save()` left an empty file, or
+  truncated an existing file. See [Issue #221].
+
+  [Issue #221]: https://github.com/jmcnamara/rust_xlsxwriter/issues/221
 
 
 ## [0.102.0] - 2026-10-29
