@@ -9,7 +9,7 @@ use crate::common;
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 // Test to demonstrate row or column formatting.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -23,11 +23,42 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test to demonstrate row or column formatting in low memory mode.
+#[cfg(feature = "constant_memory")]
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet_with_low_memory()?;
+    let bold = Format::new().set_bold();
+
+    worksheet.set_row_format(0, &bold)?;
+    worksheet.write_string(0, 0, "Foo")?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_row_col_format02() {
+fn test_row_col_format02_1() {
     let test_runner = common::TestRunner::new()
         .set_name("row_col_format02")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+#[cfg(feature = "constant_memory")]
+fn test_row_col_format02_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("row_col_format02")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
+        .ignore_worksheet_spans()
         .initialize();
 
     test_runner.assert_eq();

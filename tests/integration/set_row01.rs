@@ -9,7 +9,7 @@ use crate::common;
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 // Test to demonstrate row formatting.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -33,11 +33,52 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test to demonstrate row formatting in constant memory mode.
+#[cfg(feature = "constant_memory")]
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet_with_constant_memory()?;
+
+    worksheet.set_row_height(0, 0.75)?;
+    worksheet.set_row_height(1, 1.50)?;
+    worksheet.set_row_height(2, 2.25)?;
+    worksheet.set_row_height(3, 3)?;
+
+    worksheet.set_row_height(11, 9)?;
+    worksheet.set_row_height(12, 9.75)?;
+    worksheet.set_row_height(13, 10.50)?;
+    worksheet.set_row_height(14, 11.25)?;
+
+    worksheet.set_row_height(18, 14.25)?;
+    worksheet.set_row_height(20, 15.75)?;
+    worksheet.set_row_height(21, 16.50)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_set_row01() {
+fn test_set_row01_1() {
     let test_runner = common::TestRunner::new()
         .set_name("set_row01")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+#[cfg(feature = "constant_memory")]
+fn test_set_row01_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("set_row01")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
+        .ignore_worksheet_spans()
         .initialize();
 
     test_runner.assert_eq();

@@ -19292,29 +19292,31 @@ impl Worksheet {
         // First find any write ahead cached rows.
         let mut remaining_rows: Vec<_> = self.write_ahead.keys().copied().collect();
 
-        // Add any changed row elements.
-        let max_changed_row = self.changed_rows.keys().max().unwrap_or(&0);
-        if *max_changed_row > self.current_row {
-            for row_num in self.current_row..=*max_changed_row {
-                if self.changed_rows.contains_key(&row_num) {
-                    remaining_rows.push(row_num);
-                }
+        // Add any changed row elements after the current row.
+        let current_row = self.current_row;
+        for row_num in self.changed_rows.keys() {
+            if *row_num > current_row {
+                remaining_rows.push(*row_num);
             }
         }
-
-        // Add the current row.
-        remaining_rows.push(self.current_row);
 
         // Remove any duplicate rows.
         remaining_rows.sort_unstable();
         remaining_rows.dedup();
 
-        // If there is data to write (and not just write-ahead or rows) we move
-        // the final row ahead by one. This will start any subsequent write() on
-        // the next row, after a resave.
-        if self.data_table.contains_key(&self.current_row) {
-            remaining_rows.push(1 + *remaining_rows.last().unwrap());
+        // Return if there is nothing to write.
+        let has_current_row = self.data_table.contains_key(&current_row)
+            || self.changed_rows.contains_key(&current_row);
+
+        if remaining_rows.is_empty() && !has_current_row {
+            return;
         }
+
+        // Add an extra row so that the last remaining row is written, since
+        // flush_data_row() writes the current row and then moves to the next.
+        // Any write() after a resave starts on this row.
+        let last_row = remaining_rows.last().copied().unwrap_or(current_row);
+        remaining_rows.push(last_row + 1);
 
         // Flush all the remaining rows.
         for remaining_row in remaining_rows {
