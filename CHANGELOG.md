@@ -5,7 +5,36 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.102.1] - 2026-11-XX
+## [0.103.0] - 2026-11-18
+
+### Added
+
+- Added support for worksheet pivot tables via the `PivotTable` struct and the
+  `Worksheet::add_pivot_table()` method. Pivot tables can have row, column,
+  filter and value fields, and can set value field functions, names and number
+  formats, as well as the pivot table style, layout and grand totals. See
+  [Feature Request #53].
+
+  <img src="https://rustxlsxwriter.github.io/images/pivot_table_demo.png">
+
+  **Note**, the pivot table data isn't stored in the file. Excel builds the
+  pivot table from the source data when the file is opened. As a result,
+  applications that don't refresh pivot tables on load will show an empty pivot
+  table, and Excel will ask the user to save the file when it is closed, even if
+  no changes were made. See the `PivotTable` "Limitations" docs for details.
+
+  [Feature Request #53]: https://github.com/jmcnamara/rust_xlsxwriter/issues/53
+
+### Changed
+
+- **Breaking change**: The `XlsxError` enum is now marked as
+  `#[non_exhaustive]`, so code that matches on it will need a wildcard arm. This
+  allows new error variants (like in this release) to be added in future
+  releases without further breaking changes.
+
+- Updated the optional `jiff` dependency to v1.0. See [PR #222].
+
+  [PR #222]: https://github.com/jmcnamara/rust_xlsxwriter/pull/222
 
 ### Fixed
 

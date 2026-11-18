@@ -127,8 +127,6 @@ following design considerations:
   libraries written in C ([libxlsxwriter]), Python ([XlsxWriter]), and Perl
   ([Excel::Writer::XLSX]), by the same author. Bug fixes and improvements in
   one get transferred to the others.
-- **No FAQ section**. The Rust implementation seeks to avoid some of the
-  required workarounds and API mistakes of the other language variants.
 
 [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
 [libxlsxwriter]: https://libxlsxwriter.github.io
@@ -204,9 +202,8 @@ cargo add rust_xlsxwriter -F constant_memory
 
 Recent changes:
 
+- Added Pivot Table support.
 - Performance improvements.
-- Added support for writing directly to STDOUT.
-- Added support for autofitting formatted numbers and dates.
 
 See the full [Release Notes and Changelog].
 
