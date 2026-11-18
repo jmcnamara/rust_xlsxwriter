@@ -41,6 +41,7 @@
 //! - Defined names.
 //! - Autofilters.
 //! - Worksheet Tables.
+//! - Pivot Tables.
 //! - Serde serialization support.
 //! - Support for macros.
 //! - Memory optimization mode for writing large files.
@@ -82,6 +83,9 @@
 //! - [`Table`]: The interface for worksheet tables. Tables in Excel are a way
 //!   of grouping a range of cells into a single entity that has common
 //!   formatting or that can be referenced in formulas.
+//! - [`PivotTable`]: The interface for pivot tables in worksheets. Pivot tables
+//!   in Excel are a way of summarizing, grouping and analyzing a range of
+//!   source data.
 //! - [`Image`]: The interface for images used in worksheets.
 //! - [`Conditional Formats`](crate::conditional_format): Working with
 //!   conditional formatting in worksheets.

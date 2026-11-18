@@ -9216,7 +9216,15 @@ impl Worksheet {
 
     /// Add a pivot table to a worksheet.
     ///
-    /// This feature is a work in progress.
+    /// Pivot tables in Excel are a way of summarizing, grouping and analyzing a
+    /// range of source data. The unique values of the source data fields can be
+    /// arranged as row and column labels, and the numeric fields are
+    /// summarized, for example as a sum or an average, for each label. Pivot
+    /// tables can also have filter fields, different layouts and formatting
+    /// styles.
+    ///
+    /// In `rust_xlsxwriter` a pivot table is configured via a `PivotTable`
+    /// struct. See the [`PivotTable`] docs for more details.
     ///
     /// # Parameters
     ///
@@ -9229,7 +9237,92 @@ impl Worksheet {
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
+    ///   worksheet limits. This also applies to the data source range.
+    /// - [`XlsxError::RowColumnOrderError`] - The first row or column of the
+    ///   data source range is greater than the last row or column.
+    /// - [`XlsxError::PivotTableError`] - A pivot table error such as:
+    ///   - The data source isn't set, isn't a valid range, or doesn't have a
+    ///     header row and at least one data row.
+    ///   - A field is used more than once in the row, column and filter fields,
+    ///     or a value field name is duplicated.
+    ///   - The pivot table overlaps a worksheet table, a merged range, another
+    ///     pivot table or its own source data.
+    ///   - The pivot table is added to a chartsheet.
+    ///
+    /// The field names and the header row of the source data are checked when
+    /// the workbook is saved.
+    ///
+    /// # Examples
+    ///
+    /// Example of creating a pivot table with some of the available features.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_pivot_table_demo.rs
+    /// #
+    /// use rust_xlsxwriter::{
+    ///     PivotTable, PivotTableFunction, PivotTableLayout, PivotTableStyle, PivotTableValueField,
+    ///     Workbook, XlsxError,
+    /// };
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet for the source data.
+    ///     let worksheet = workbook.add_worksheet().set_name("Data")?;
+    ///
+    ///     // Some sample data to summarize.
+    ///     let data = [
+    ///         ("East", "Apple", 9000, "July"),
+    ///         ("West", "Pear", 5000, "July"),
+    ///         ("North", "Apple", 3000, "August"),
+    ///         ("East", "Grape", 8000, "August"),
+    ///         ("West", "Apple", 6000, "September"),
+    ///         ("North", "Pear", 4000, "September"),
+    ///         ("East", "Pear", 7000, "October"),
+    ///         ("South", "Grape", 2000, "October"),
+    ///     ];
+    ///
+    ///     // Write the header row and the data.
+    ///     worksheet.write_row(0, 0, ["Region", "Item", "Volume", "Month"])?;
+    ///     for (row, (region, item, volume, month)) in data.iter().enumerate() {
+    ///         let row = row as u32 + 1;
+    ///         worksheet.write(row, 0, *region)?;
+    ///         worksheet.write(row, 1, *item)?;
+    ///         worksheet.write(row, 2, *volume)?;
+    ///         worksheet.write(row, 3, *month)?;
+    ///     }
+    ///
+    ///     // Create a pivot table that summarizes the "Volume" by "Region" and "Item",
+    ///     // with a filter on "Month".
+    ///     let pivot_table = PivotTable::new()
+    ///         .set_data_source("Data!A1:D9")
+    ///         .add_row_field("Region")
+    ///         .add_column_field("Item")
+    ///         .add_filter_field("Month")
+    ///         .add_value_field(
+    ///             &PivotTableValueField::new("Volume")
+    ///                 .set_function(PivotTableFunction::Sum)
+    ///                 .set_custom_name("Total Volume")
+    ///                 .set_num_format("#,##0"),
+    ///         )
+    ///         .set_style(PivotTableStyle::Medium4)
+    ///         .set_layout(PivotTableLayout::Tabular);
+    ///
+    ///     // Add a worksheet for the pivot table and add the pivot table to it.
+    ///     let worksheet = workbook.add_worksheet().set_name("Pivot")?;
+    ///     worksheet.add_pivot_table(2, 0, &pivot_table)?;
+    ///
+    ///     // Save the file to disk.
+    ///     workbook.save("pivot_table.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/pivot_table_demo.png">
     ///
     pub fn add_pivot_table(
         &mut self,

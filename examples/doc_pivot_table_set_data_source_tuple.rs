@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2026, John McNamara, jmcnamara@cpan.org
 
-//! Example of creating a simple pivot table and setting the data source as a tuple.
+//! Example of creating a pivot table and setting the data source as a tuple.
 
 use rust_xlsxwriter::{PivotTable, PivotTableValueField, Workbook, XlsxError};
 

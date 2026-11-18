@@ -199,6 +199,10 @@ There are some limitations and restrictions when using "constant memory" mode.
 - Functions that set formatting separately from data, such as
   [`Worksheet::set_cell_format()`](crate::Worksheet::set_cell_format), will
   only work on the current row.
+- Pivot tables with source data on a "constant memory" worksheet must set the
+  field names with
+  [`PivotTable::set_field_names()`](crate::PivotTable::set_field_names), since
+  the header row isn't retained in memory.
 
 [tempfile]: https://crates.io/crates/tempfile
 
