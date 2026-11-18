@@ -117,6 +117,10 @@ use crate::{ColNum, Format, RowNum, XlsxError};
 ///   worksheets.
 /// - Excel will ask the end user to save the file even if no visible changes
 ///   were made.
+/// - The size of the pivot table isn't known until Excel builds it, so only
+///   the top left cells of the pivot table are checked for overlaps with
+///   worksheet tables, merged ranges, other pivot tables and the source data.
+///   Excel will show an error if the full pivot table overlaps them.
 ///
 /// The overall limitation can't easily be fixed without replicating most of the
 /// logic of the Excel Pivot Table engine.
@@ -2660,8 +2664,12 @@ impl fmt::Display for PivotTableFunction {
 ///
 pub trait IntoPivotTableSource {
     /// Trait function to turn a type into a sheet name and a zero indexed
-    /// `(first_row, first_col, last_row, last_col)` range. It returns the
-    /// original range string as an error if it isn't valid.
+    /// `(first_row, first_col, last_row, last_col)` range.
+    ///
+    /// # Errors
+    ///
+    /// Returns the original range string as the error if it isn't a valid
+    /// range.
     fn new_pivot_table_source(&self) -> Result<(String, RowNum, ColNum, RowNum, ColNum), String>;
 }
 
@@ -2673,7 +2681,7 @@ impl IntoPivotTableSource for &str {
 
 impl IntoPivotTableSource for &String {
     fn new_pivot_table_source(&self) -> Result<(String, RowNum, ColNum, RowNum, ColNum), String> {
-        parse_source_range(self).ok_or_else(|| self.to_string())
+        parse_source_range(self).ok_or_else(|| (*self).clone())
     }
 }
 

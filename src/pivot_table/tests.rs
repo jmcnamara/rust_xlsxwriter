@@ -10,7 +10,8 @@ mod pivot_table_tests {
     use crate::pivot_table::parse_source_range;
     use crate::worksheet::{COL_MAX, ROW_MAX};
     use crate::{
-        Format, Formula, PivotTable, PivotTableValueField, Table, Workbook, Worksheet, XlsxError,
+        Chart, ChartType, Format, Formula, PivotTable, PivotTableValueField, Table, Workbook,
+        Worksheet, XlsxError,
     };
 
     #[test]
@@ -123,6 +124,28 @@ mod pivot_table_tests {
             result,
             Err(XlsxError::UnknownWorksheetNameOrIndex(_))
         ));
+    }
+
+    #[test]
+    fn test_validate_chartsheet_source() {
+        // Check for a data source on a chartsheet.
+        let mut workbook = Workbook::new();
+        let mut chart = Chart::new(ChartType::Column);
+        chart.add_series().set_values(("Chart1", 1, 0, 1, 0));
+
+        let chartsheet = workbook.add_chartsheet();
+        chartsheet.insert_chart(0, 0, &chart).unwrap();
+        chartsheet.write(0, 0, "Region").unwrap();
+        chartsheet.write(1, 0, "East").unwrap();
+
+        let pivot_table = PivotTable::new()
+            .set_data_source(("Chart1", 0, 0, 1, 0))
+            .add_row_field("Region");
+        let worksheet = workbook.add_worksheet();
+        worksheet.add_pivot_table(2, 0, &pivot_table).unwrap();
+
+        let result = workbook.save_to_buffer();
+        assert!(matches!(result, Err(XlsxError::PivotTableError(_))));
     }
 
     #[test]
@@ -406,22 +429,29 @@ mod pivot_table_tests {
         let result = workbook.save_to_buffer();
         assert!(result.is_ok());
 
-        // Check for a formula header cell without a result.
-        let mut workbook = Workbook::new();
-        let worksheet = workbook.add_worksheet();
-        worksheet
-            .write_formula(0, 0, Formula::new("=\"Reg\"&\"ion\""))
-            .unwrap();
-        worksheet.write(1, 0, "East").unwrap();
+        // Check for a formula header cell without a result, with the default
+        // and an empty formula result default.
+        for default_result in ["0", ""] {
+            let mut workbook = Workbook::new();
+            let worksheet = workbook.add_worksheet();
+            worksheet.set_formula_result_default(default_result);
+            worksheet
+                .write_formula(0, 0, Formula::new("=\"Reg\"&\"ion\""))
+                .unwrap();
+            worksheet.write(1, 0, "East").unwrap();
 
-        let pivot_table = PivotTable::new()
-            .set_data_source(("Sheet1", 0, 0, 1, 0))
-            .add_row_field("Region");
-        let worksheet = workbook.add_worksheet();
-        worksheet.add_pivot_table(2, 0, &pivot_table).unwrap();
+            let pivot_table = PivotTable::new()
+                .set_data_source(("Sheet1", 0, 0, 1, 0))
+                .add_row_field("Region");
+            let worksheet = workbook.add_worksheet();
+            worksheet.add_pivot_table(2, 0, &pivot_table).unwrap();
 
-        let result = workbook.save_to_buffer();
-        assert!(matches!(result, Err(XlsxError::PivotTableError(_))));
+            let result = workbook.save_to_buffer();
+            assert!(matches!(
+                result,
+                Err(XlsxError::PivotTableError(message)) if message.contains("without a result")
+            ));
+        }
     }
 
     #[test]
