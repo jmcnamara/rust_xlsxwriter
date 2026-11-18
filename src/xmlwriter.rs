@@ -353,7 +353,7 @@ pub(crate) fn escape_attribute_escapes(original: &str) -> Cow<'_, str> {
 
 // Escape literal _xHHHH_ strings with the given encoded underscore prefix.
 fn escape_literal_escapes<'a>(original: &'a str, prefix: &str) -> Cow<'a, str> {
-    // Skip the conversion if there are no "_x" strings, but also excludesthe
+    // Skip the conversion if there are no "_x" strings, but also excludes the
     // "_xlfn." prefix in formulas.
     let bytes = original.as_bytes();
     if !original.match_indices('_').any(|(index, _)| {

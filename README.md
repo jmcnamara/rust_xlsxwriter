@@ -97,6 +97,7 @@ supported features are:
 - Defined names.
 - Autofilters.
 - Worksheet Tables.
+- Pivot Tables.
 - Serde serialization support.
 - Support for macros.
 - Memory optimization mode for writing large files.
