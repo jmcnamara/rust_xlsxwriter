@@ -3015,6 +3015,13 @@ impl Workbook {
                 return Err(XlsxError::UnknownWorksheetNameOrIndex(error));
             };
 
+            if worksheet.is_chartsheet {
+                return Err(XlsxError::PivotTableError(format!(
+                    "Pivot table data source can't be a chartsheet ('{}')",
+                    source.sheet_name
+                )));
+            }
+
             // Read the field names from the header row of the source data. The
             // header row of a constant memory worksheet has already been
             // written to disk so the user must define the field names instead.

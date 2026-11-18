@@ -17808,7 +17808,9 @@ impl Worksheet {
                 }
 
                 Some(CellType::Formula { result, .. } | CellType::ArrayFormula { result, .. }) => {
-                    if result.is_empty() {
+                    // A formula without a user defined result is stored with
+                    // the worksheet default result, which is "0" by default.
+                    if result.is_empty() || *result == self.default_result {
                         let cell = utility::row_col_to_cell(first_row, col_num);
                         return Err(XlsxError::PivotTableError(format!(
                             "Header cell '{}!{cell}' is a formula without a result. Set one with Formula::set_result() or set the headers with PivotTable::set_field_names()",
