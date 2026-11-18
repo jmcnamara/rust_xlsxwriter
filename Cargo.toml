@@ -19,7 +19,7 @@ zip = {version = "9.0", default-features = false, features = ["deflate"]}
 # Optional dependencies.
 ryu = {optional = true, version = "1.0"}
 zmij = {optional = true, version = "1.0"}
-jiff = {optional = true, version = "0.2", default-features = false, features = []}
+jiff = {optional = true, version = "1.0", default-features = false, features = []}
 serde = {optional = true, version = "1.0", features = ["derive"]}
 ssfmt = {optional = true, version = "0.1"}
 chrono = {optional = true, version = "0.4", default-features = false, features = ["clock", "wasmbind", "serde"]}
