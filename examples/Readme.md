@@ -237,6 +237,10 @@ documentation and generally show how an individual function works.
   defaults to 4,000 rows x 40 columns. usage:
   ./target/release/examples/app_perf_test [num_rows]
 
+* `app_pivot_table.rs` - An example of how to create pivot tables with the
+  `rust_xlsxwriter` library. A pivot table is a way of grouping and
+  summarizing the data in a worksheet range.
+
 * `app_rich_strings.rs` - An example of using the `rust_xlsxwriter` library
   to write "rich" multi-format strings in worksheet cells.
 
@@ -1115,6 +1119,64 @@ documentation and generally show how an individual function works.
 
 * `doc_note_set_width.rs` - Demonstrates adding a note to a worksheet cell.
   This example also changes the note dimensions.
+
+* `doc_pivot_table_add_column_field.rs` - Example of creating a pivot table
+  with a row field and a column field.
+
+* `doc_pivot_table_add_filter_field.rs` - Example of creating a pivot table
+  with a filter field.
+
+* `doc_pivot_table_add_row_field1.rs` - Example of creating a pivot table
+  with a single row field.
+
+* `doc_pivot_table_add_row_field2.rs` - Example of creating a pivot table
+  with two row fields. The second row field is nested under the first.
+
+* `doc_pivot_table_add_value_field1.rs` - Example of creating a pivot table
+  with a single value field.
+
+* `doc_pivot_table_add_value_field2.rs` - Example of creating a pivot table
+  with two value fields. The values are shown in separate columns.
+
+* `doc_pivot_table_add_value_field3.rs` - Example of creating a pivot table
+  with three value fields. The values are shown in separate columns.
+
+* `doc_pivot_table_demo.rs` - Example of creating a pivot table with some
+  of the available features.
+
+* `doc_pivot_table_set_data_source_tuple.rs` - Example of creating a pivot
+  table and setting the data source as a tuple.
+
+* `doc_pivot_table_set_data_source.rs` - Example of creating a pivot table
+  and setting the data source.
+
+* `doc_pivot_table_set_field_names.rs` - Example of creating a pivot table
+  and setting the field names explicitly. This is generally only required
+  when the data source is on a worksheet in constant or low memory mode.
+
+* `doc_pivot_table_set_grand_totals.rs` - Example of creating a pivot table
+  and turning off the row and column grand totals.
+
+* `doc_pivot_table_set_layout1.rs` - Example of creating a pivot table with
+  the Outline layout. Each row field is in its own column and the items of
+  the next field are below the item in the current field.
+
+* `doc_pivot_table_set_layout2.rs` - Example of creating a pivot table with
+  the Tabular layout. Each row field is in its own column.
+
+* `doc_pivot_table_set_style.rs` - Example of creating a pivot table and
+  setting its style.
+
+* `doc_pivot_table_simple.rs` - Example of creating a simple pivot table.
+
+* `doc_pivot_table_value_field_set_custom_name.rs` - Example of creating a
+  pivot table and setting a custom name for a value field.
+
+* `doc_pivot_table_value_field_set_function.rs` - Example of creating a
+  pivot table and setting the function used to summarize a value field.
+
+* `doc_pivot_table_value_field_set_num_format.rs` - Example of creating a
+  pivot table and setting the number format of a value field.
 
 * `doc_properties_checksum1.rs` - Create a simple workbook to demonstrate
   the changing checksum due to the changing creation date.

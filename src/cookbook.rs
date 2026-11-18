@@ -20,59 +20,60 @@ cargo run --example app_demo  # or any other example
 5. [Merging cells: An example of merging cell ranges](#merging-cells-an-example-of-merging-cell-ranges)
 6. [Autofilters: Add an autofilter to a worksheet](#autofilters-add-an-autofilter-to-a-worksheet)
 7. [Tables: Adding worksheet tables](#tables-adding-worksheet-tables)
-8. [Conditional Formatting: Adding conditional formatting to worksheets](#conditional-formatting-adding-conditional-formatting-to-worksheets)
-9. [Data Validation: Add cell validation and dropdowns](#data-validation-add-cell-validation-and-dropdowns)
-10. [Notes: Adding notes to worksheet cells](#notes-adding-notes-to-worksheet-cells)
-11. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
-12. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
-13. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
-14. [Theme: Use a custom workbook theme](#theme-use-a-custom-workbook-theme)
-15. [Theme: Use the Excel 2023/Aptos theme](#theme-use-the-excel-2023aptos-theme)
-16. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
-17. [Insert images: Embedding an image in a cell](#insert-images-embedding-an-image-in-a-cell)
-18. [Insert images: Inserting images to fit a cell](#insert-images-inserting-images-to-fit-a-cell)
-19. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
-20. [Adding a watermark: Adding a watermark to a worksheet by adding a background image](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-a-background-image)
-21. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
-22. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
-23. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
-24. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
-25. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
-26. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
-27. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
-28. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
-29. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
-30. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
-31. [Chart: Using a secondary axis](#chart-using-a-secondary-axis)
-32. [Chart: Create a combined chart](#chart-create-a-combined-chart)
-33. [Chart: Create a combined pareto chart](#chart-create-a-combined-pareto-chart)
-34. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
-35. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
-36. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-37. [Chart: Chart data table](#chart-chart-data-table)
-38. [Chart: Chart data tools](#chart-chart-data-tools)
-39. [Chart: Clustered categories](#chart-clustered-categories)
-40. [Chart: Gauge Chart](#chart-gauge-chart)
-41. [Chart: Chartsheet](#chart-chartsheet)
-42. [Grouped Rows: Create a grouped row outline](#grouped-rows-create-a-grouped-row-outline)
-43. [Grouped Columns: Create a grouped column outline](#grouped-columns-create-a-grouped-column-outline)
-44. [Textbox: Inserting Checkboxes in worksheets](#textbox-inserting-checkboxes-in-worksheets)
-45. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
-46. [Textbox: Ignore Excel cell errors](#textbox-ignore-excel-cell-errors)
-47. [Sparklines: simple example](#sparklines-simple-example)
-48. [Sparklines: advanced example](#sparklines-advanced-example)
-49. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
-50. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
-51. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-52. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
-53. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
-54. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-55. [Internal links: Creating a Table of Contents](#internal-links-creating-a-table-of-contents)
-56. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-57. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-58. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-59. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-60. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+8. [Pivot Tables: Adding pivot tables](#pivot-tables-adding-pivot-tables)
+9. [Conditional Formatting: Adding conditional formatting to worksheets](#conditional-formatting-adding-conditional-formatting-to-worksheets)
+10. [Data Validation: Add cell validation and dropdowns](#data-validation-add-cell-validation-and-dropdowns)
+11. [Notes: Adding notes to worksheet cells](#notes-adding-notes-to-worksheet-cells)
+12. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
+13. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
+14. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
+15. [Theme: Use a custom workbook theme](#theme-use-a-custom-workbook-theme)
+16. [Theme: Use the Excel 2023/Aptos theme](#theme-use-the-excel-2023aptos-theme)
+17. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
+18. [Insert images: Embedding an image in a cell](#insert-images-embedding-an-image-in-a-cell)
+19. [Insert images: Inserting images to fit a cell](#insert-images-inserting-images-to-fit-a-cell)
+20. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
+21. [Adding a watermark: Adding a watermark to a worksheet by adding a background image](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-a-background-image)
+22. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
+23. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
+24. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
+25. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
+26. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
+27. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
+28. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
+29. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
+30. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
+31. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
+32. [Chart: Using a secondary axis](#chart-using-a-secondary-axis)
+33. [Chart: Create a combined chart](#chart-create-a-combined-chart)
+34. [Chart: Create a combined pareto chart](#chart-create-a-combined-pareto-chart)
+35. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
+36. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
+37. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
+38. [Chart: Chart data table](#chart-chart-data-table)
+39. [Chart: Chart data tools](#chart-chart-data-tools)
+40. [Chart: Clustered categories](#chart-clustered-categories)
+41. [Chart: Gauge Chart](#chart-gauge-chart)
+42. [Chart: Chartsheet](#chart-chartsheet)
+43. [Grouped Rows: Create a grouped row outline](#grouped-rows-create-a-grouped-row-outline)
+44. [Grouped Columns: Create a grouped column outline](#grouped-columns-create-a-grouped-column-outline)
+45. [Textbox: Inserting Checkboxes in worksheets](#textbox-inserting-checkboxes-in-worksheets)
+46. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
+47. [Textbox: Ignore Excel cell errors](#textbox-ignore-excel-cell-errors)
+48. [Sparklines: simple example](#sparklines-simple-example)
+49. [Sparklines: advanced example](#sparklines-advanced-example)
+50. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
+51. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
+52. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+53. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+54. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+55. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
+56. [Internal links: Creating a Table of Contents](#internal-links-creating-a-table-of-contents)
+57. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+58. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+59. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+60. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+61. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -1417,6 +1418,302 @@ Code to generate the above example:
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 7, 6, &table)?;
+```
+
+
+# Pivot Tables: Adding pivot tables
+
+Pivot tables in Excel are a way of summarizing, grouping and analyzing a range
+of source data. The unique values of the source data fields can be arranged as
+row and column labels, and the numeric fields are summarized, for example as a
+sum or an average, for each label. Pivot tables can also have filter fields,
+different layouts and formatting styles.
+
+The image below shows a pivot table in Excel with the "Pivot Table Fields" list
+used to arrange the fields.
+
+<img src="https://rustxlsxwriter.github.io/images/pivot_table_demo.png">
+
+A pivot table is added to a worksheet via the [`Worksheet::add_pivot_table()`]
+method. The source data range and fields of a pivot table are configured via a
+[`PivotTable`] struct, but the source data is added using standard
+[`Worksheet::write()`] methods.
+
+[`PivotTable`]: crate::PivotTable
+[`Worksheet::write()`]: crate::Worksheet::write
+[`Worksheet::add_pivot_table()`]: crate::Worksheet::add_pivot_table
+
+## Some examples:
+
+**Example 1.** Pivot table with no fields.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table1.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create a pivot table based on the worksheet data.
+    let pivot_table = PivotTable::new().set_data_source("Data!A1:D51");
+
+    // Add the pivot table to a new worksheet.
+    let worksheet = workbook.add_worksheet().set_name("Pivot1")?;
+    worksheet.add_pivot_table(2, 0, &pivot_table)?;
+```
+
+
+**Example 2.** Pivot table with a row field and a value field. Note that the
+data source can also be specified as a tuple.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table2.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create a pivot table based on the worksheet data and summarize the
+    // "Volume" data by "Region". Note that the data source can also be
+    // specified as a tuple.
+    let pivot_table = PivotTable::new()
+        .set_data_source(("Data", 0, 0, 50, 3))
+        .add_row_field("Region")
+        .add_value_field(&PivotTableValueField::new("Volume"));
+
+    // Add the pivot table to a new worksheet.
+    let worksheet = workbook.add_worksheet().set_name("Pivot2")?;
+    worksheet.add_pivot_table(2, 0, &pivot_table)?;
+```
+
+
+**Example 3.** Pivot table with a row field, a column field and a value field.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table3.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create a pivot table based on the worksheet data and summarize the
+    // "Volume" data by "Region" and "Item".
+    let pivot_table = PivotTable::new()
+        .set_data_source("Data!A1:D51")
+        .add_row_field("Region")
+        .add_column_field("Item")
+        .add_value_field(&PivotTableValueField::new("Volume"));
+
+    // Add the pivot table to a new worksheet.
+    let worksheet = workbook.add_worksheet().set_name("Pivot3")?;
+    worksheet.add_pivot_table(2, 0, &pivot_table)?;
+```
+
+
+**Example 4.** Pivot table with a filter field.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table4.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create a pivot table based on the worksheet data and summarize the
+    // "Volume" data by "Region", with a filter on "Month".
+    let pivot_table = PivotTable::new()
+        .set_data_source("Data!A1:D51")
+        .add_row_field("Region")
+        .add_value_field(&PivotTableValueField::new("Volume"))
+        .add_filter_field("Month");
+
+    // Add the pivot table to a new worksheet. The filter is displayed in the
+    // first row and the pivot table body starts in the third row.
+    let worksheet = workbook.add_worksheet().set_name("Pivot4")?;
+    worksheet.add_pivot_table(0, 0, &pivot_table)?;
+```
+
+
+**Example 5.** Pivot table with two row fields.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table5.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create a pivot table based on the worksheet data and summarize the
+    // "Volume" data by "Region" and then by "Item" within each region.
+    let pivot_table = PivotTable::new()
+        .set_data_source("Data!A1:D51")
+        .add_row_field("Region")
+        .add_row_field("Item")
+        .add_value_field(&PivotTableValueField::new("Volume"));
+
+    // Add the pivot table to a new worksheet.
+    let worksheet = workbook.add_worksheet().set_name("Pivot5")?;
+    worksheet.add_pivot_table(2, 0, &pivot_table)?;
+```
+
+
+**Example 6.** Pivot table with several value fields that use different
+functions.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table6.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create a pivot table based on the worksheet data and summarize the
+    // "Volume" data by "Region" using different functions.
+    let pivot_table = PivotTable::new()
+        .set_data_source("Data!A1:D51")
+        .add_row_field("Region")
+        .add_value_field(&PivotTableValueField::new("Volume"))
+        .add_value_field(
+            &PivotTableValueField::new("Volume").set_function(PivotTableFunction::Count),
+        )
+        .add_value_field(
+            &PivotTableValueField::new("Volume").set_function(PivotTableFunction::Average),
+        );
+
+    // Add the pivot table to a new worksheet.
+    let worksheet = workbook.add_worksheet().set_name("Pivot6")?;
+    worksheet.add_pivot_table(2, 0, &pivot_table)?;
+```
+
+
+**Example 7.** Pivot table with a custom name and number format for the value
+field.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table7.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create a pivot table based on the worksheet data and summarize the
+    // "Volume" data by "Region", with a custom name and number format.
+    let pivot_table = PivotTable::new()
+        .set_data_source("Data!A1:D51")
+        .add_row_field("Region")
+        .add_value_field(
+            &PivotTableValueField::new("Volume")
+                .set_custom_name("Total Volume")
+                .set_num_format("#,##0"),
+        );
+
+    // Add the pivot table to a new worksheet.
+    let worksheet = workbook.add_worksheet().set_name("Pivot7")?;
+    worksheet.add_pivot_table(2, 0, &pivot_table)?;
+```
+
+
+**Example 8.** Pivot table with a different style and no grand totals.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table8.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create a pivot table based on the worksheet data and summarize the
+    // "Volume" data by "Region" and "Item", without grand totals.
+    let pivot_table = PivotTable::new()
+        .set_data_source("Data!A1:D51")
+        .add_row_field("Region")
+        .add_column_field("Item")
+        .add_value_field(&PivotTableValueField::new("Volume"))
+        .set_style(PivotTableStyle::Medium9)
+        .set_row_grand_totals(false)
+        .set_column_grand_totals(false);
+
+    // Add the pivot table to a new worksheet.
+    let worksheet = workbook.add_worksheet().set_name("Pivot8")?;
+    worksheet.add_pivot_table(2, 0, &pivot_table)?;
+```
+
+
+**Example 9.** Pivot table with a tabular layout.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table9.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create a pivot table based on the worksheet data and summarize the
+    // "Volume" data by "Region" and "Item", with each row field in its own
+    // column.
+    let pivot_table = PivotTable::new()
+        .set_data_source("Data!A1:D51")
+        .add_row_field("Region")
+        .add_row_field("Item")
+        .add_value_field(&PivotTableValueField::new("Volume"))
+        .set_layout(PivotTableLayout::Tabular);
+
+    // Add the pivot table to a new worksheet.
+    let worksheet = workbook.add_worksheet().set_name("Pivot9")?;
+    worksheet.add_pivot_table(2, 0, &pivot_table)?;
+```
+
+
+**Example 10.** Two pivot tables on the same worksheet.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table10.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Create two pivot tables based on the worksheet data and summarize the
+    // "Volume" data by "Region" in one and by "Item" in the other.
+    let pivot_table1 = PivotTable::new()
+        .set_data_source("Data!A1:D51")
+        .add_row_field("Region")
+        .add_value_field(&PivotTableValueField::new("Volume"));
+
+    let pivot_table2 = PivotTable::new()
+        .set_data_source("Data!A1:D51")
+        .add_row_field("Item")
+        .add_value_field(&PivotTableValueField::new("Volume"));
+
+    // Add the pivot tables side by side on a new worksheet.
+    let worksheet = workbook.add_worksheet().set_name("Pivot10")?;
+    worksheet.add_pivot_table(2, 0, &pivot_table1)?;
+    worksheet.add_pivot_table(2, 5, &pivot_table2)?;
+```
+
+
+**Example 11.** Pivot table on the same worksheet as the source data.
+
+<img src="https://rustxlsxwriter.github.io/images/app_pivot_table11.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_pivot_table.rs
+
+    // Add a new worksheet with a copy of the sample data.
+    let worksheet = workbook.add_worksheet().set_name("Pivot11")?;
+    populate_pivot_data(worksheet)?;
+
+    // Create a pivot table based on the data in the same worksheet and
+    // summarize the "Volume" data by "Region".
+    let pivot_table = PivotTable::new()
+        .set_data_source("Pivot11!A1:D51")
+        .add_row_field("Region")
+        .add_value_field(&PivotTableValueField::new("Volume"));
+
+    // Add the pivot table to the right of the data.
+    worksheet.add_pivot_table(2, 6, &pivot_table)?;
 ```
 
 
