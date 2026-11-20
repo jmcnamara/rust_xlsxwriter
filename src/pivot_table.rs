@@ -1345,7 +1345,7 @@ impl PivotTable {
 
         if !self.row_fields.is_empty() {
             // Write the rowFields element.
-            self.write_axis_fields("rowFields", &self.row_fields.clone());
+            self.write_row_fields();
         }
 
         if has_fields && (self.row_fields.is_empty() || self.show_column_grand_totals) {
@@ -1589,13 +1589,13 @@ impl PivotTable {
         xml_end_tag(&mut self.writer, "items");
     }
 
-    // Write the <rowFields> or <colFields> element.
-    fn write_axis_fields(&mut self, tag: &str, names: &[String]) {
-        let attributes = [("count", names.len().to_string())];
+    // Write the <rowFields> element.
+    fn write_row_fields(&mut self) {
+        let attributes = [("count", self.row_fields.len().to_string())];
 
-        xml_start_tag(&mut self.writer, tag, &attributes);
+        xml_start_tag(&mut self.writer, "rowFields", &attributes);
 
-        for name in names {
+        for name in &self.row_fields {
             if let Some(index) = self.field_index(name) {
                 // Write the field element.
                 let attributes = [("x", index.to_string())];
@@ -1603,7 +1603,7 @@ impl PivotTable {
             }
         }
 
-        xml_end_tag(&mut self.writer, tag);
+        xml_end_tag(&mut self.writer, "rowFields");
     }
 
     // Write the <colFields> element, with the virtual "Values" field (index
