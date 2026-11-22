@@ -203,6 +203,7 @@ cargo add rust_xlsxwriter -F constant_memory
 
 Recent changes:
 
+- Added Custom UI/Ribbon support.
 - Added Pivot Table support.
 - Performance improvements.
 

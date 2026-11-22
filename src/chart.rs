@@ -244,7 +244,7 @@
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/chart_tutorial4.png">
 //!
-//! For more examples see chart examples in the[`Cookbook`](crate::cookbook).
+//! For more examples see chart examples in the [`Cookbook`](crate::cookbook).
 //!
 //!
 //!

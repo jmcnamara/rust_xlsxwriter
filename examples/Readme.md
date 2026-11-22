@@ -1972,6 +1972,11 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_write_url_with_text.rs` - Demonstrates writing a URL with
   alternative text.
 
+* `doc_xlsxserialize_base.rs` - Example of serializing Serde derived
+  structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait. This is the base example, without `xlsx`
+  attributes, used in the `XlsxSerialize` attribute docs.
+
 * `doc_xlsxserialize_column_width.rs` - Example of serializing Serde
   derived structs to an Excel worksheet using `rust_xlsxwriter` and the
   `XlsxSerialize` trait.

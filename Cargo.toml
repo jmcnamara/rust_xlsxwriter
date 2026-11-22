@@ -8,7 +8,7 @@ keywords = ["excel", "xlsx"]
 exclude = ["tests/**/*"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.103.0"
+version = "0.104.0"
 edition = "2021"
 rust-version = "1.88.0" # For zip.rs compatibility.
 
@@ -288,6 +288,11 @@ required-features = ["serde"]
 [[example]]
 name = "doc_worksheet_serialize_vectors"
 path = "examples/doc_worksheet_serialize_vectors.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_base"
+path = "examples/doc_xlsxserialize_base.rs"
 required-features = ["serde"]
 
 [[example]]
