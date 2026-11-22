@@ -44,6 +44,7 @@
 //! - Pivot Tables.
 //! - Serde serialization support.
 //! - Support for macros.
+//! - Custom UI/Ribbon elements.
 //! - Memory optimization mode for writing large files.
 //!
 //! [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
@@ -93,6 +94,7 @@
 //! - [`Note`]: Adding Notes to worksheet cells.
 //! - [`Shape`]: Adding Textbox shapes to worksheets.
 //! - [`Macros`](crate::macros): Working with Macros.
+//! - [`Custom UI`](crate::custom_ui): Working with Custom UI elements/Ribbons.
 //! - [`Sparklines`](crate::sparkline): Working with Sparklines.
 //! - [`ExcelDateTime`]: A type to represent dates and times in Excel format.
 //! - [`Formula`]: A type for Excel formulas.
@@ -341,6 +343,7 @@ pub mod changelog;
 pub mod chart;
 pub mod conditional_format;
 pub mod cookbook;
+pub mod custom_ui;
 pub mod macros;
 pub mod performance;
 pub mod sparkline;

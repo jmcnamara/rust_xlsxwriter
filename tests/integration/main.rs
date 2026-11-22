@@ -576,6 +576,7 @@ mod cond_format23;
 mod cond_format24;
 mod cond_format25;
 mod cond_format26;
+mod custom_ui01;
 mod data_validation01;
 mod data_validation02;
 mod data_validation03;

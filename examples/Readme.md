@@ -123,6 +123,11 @@ documentation and generally show how an individual function works.
   Conditional formatting allows you to apply a format to a cell or a range
   of cells based on user defined rule.
 
+* `app_custom_ui.rs` - An example of adding a custom ribbon tab to a
+  `rust_xlsxwriter` file using a Custom UI XML file. The custom tab
+  contains built-in Excel commands and a button that runs a macro from a
+  VBA project file.
+
 * `app_data_validation.rs` - Example of how to add data validation and
   dropdown lists using the `rust_xlsxwriter` library. Data validation is a
   feature of Excel which allows you to restrict the data that a user enters
@@ -1346,6 +1351,16 @@ documentation and generally show how an individual function works.
   worksheet name.
 
 * `doc_utility_quote_sheet_name.rs` - Demonstrates quoting worksheet names.
+
+* `doc_workbook_add_custom_ui.rs` - An example of adding a custom ribbon
+  tab to a workbook using a Custom UI XML file. The tab contains a button
+  that runs a macro from a VBA project.
+
+* `doc_workbook_add_custom_ui1.rs` - An example of adding a Custom UI XML
+  file to modify the Ribbon in an Excel file.
+
+* `doc_workbook_add_custom_ui2.rs` - An example of adding both the Excel
+  2007 and the Excel 2010+ format Custom UI XML files to a workbook.
 
 * `doc_workbook_add_worksheet_with_constant_memory.rs` - Demonstrates
   adding worksheets in "standard" and "constant memory" modes.

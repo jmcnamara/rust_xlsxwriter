@@ -64,16 +64,17 @@ cargo run --example app_demo  # or any other example
 49. [Sparklines: advanced example](#sparklines-advanced-example)
 50. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
 51. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
-52. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-53. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
-54. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
-55. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-56. [Internal links: Creating a Table of Contents](#internal-links-creating-a-table-of-contents)
-57. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-58. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-59. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-60. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-61. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+52. [Custom UI: Adding a custom ribbon tab](#custom-ui-adding-a-custom-ribbon-tab)
+53. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+54. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+55. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+56. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
+57. [Internal links: Creating a Table of Contents](#internal-links-creating-a-table-of-contents)
+58. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+59. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+60. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+61. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+62. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -6989,6 +6990,62 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
+
+
+# Custom UI: Adding a custom ribbon tab
+
+An example of adding a custom ribbon tab to a `rust_xlsxwriter` file using a
+Custom UI XML file.
+
+The custom tab contains built-in Excel commands and a button that runs a macro
+from a VBA project file. See [Working with Custom UI
+elements/Ribbons](../custom_ui/custom_ui.md) for more details.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_custom_ui.png">
+
+```rust
+// Sample code from examples/app_custom_ui.rs
+
+use rust_xlsxwriter::{Format, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add the Custom UI XML file for the Excel 2010+ ribbon.
+    workbook.add_custom_ui("examples/customUI14.xml")?;
+
+    // Add the VBA project for the macro on the custom ribbon tab. This was
+    // extracted from an Excel file using the vba_extract utility.
+    workbook.add_vba_project("examples/vbaProject_custom_ui.bin")?;
+
+    // Add a worksheet.
+    let worksheet = workbook.add_worksheet();
+
+    // Widen the first column for clarity.
+    worksheet.set_column_width(0, 50)?;
+
+    // Show some instructions for the end user.
+    let bold = Format::new().set_bold();
+    let message = "Use the 'My Ribbon' tab to sort the selected data.";
+    worksheet.write_with_format(0, 0, message, &bold)?;
+
+    // Add some data to sort.
+    let fruits = ["Pear", "Apple", "Orange", "Banana", "Grape"];
+    worksheet.write_column(2, 0, fruits)?;
+
+    // Preselect the data so it is ready to sort.
+    worksheet.set_selection(2, 0, 6, 0)?;
+
+    // Save the file to disk. Note the `.xlsm` extension. This is required by
+    // Excel for files with VBA macros or it will raise a warning.
+    workbook.save("custom_ui.xlsm")?;
+
+    Ok(())
+}
+```
 
 
 # Defined names: using user defined variable names in worksheets

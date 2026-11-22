@@ -238,6 +238,72 @@ mod workbook_tests {
         assert!(matches!(result, Err(XlsxError::ThemeError(_))));
     }
 
+    #[test]
+    fn duplicate_custom_ui() {
+        let mut workbook = Workbook::default();
+        let custom_ui = "tests/input/custom_ui/customUI14-01.xml";
+
+        workbook.add_custom_ui(custom_ui).unwrap();
+        let result = workbook.add_custom_ui(custom_ui);
+
+        assert!(matches!(result, Err(XlsxError::CustomUiError(_))));
+    }
+
+    #[test]
+    fn non_custom_ui_xml_file() {
+        let mut workbook = Workbook::default();
+
+        let result = workbook.add_custom_ui("tests/input/themes/empty.xml");
+        assert!(matches!(result, Err(XlsxError::CustomUiError(_))));
+
+        let result = workbook.add_custom_ui("tests/input/themes/civic.xml");
+        assert!(matches!(result, Err(XlsxError::CustomUiError(_))));
+    }
+
+    #[test]
+    fn custom_ui_part_names() {
+        let namespace_2007 = "http://schemas.microsoft.com/office/2006/01/customui";
+        let namespace_2010 = "http://schemas.microsoft.com/office/2009/07/customui";
+
+        let test_data = [
+            // Check for the Excel 2007 and 2010+ namespaces.
+            (format!(r#"<customUI xmlns="{namespace_2007}">"#), Some("customUI")),
+            (format!(r#"<customUI xmlns="{namespace_2010}">"#), Some("customUI14")),
+            // Check for a declaration, comments and whitespace before the root.
+            (
+                format!(
+                    "\u{feff}<?xml version=\"1.0\"?>\r\n<!-- A comment -->\n <customUI xmlns=\"{namespace_2010}\">"
+                ),
+                Some("customUI14"),
+            ),
+            // Check for other attributes and single quotes.
+            (
+                format!("<customUI onLoad='load' xmlns='{namespace_2007}'>"),
+                Some("customUI"),
+            ),
+            // Check for a namespace prefix.
+            (
+                format!(r#"<mso:customUI xmlns:mso="{namespace_2010}">"#),
+                Some("customUI14"),
+            ),
+            // Check for a prefix without a matching namespace.
+            (format!(r#"<mso:customUI xmlns="{namespace_2010}">"#), None),
+            // Check for an unknown namespace.
+            (r#"<customUI xmlns="http://example.com/customui">"#.to_string(), None),
+            // Check for a missing namespace.
+            ("<customUI>".to_string(), None),
+            // Check for a different root element.
+            (format!(r#"<ribbon xmlns="{namespace_2010}">"#), None),
+            // Check for an empty or non-XML file.
+            (String::new(), None),
+            ("customUI".to_string(), None),
+        ];
+
+        for (xml, expected) in test_data {
+            assert_eq!(expected, Workbook::custom_ui_part_name(&xml), "{xml}");
+        }
+    }
+
     // Test a failure to create a temporary file. The temp dir is removed after
     // it is set to simulate a directory that isn't writable.
     #[test]

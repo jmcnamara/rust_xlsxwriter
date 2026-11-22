@@ -5,6 +5,17 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.104.0] - Unreleased
+
+### Added
+
+- Added support for custom ribbon UI XML files via the
+  `Workbook::add_custom_ui()` method. See the [Working with Custom UI] docs.
+
+  <img src="https://rustxlsxwriter.github.io/images/app_custom_ui.png">
+
+  [Working with Custom UI]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/custom_ui/index.html
+
 ## [0.103.0] - 2026-11-18
 
 ### Added

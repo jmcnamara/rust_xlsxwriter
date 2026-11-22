@@ -100,6 +100,7 @@ supported features are:
 - Pivot Tables.
 - Serde serialization support.
 - Support for macros.
+- Custom UI/Ribbon elements.
 - Memory optimization mode for writing large files.
 
 

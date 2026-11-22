@@ -197,6 +197,12 @@ pub enum XlsxError {
     /// An error that is raised when setting the theme for a workbook.
     ThemeError(String),
 
+    /// An error that is raised when adding a Custom UI file to a workbook. The
+    /// file must have a `customUI` root element with an Excel 2007 or Excel
+    /// 2010+ Custom UI namespace, and only one file of each format can be
+    /// added. See [`Workbook::add_custom_ui()`](crate::Workbook::add_custom_ui).
+    CustomUiError(String),
+
     /// A customizable error that can be used by third parties to raise errors
     /// or as a conversion target for other error types.
     CustomError(String),
@@ -412,6 +418,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::ThemeError(error) => {
                 write!(f, "Theme error: '{error}'.")
+            }
+
+            XlsxError::CustomUiError(error) => {
+                write!(f, "Custom UI error: '{error}'.")
             }
 
             XlsxError::CustomError(error) => {

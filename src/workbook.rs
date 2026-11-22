@@ -344,6 +344,7 @@ pub struct Workbook {
     pub(crate) feature_property_bags: HashSet<FeaturePropertyBagTypes>,
     pub(crate) theme_xml: String,
     pub(crate) pivot_caches: Vec<PivotCache>,
+    pub(crate) custom_uis: Vec<(&'static str, String, Vec<u8>)>,
 
     xf_indices: Arc<RwLock<HashMap<Format, u32>>>,
     dxf_indices: HashMap<Format, u32>,
@@ -459,6 +460,7 @@ impl Workbook {
             max_col_width: 1790,
             theme_xml: String::from(THEME_XML_2007),
             pivot_caches: vec![],
+            custom_uis: vec![],
             default_theme_version: String::from("124226"),
 
             #[cfg(feature = "constant_memory")]
@@ -2358,6 +2360,101 @@ impl Workbook {
         Ok(self)
     }
 
+    /// Add a Custom UI XML file to customize the Excel Ribbon.
+    ///
+    /// Excel allows the Ribbon interface to be customized with custom tabs,
+    /// groups, buttons and other controls via Custom UI XML files that are
+    /// embedded in the Excel file. The `add_custom_ui()` method adds one of
+    /// these files to the workbook.
+    ///
+    /// Excel supports two Custom UI formats, the Excel 2007 format and the
+    /// Excel 2010+ format, which are identified by the namespace of the
+    /// `customUI` root element:
+    ///
+    /// - Excel 2007 format: `http://schemas.microsoft.com/office/2006/01/customui`
+    /// - Excel 2010+ format: `http://schemas.microsoft.com/office/2009/07/customui`
+    ///
+    /// One file of each format can be added to a workbook. In practice, the
+    /// Excel 2010+ format on its own is sufficient unless the file needs to
+    /// work in Excel 2007.
+    ///
+    /// Custom UI controls that run VBA macros also require a VBA project to be
+    /// added with [`Workbook::add_vba_project()`] and the file must be saved
+    /// with an `.xlsm` extension.
+    ///
+    /// See [Working with Custom UI elements](crate::custom_ui) for more
+    /// details.
+    ///
+    /// # Parameters
+    ///
+    /// - `path`: A path to a Custom UI XML file.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::IoError`] - I/O errors if the path doesn't exist or is
+    ///   restricted.
+    /// - [`XlsxError::CustomUiError`] - The file doesn't have a `customUI`
+    ///   root element with an Excel 2007 or Excel 2010+ namespace, or a file of
+    ///   the same format has already been added.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding a custom ribbon tab to a workbook using a Custom UI
+    /// XML file. The tab contains a button that runs a macro from a VBA
+    /// project.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_add_custom_ui.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add the Custom UI XML file for the Excel 2010+ ribbon.
+    ///     workbook.add_custom_ui("examples/customUI14.xml")?;
+    ///
+    ///     // Add the VBA project with the macro used by the ribbon button.
+    ///     workbook.add_vba_project("examples/vbaProject_custom_ui.bin")?;
+    ///
+    ///     let worksheet = workbook.add_worksheet();
+    ///     worksheet.write(0, 0, "Use the 'My Ribbon' tab.")?;
+    ///
+    ///     // Note the `.xlsm` extension, which is required for VBA macros.
+    ///     workbook.save("custom_ui.xlsm")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/workbook_add_custom_ui.png">
+    ///
+    pub fn add_custom_ui<P: AsRef<Path>>(&mut self, path: P) -> Result<&mut Workbook, XlsxError> {
+        let data = std::fs::read(&path)?;
+        let filename = path.as_ref().display().to_string();
+
+        let Some(part_name) = std::str::from_utf8(&data)
+            .ok()
+            .and_then(Self::custom_ui_part_name)
+        else {
+            return Err(XlsxError::CustomUiError(format!(
+                "File '{filename}' doesn't have a 'customUI' root element with an Excel 2007 or Excel 2010+ namespace"
+            )));
+        };
+
+        if let Some((_, previous, _)) = self.custom_uis.iter().find(|ui| ui.0 == part_name) {
+            return Err(XlsxError::CustomUiError(format!(
+                "File '{filename}' has the same Custom UI format as '{previous}'. Only one file of each format is allowed"
+            )));
+        }
+
+        self.custom_uis.push((part_name, filename, data));
+
+        Ok(self)
+    }
+
     /// Set the workbook name used in VBA macros.
     ///
     /// This method can be used to set the VBA name for the workbook. This is
@@ -2596,6 +2693,55 @@ impl Workbook {
     #[cfg(feature = "constant_memory")]
     fn create_tempfile(dir: &Path) -> Result<File, XlsxError> {
         tempfile_in(dir).map_err(|error| XlsxError::TempFileError(dir.to_path_buf(), error))
+    }
+
+    // Get the custom UI part name, "customUI" or "customUI14", from the
+    // namespace of the root element of a custom UI XML file.
+    fn custom_ui_part_name(xml: &str) -> Option<&'static str> {
+        let mut xml = xml.trim_start_matches('\u{feff}').trim_start();
+
+        // Skip the XML declaration and any comments before the root element.
+        loop {
+            if let Some(rest) = xml.strip_prefix("<?") {
+                xml = rest.split_once("?>")?.1.trim_start();
+            } else if let Some(rest) = xml.strip_prefix("<!--") {
+                xml = rest.split_once("-->")?.1.trim_start();
+            } else {
+                break;
+            }
+        }
+
+        // Get the root element name, with an optional namespace prefix, and
+        // its attributes.
+        let start_tag = xml.strip_prefix('<')?.split_once('>')?.0;
+        let start_tag = start_tag.strip_suffix('/').unwrap_or(start_tag);
+        let (name, mut attributes) = start_tag.split_once(char::is_whitespace)?;
+
+        let xmlns = match name.split_once(':') {
+            Some((prefix, "customUI")) => format!("xmlns:{prefix}"),
+            None if name == "customUI" => "xmlns".to_string(),
+            _ => return None,
+        };
+
+        // Find the value of the namespace attribute for the root element.
+        let namespace = loop {
+            let (attribute, rest) = attributes.split_once('=')?;
+            let rest = rest.trim_start();
+            let quote = rest.chars().next().filter(|c| *c == '"' || *c == '\'')?;
+            let (value, rest) = rest[1..].split_once(quote)?;
+
+            if attribute.trim() == xmlns {
+                break value;
+            }
+
+            attributes = rest;
+        };
+
+        match namespace {
+            "http://schemas.microsoft.com/office/2006/01/customui" => Some("customUI"),
+            "http://schemas.microsoft.com/office/2009/07/customui" => Some("customUI14"),
+            _ => None,
+        }
     }
 
     // Read theme XML from either a zip file (thmx/xlsx) or a text file.
@@ -3475,6 +3621,7 @@ impl Workbook {
 
     // Collect some workbook-level metadata to help generate the xlsx
     // package/file.
+    #[allow(clippy::too_many_lines)]
     fn set_package_options(
         &mut self,
         mut package_options: PackagerOptions,
@@ -3488,6 +3635,7 @@ impl Workbook {
 
         package_options.is_xlsm_file = self.is_xlsm_file;
         package_options.has_vba_signature = !self.vba_signature.is_empty();
+        package_options.custom_ui_parts = self.custom_uis.iter().map(|ui| ui.0).collect();
         package_options
             .feature_property_bags
             .clone_from(&self.feature_property_bags);

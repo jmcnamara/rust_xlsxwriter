@@ -200,6 +200,7 @@ impl<W: Write + Send> Packager<W> {
         self.write_pivot_table_files(workbook)?;
         self.write_pivot_cache_files(workbook)?;
         self.write_vba_project(workbook)?;
+        self.write_custom_ui_files(workbook)?;
 
         let mut rel_index = 0;
 
@@ -358,6 +359,19 @@ impl<W: Write + Send> Packager<W> {
         if !options.properties.custom_properties.is_empty() {
             rels.add_document_relationship("custom-properties", "docProps/custom.xml", "");
         }
+
+        // Add the custom UI relationships. The Excel 2010+ customUI14 part uses
+        // the 2007 schema.
+        for part_name in &options.custom_ui_parts {
+            let version = if *part_name == "customUI14" {
+                "2007"
+            } else {
+                "2006"
+            };
+            let target = format!("customUI/{part_name}.xml");
+            rels.add_office_relationship(version, "ui/extensibility", &target, "");
+        }
+
         self.zip.start_file("_rels/.rels", self.zip_options)?;
 
         rels.assemble_xml_file();
@@ -1141,6 +1155,17 @@ impl<W: Write + Send> Packager<W> {
         self.write_vba_signature(workbook)
     }
 
+    // Write the custom UI XML files.
+    fn write_custom_ui_files(&mut self, workbook: &Workbook) -> Result<(), XlsxError> {
+        for (part_name, _, data) in &workbook.custom_uis {
+            let filename = format!("customUI/{part_name}.xml");
+            self.zip.start_file(filename, self.zip_options)?;
+            self.zip.write_all(data)?;
+        }
+
+        Ok(())
+    }
+
     // Write the VBA signature file.
     fn write_vba_signature(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         if workbook.vba_signature.is_empty() {
@@ -1205,6 +1230,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) num_embedded_images: u32,
     pub(crate) has_embedded_image_descriptions: bool,
     pub(crate) feature_property_bags: HashSet<FeaturePropertyBagTypes>,
+    pub(crate) custom_ui_parts: Vec<&'static str>,
 }
 
 impl PackagerOptions {
@@ -1234,6 +1260,7 @@ impl PackagerOptions {
             num_embedded_images: 0,
             has_embedded_image_descriptions: false,
             feature_property_bags: HashSet::new(),
+            custom_ui_parts: vec![],
         }
     }
 }
