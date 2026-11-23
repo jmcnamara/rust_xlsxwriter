@@ -10,18 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added support for custom ribbon UI XML files via the
-  `Workbook::add_custom_ui()` method. See the [Working with Custom UI] docs.
+  [`Workbook::add_custom_ui()`] method. See the [Working with Custom UI] docs.
 
   <img src="https://rustxlsxwriter.github.io/images/app_custom_ui.png">
 
-  [Working with Custom UI]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/custom_ui/index.html
+  [Working with Custom UI]: crate::custom_ui
 
 ## [0.103.0] - 2026-11-18
 
 ### Added
 
-- Added support for worksheet pivot tables via the `PivotTable` struct and the
-  `Worksheet::add_pivot_table()` method. Pivot tables can have row, column,
+- Added support for worksheet pivot tables via the [`PivotTable`] struct and the
+  [`Worksheet::add_pivot_table()`] method. Pivot tables can have row, column,
   filter and value fields, and can set value field functions, names and number
   formats, as well as the pivot table style, layout and grand totals. See
   [Feature Request #53].
@@ -32,13 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pivot table from the source data when the file is opened. As a result,
   applications that don't refresh pivot tables on load will show an empty pivot
   table, and Excel will ask the user to save the file when it is closed, even if
-  no changes were made. See the `PivotTable` "Limitations" docs for details.
+  no changes were made. See the [`PivotTable`] "Limitations" docs for details.
 
   [Feature Request #53]: https://github.com/jmcnamara/rust_xlsxwriter/issues/53
 
 ### Changed
 
-- **Breaking change**: The `XlsxError` enum is now marked as
+- **Breaking change**: The [`XlsxError`] enum is now marked as
   `#[non_exhaustive]`, so code that matches on it will need a wildcard arm. This
   allows new error variants (like in this release) to be added in future
   releases without further breaking changes.
@@ -68,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rich strings, notes, headers, autofilters and document properties.
   See [Issue #217].
 
-- Fixed an error in the the `IgnoreError::TwoDigitTextYear` attribute name. See
+- Fixed an error in the the [`IgnoreError::TwoDigitTextYear`] attribute name. See
   [Issue #218].
 
   [Issue #218]: https://github.com/jmcnamara/rust_xlsxwriter/issues/218
@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #219]: https://github.com/jmcnamara/rust_xlsxwriter/issues/219
 
-- Fixed an issue where a failed `Workbook::save()` left an empty file, or
+- Fixed an issue where a failed [`Workbook::save()`] left an empty file, or
   truncated an existing file. See [Issue #221].
 
   [Issue #221]: https://github.com/jmcnamara/rust_xlsxwriter/issues/221
@@ -92,7 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `Workbook::set_tab_ratio()` to set the ratio between the worksheet tabs
+- Added [`Workbook::set_tab_ratio()`] to set the ratio between the worksheet tabs
   and the horizontal scroll bar.
 
 ### Fixed
@@ -103,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #207]: https://github.com/jmcnamara/rust_xlsxwriter/issues/207
 
-- Fixed an off by one error in `Worksheet::set_first_tab()`. See [Issue #208].
+- Fixed an off by one error in [`Worksheet::set_first_tab()`]. See [Issue #208].
 
   [Issue #208]: https://github.com/jmcnamara/rust_xlsxwriter/issues/208
 
@@ -141,8 +141,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Also added `Error::source()` support for the `XlsxError::IoError`,
-  `XlsxError::ZipError` and `XlsxError::PolarsError` variants. This allows the
+- Also added `Error::source()` support for the [`XlsxError::IoError`],
+  [`XlsxError::ZipError`] and `XlsxError::PolarsError` variants. This allows the
   underlying cause, such as the `io::Error` in a `ZipError::Io` error, to be
   accessed via the standard error source chain.
 
@@ -154,7 +154,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Breaking change**: The `Workbook::add_worksheet_with_constant_memory()` and
   `Workbook::add_worksheet_with_low_memory()` methods now return a `Result`
   instead of panicking if a temporary file can't be created, for example if the
-  temporary directory isn't writable. A new `XlsxError::TempFileError` error was
+  temporary directory isn't writable. A new [`XlsxError::TempFileError`] error was
   added for this. The tempfile is also only created when it is needed rather
   than when the worksheet is created, and standard worksheets no longer create
   one. See [Issue #195].
@@ -174,16 +174,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #205]: https://github.com/jmcnamara/rust_xlsxwriter/issues/205
 
-- Added the `Workbook::set_zip_compression_level()` method to set the
+- Added the [`Workbook::set_zip_compression_level()`] method to set the
   compression level of the xlsx zip container in the range 1 to 9. The default
   level is 6. Lower levels are faster and higher levels produce smaller files.
   See the "Zip compression level" section of the [Performance] docs for a
   comparison of the levels. See [Issue #197].
 
   [Issue #197]: https://github.com/jmcnamara/rust_xlsxwriter/issues/197
-  [Performance]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html
+  [Performance]: crate::performance
 
-- Added the `Workbook::set_calculation_mode()` method and `CalculationMode`
+- Added the [`Workbook::set_calculation_mode()`] method and [`CalculationMode`]
   enum to set the formula calculation mode of a workbook to `Automatic` (the
   default), `Manual` or `Partial`. See [Issue #206].
 
@@ -191,7 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #206]: https://github.com/jmcnamara/rust_xlsxwriter/issues/206
 
-- Added the `Worksheet::set_hidden_zeroes()` method to hide zero values in
+- Added the [`Worksheet::set_hidden_zeroes()`] method to hide zero values in
   worksheet cells. This is the equivalent of turning off the Excel option "Show
   a zero in cells that have zero value". See [Issue #201].
 
@@ -220,7 +220,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #200]: https://github.com/jmcnamara/rust_xlsxwriter/issues/200
 
-- Fixed issue where `FilterCondition::add_custom_boolean_or()` only worked
+- Fixed issue where [`FilterCondition::add_custom_boolean_or()`] only worked
   correctly when it was in a certain position in the method chain.
   See [Issue #202].
 
@@ -248,17 +248,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Breaking change**: Renamed error `XlsxError::TableNameReused` to
-  `XlsxError::NameReused` to clarify that Table names and Defined names must be
+  [`XlsxError::NameReused`] to clarify that Table names and Defined names must be
   unique to each other as well as within their own namespaces. Also added checks
   to ensure this. See [Issue #189].
 
 ### Fixed
 
-- Fixed issue in `utility::quote_sheet_name()` to avoid incorrectly matching
+- Fixed issue in [`utility::quote_sheet_name()`] to avoid incorrectly matching
   names like `Q.1` as cell references. See [Issue #189].
 
 - Fixed issue where where worksheet level defined names with quotes like
-- `'Sheet 1'!Name` were not split correctly. See [Issue #189].
+  `'Sheet 1'!Name` were not split correctly. See [Issue #189].
 
 ### Added
 
@@ -272,7 +272,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed issue where an empty sheet or variable name in `Workbook::define_name()`
+- Fixed issue where an empty sheet or variable name in [`Workbook::define_name()`]
   created an invalid Excel file. See [Issue #186].
 
   [Issue #186]: https://github.com/jmcnamara/rust_xlsxwriter/issues/186
@@ -310,8 +310,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed issue where using `Worksheet::set_tab_color()` and
-  `Worksheet::set_print_fit_to_pages()` on the same worksheet caused an invalid
+- Fixed issue where using [`Worksheet::set_tab_color()`] and
+  [`Worksheet::set_print_fit_to_pages()`] on the same worksheet caused an invalid
   Excel file due to an XML element ordering issue. See [Issue #184].
 
   [Issue #184]: https://github.com/jmcnamara/rust_xlsxwriter/issues/184
@@ -424,7 +424,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   <img src="https://rustxlsxwriter.github.io/images/worksheet_autofit_with_format2.png">
 
 - Added the [`Worksheet::set_autofit_max_row()`] method to limit the number of
-  rows processed when applying `Worksheet::autofit()`. This is a performance
+  rows processed when applying [`Worksheet::autofit()`]. This is a performance
   workaround for autofitting large datasets where a value of 200-500 rows can be
   used to autofit the data in the visible row range of most users.
 
@@ -433,8 +433,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Worksheet::autofit_to_max_width()` method.
 
   [`ssfmt`]: https://crates.io/crates/ssfmt
-  [`Worksheet::set_autofit_max_width()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_autofit_max_width
-  [`Worksheet::set_autofit_max_row()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_autofit_max_row
 
 
 ### Deprecated
@@ -520,9 +518,6 @@ This release adds several features related to setting themes and default fonts.
   [Request #158].
 
   [Request #158]: https://github.com/jmcnamara/rust_xlsxwriter/issues/158
-  [`Workbook::use_custom_theme()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.use_custom_theme
-  [`Workbook::use_excel_2023_theme()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.use_excel_2023_theme
-  [`Workbook::set_default_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.set_default_format
 
 
 ### Fixed
@@ -541,12 +536,12 @@ This release adds several features related to setting themes and default fonts.
 
   <img src="https://rustxlsxwriter.github.io/images/app_chart_clustered.png">
 
- [Clustered Chart]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#chart-clustered-categories
+ [Clustered Chart]: crate::cookbook#chart-clustered-categories
 
 - Added support for non-contiguous chart ranges like
   `=(Sheet1!$A$1:$A$2,Sheet1!$A$4:$A$5)`. These can only be added as strings.
 
-- Added `Table::set_alt_text()` and `Table::set_alt_text_title()` methods to the
+- Added [`Table::set_alt_text()`] and [`Table::set_alt_text_title()`] methods to the
   [`Table`] object to allow alternative text to be specified for screen readers.
 
   <img src="https://rustxlsxwriter.github.io/images/table_set_alt_text.png">
@@ -559,8 +554,6 @@ This release adds several features related to setting themes and default fonts.
   [Request #157]: https://github.com/jmcnamara/rust_xlsxwriter/issues/157
 
   <img src="https://rustxlsxwriter.github.io/images/app_images_fit_to_cell.png">
-
-  [`Worksheet::insert_image_fit_to_cell_centered()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image_fit_to_cell_centered
 
 
 ## [0.90.2] - 2025-09-26
@@ -582,8 +575,6 @@ This release adds several features related to setting themes and default fonts.
 
   [Request #156]: https://github.com/jmcnamara/rust_xlsxwriter/issues/156
 
-[`Worksheet::set_zoom_to_fit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_zoom_to_fit
-
 - Updated optional `polars` dependency to v0.51.
 
 
@@ -598,8 +589,8 @@ This release adds several features related to setting themes and default fonts.
 
 ### Fixed
 
-- Fixed issue where `Worksheet::set_selection()` and
-  `Worksheet::set_freeze_panes()` didn't work together.
+- Fixed issue where [`Worksheet::set_selection()`] and
+  [`Worksheet::set_freeze_panes()`] didn't work together.
 
   [Issue #154].
 
@@ -672,7 +663,7 @@ This release adds several features related to setting themes and default fonts.
 
 ### Added
 
-- Enabled `sync` for the internal components of `Worksheet` to allow it to by
+- Enabled `sync` for the internal components of [`Worksheet`] to allow it to by
   `sync` when required.
 
   [Request #144].
@@ -689,9 +680,7 @@ This release adds several features related to setting themes and default fonts.
   isn't accessible or if it is loaded in memory (which would negate the effect
   of `constant_memory` mode).
 
-  See [`Workbook::set_tempdir()`].
-
-  [`Workbook::set_tempdir()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.set_tempdir
+  See `Workbook::set_tempdir()`.
 
 
 ## [0.84.2] - 2025-03-24
@@ -745,11 +734,7 @@ This release adds several features related to setting themes and default fonts.
   - [`utility::worksheet_range_absolute()`] - Convert a worksheet name and cell
     reference to an Excel "`Sheet1!$A$1:$B$1`" style absolute range string.
 
-  [`Format::merge()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#method.merge
-  [Row and Column Formats]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#row-and-column-formats
-  [`utility::quote_sheet_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.quote_sheet_name.html
-  [`utility::worksheet_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.worksheet_range.html
-  [`utility::worksheet_range_absolute()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.worksheet_range_absolute.html
+  [Row and Column Formats]: crate::Format#row-and-column-formats
 
 
 ## [0.83.0] - 2025-02-04
@@ -766,7 +751,7 @@ This release adds several features related to setting themes and default fonts.
 
   See [Grouping and outlining data].
 
-  [Grouping and outlining data]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/index.html#grouping-and-outlining-data
+  [Grouping and outlining data]: crate::worksheet#grouping-and-outlining-data
   <br>
   <br>
 
@@ -783,16 +768,12 @@ This release adds several features related to setting themes and default fonts.
   these errors can be ignored by using [`Worksheet::ignore_error()`] and
   [`Worksheet::ignore_error_range()`].
 
-  [`Worksheet::ignore_error()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.ignore_error
-  [`Worksheet::ignore_error_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.ignore_error_range
   <br>
   <br>
 
 - Added support for worksheet background images via the [`Worksheet::insert_background_image()`] method.
 
   <img src="https://rustxlsxwriter.github.io/images/app_background_image.png">
-
-  [`Worksheet::insert_background_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_background_image
 
 
 
@@ -810,7 +791,6 @@ This release adds several features related to setting themes and default fonts.
   <img src="https://rustxlsxwriter.github.io/images/checkbox.png">
 
   [a new feature added to Excel]: https://techcommunity.microsoft.com/blog/excelblog/introducing-checkboxes-in-excel/4173561
-  [`Worksheet::insert_checkbox()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_checkbox
 
 - Added support for overriding the default handling of NaN and Infinity numbers.
   These aren't supported by Excel so they are replaced with default or custom
@@ -819,10 +799,6 @@ This release adds several features related to setting themes and default fonts.
   - [`Worksheet::set_nan_value()`]
   - [`Worksheet::set_infinity_value()`]
   - [`Worksheet::set_neg_infinity_value()`]
-
-  [`Worksheet::set_nan_value()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_nan_value
-  [`Worksheet::set_infinity_value()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_infinity_value
-  [`Worksheet::set_neg_infinity_value()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_neg_infinity_value
 
 
 - Updated `polars` dependency to 0.46 to pick up latest Polars additions for
@@ -871,9 +847,6 @@ This release adds several features related to setting themes and default fonts.
   calculate a string auto-fit width so that they can implement their own
   auto-fit functionality with additional logic.
 
-  [`utility::cell_autofit_width()`]:
-      https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.cell_autofit_width.html
-
 - Updated `polars` dependency to 0.44 to pick up latest Polars additions for
   [`polars_excel_writer`].
 
@@ -893,13 +866,12 @@ This release adds several features related to setting themes and default fonts.
 
 ### Added
 
-- Made the `FilterData::new_string_and_criteria()` and
-  `FilterData::new_number_and_criteria()` functions public to allows users to
+- Made the [`FilterData::new_string_and_criteria()`] and
+  [`FilterData::new_number_and_criteria()`] functions public to allows users to
   implement the [`IntoFilterData`] trait.
 
   [Request #115]
 
-  [`IntoFilterData`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoFilterData.html
   [Request #115]: https://github.com/jmcnamara/rust_xlsxwriter/issues/115
 
 
@@ -922,8 +894,6 @@ This release adds several features related to setting themes and default fonts.
   the user to position multiple objects using the same cell reference and
   different offset values when using functions like
   [`Worksheet::insert_chart_with_offset()`].
-
-  [`Worksheet::insert_chart_with_offset()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_chart_with_offset
 
 
 ## [0.79.1] - 2024-10-31
@@ -955,8 +925,6 @@ This release adds several features related to setting themes and default fonts.
 
   See [`Workbook::use_zip_large_file()`].
 
-  [`Workbook::use_zip_large_file()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.use_zip_large_file
-
   [zip.rs]: https://crates.io/crates/zip
   [ZIP64]: https://en.wikipedia.org/wiki/ZIP_(file_format)#ZIP64
 
@@ -978,7 +946,7 @@ This release adds several features related to setting themes and default fonts.
 
   <img src="https://rustxlsxwriter.github.io/images/performance_memory1.png">
 
-  [constant memory]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html#constant-memory-mode
+  [constant memory]: crate::performance#constant-memory-mode
 
 
 
@@ -995,7 +963,7 @@ This release adds several features related to setting themes and default fonts.
 
   <img src="https://rustxlsxwriter.github.io/images/chartsheet.png">
 
-  [Chartsheets]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/index.html#chartsheets
+  [Chartsheets]: crate::worksheet#chartsheets
 
 
 - Updated `polars` dependency to 0.43 to pick up latest Polars additions for
@@ -1010,9 +978,6 @@ This release adds several features related to setting themes and default fonts.
     for [`Shape`].
 
     <img src="https://rustxlsxwriter.github.io/images/app_textbox.png">
-
-
-    [`Shape`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Shape.html
 
 
 ## [0.75.0] - 2024-09-02
@@ -1053,11 +1018,6 @@ This release adds several features related to setting themes and default fonts.
 
   <img src="https://rustxlsxwriter.github.io/images/worksheet_set_range_format_with_border.png">
 
-  [`Worksheet::set_cell_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_cell_format
-  [`Worksheet::set_range_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_range_format
-  [`Worksheet::write_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_with_format
-  [`Worksheet::set_range_format_with_border()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_range_format_with_border
-
 - Replaced the `IntoColor` trait with `Into<Color>` in all APIs. This doesn't
   require a change by the end user (unless they implemented `IntoColor` for
   their own type).
@@ -1078,9 +1038,6 @@ This release adds several features related to setting themes and default fonts.
 
   See [`Worksheet::set_default_row_height()`] and  [`Worksheet::hide_unused_rows()`].
 
-  [`Worksheet::hide_unused_rows()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.hide_unused_rows
-  [`Worksheet::set_default_row_height()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_default_row_height
-
 
 ## [0.72.0] - 2024-07-26
 
@@ -1098,8 +1055,6 @@ This release adds several features related to setting themes and default fonts.
     In versions of Excel prior to Office 365 Notes were referred to as
     "Comments". The name Comment is now used for a newer style threaded comment
     and Note is used for the older non threaded version.
-
-    [`Note`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Note.html
 
 
 
@@ -1129,7 +1084,7 @@ This release adds several features related to setting themes and default fonts.
     <img src="https://rustxlsxwriter.github.io/images/app_macros.png">
 
     [`vba_extract`]: https://crates.io/crates/vba_extract
-    [Working with VBA Macros]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/macros/index.html
+    [Working with VBA Macros]: crate::macros
 
 
 ## [0.70.0] - 2024-07-14
@@ -1147,17 +1102,12 @@ This release adds several features related to setting themes and default fonts.
     <img src="https://rustxlsxwriter.github.io/images/data_validation_intro1.png">
 
 
-    [`DataValidation`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.DataValidation.html
-
-
 ## [0.69.0] - 2024-07-01
 
 ### Added
 
   - Added support for adjusting the layout position of chart elements: plot
     area, legend, title, and axis labels. See [`ChartLayout`].
-
-   [`ChartLayout`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartLayout.html
 
 ### Fixed
 
@@ -1217,7 +1167,7 @@ This release adds several features related to setting themes and default fonts.
 
     [ryu]: https://docs.rs/ryu/latest/ryu/index.html
     [zip-rs/zip2#100]: https://github.com/zip-rs/zip2/issues/100
-    [Sensitivity Label]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#document-properties-setting-the-sensitivity-label
+    [Sensitivity Label]: crate::cookbook#document-properties-setting-the-sensitivity-label
     [Feature Request #24]: https://github.com/jmcnamara/rust_xlsxwriter/issues/24
     [performance analysis]: https://github.com/jmcnamara/rust_xlsxwriter/issues/93
 
@@ -1230,9 +1180,7 @@ This release adds several features related to setting themes and default fonts.
 
 ### Changed
 
-  - Changed `ChartSeries::set_y2_axis()` to `ChartSeries::set_secondary_axis()` for API consistency.
-
-   [`ChartSeries::set_secondary_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_secondary_axis
+  - Changed `ChartSeries::set_y2_axis()` to [`ChartSeries::set_secondary_axis()`] for API consistency.
 
 
 ## [0.65.0] - 2024-06-11
@@ -1243,8 +1191,8 @@ This release adds several features related to setting themes and default fonts.
 
     <img src="https://rustxlsxwriter.github.io/images/chart_series_set_secondary_axis.png">
 
-    [Chart Secondary Axes]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/index.html#secondary-axes
-    [Combined Charts]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/index.html#combined-charts
+    [Chart Secondary Axes]: crate::chart#secondary-axes
+    [Combined Charts]: crate::chart#combined-charts
 
 
 ## [0.64.2] - 2024-04-13
@@ -1260,12 +1208,12 @@ This release adds several features related to setting themes and default fonts.
 
   - Added the [`worksheet::set_screen_gridlines()`] method to turn on/offscreen gridlines.
 
-  [`worksheet::set_screen_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_screen_gridlines
+  [`worksheet::set_screen_gridlines()`]: crate::Worksheet::set_screen_gridlines
 
   - Added updated docs on [Working with Workbooks] and [Working with Worksheets].
 
-  [Working with Workbooks]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/index.html
-  [Working with Worksheets]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/index.html
+  [Working with Workbooks]: crate::workbook
+  [Working with Worksheets]: crate::worksheet
 
 
 ## [0.64.0] - 2024-03-18
@@ -1280,7 +1228,7 @@ This release adds several features related to setting themes and default fonts.
 
   <img src="https://rustxlsxwriter.github.io/images/sparklines1.png">
 
-  [Working with Sparklines]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/sparkline/index.html
+  [Working with Sparklines]: crate::sparkline
 
 
 ## [0.63.0] - 2024-02-25
@@ -1300,10 +1248,10 @@ This release adds several features related to setting themes and default fonts.
   using the option to "Place in Cell" which is available in Excel 365 versions
   from 2023 onwards.
 
-  [`worksheet::embed_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.embed_image
-  [`worksheet::embed_image_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.embed_image_with_format
+  [`worksheet::embed_image()`]: crate::Worksheet::embed_image
+  [`worksheet::embed_image_with_format()`]: crate::Worksheet::embed_image_with_format
 
-  [Embedded Images]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#insert-images-embedding-an-image-in-a-cell
+  [Embedded Images]: crate::cookbook#insert-images-embedding-an-image-in-a-cell
 
 
 - Updated `polars` dependency to 0.37.2 to pick up latest Polars additions for
@@ -1318,9 +1266,6 @@ This release adds several features related to setting themes and default fonts.
 
   [Feature Request #83]: https://github.com/jmcnamara/rust_xlsxwriter/issues/83
 
-  [`utility::check_sheet_name()`]:
-      https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.check_sheet_name.html
-
 ### Removed
 
 - Removed unnecessary lifetime on [`Format`] objects used in Worksheet `write()`
@@ -1328,28 +1273,19 @@ This release adds several features related to setting themes and default fonts.
   types and have them include a default format. See [Feature Request #85].
 
   [Feature Request #85]: https://github.com/jmcnamara/rust_xlsxwriter/issues/85
-  [`Format`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
 
 ## [0.62.0] - 2024-01-24
 
 ### Added
 
-- Added support for adding a worksheet [`Table`] as a serialization format. See [`SerializeFieldOptions::set_table()`].
+- Added support for adding a worksheet [`Table`] as a serialization format. See `SerializeFieldOptions::set_table()`.
 
-- Added [`Worksheet::get_serialize_dimensions()`] and
-  [`Worksheet::get_serialize_column_dimensions()`] methods to get dimensions
+- Added `Worksheet::get_serialize_dimensions()` and
+  `Worksheet::get_serialize_column_dimensions()` methods to get dimensions
   from a serialized range.
 
 - Updated `polars` dependency to 0.36.2 to pick up Polars `AnyData` changes for
   [`polars_excel_writer`].
-
-
-[`Worksheet::get_serialize_dimensions()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.get_serialize_dimensions
-
-[`Worksheet::get_serialize_column_dimensions()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.get_serialize_column_dimensions
-
-
-[`SerializeFieldOptions::set_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/struct.SerializeFieldOptions.html#method.set_table
 
 
 ### Changed
@@ -1368,17 +1304,15 @@ This release adds several features related to setting themes and default fonts.
   the formatting and options of the Excel output during serialization. These are
   similar in intention to Serde container/field attributes.
 
-  See [Controlling Excel output via `XlsxSerialize` and struct attributes] and
-  [Working with Serde].
+  See Controlling Excel output via `XlsxSerialize` and struct attributes and
+  Working with Serde.
 
   [Feature Request #66].
 
   [Feature Request #66]: https://github.com/jmcnamara/rust_xlsxwriter/issues/66
 
-  [Controlling Excel output via `XlsxSerialize` and struct attributes]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#controlling-excel-output-via-xlsxserialize-and-struct-attributes
 
-
-- Added `XlsxError::CustomError` as a target error for external crates/apps.
+- Added [`XlsxError::CustomError`] as a target error for external crates/apps.
 
   [Feature Request #72].
 
@@ -1391,12 +1325,12 @@ This release adds several features related to setting themes and default fonts.
 
 - Added support for setting Serde headers using deserialization of a target
   struct type as well as the previous method of using serialization and an
-  instance of the struct type. See [Setting serialization headers].
+  instance of the struct type. See Setting serialization headers.
 
   [Feature Request #63].
 
 - Added additional support for serialization header and field options via
-  [`CustomSerializeField`].
+  `CustomSerializeField`.
 
 - Added support for writing `Result<T, E>` with [`Worksheet::write()`] when `T`
   and `E` are supported types.
@@ -1405,19 +1339,15 @@ This release adds several features related to setting themes and default fonts.
 
 [Feature Request #63]: https://github.com/jmcnamara/rust_xlsxwriter/issues/63
 [Feature Request #64]: https://github.com/jmcnamara/rust_xlsxwriter/issues/64
-[Setting serialization headers]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#setting-serialization-headers
-[`CustomSerializeField`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/struct.CustomSerializeField.html
 
 ## [0.59.0] - 2023-12-15
 
 ### Added
 
-- Added [`serialize_option_datetime_to_excel()`] to help serialization of
+- Added `serialize_option_datetime_to_excel()` to help serialization of
   `Option` Chrono types. [Feature Request #62].
 
 [Feature Request #62]: https://github.com/jmcnamara/rust_xlsxwriter/issues/62
-
-[`serialize_option_datetime_to_excel()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.serialize_option_datetime_to_excel.html
 
 
 ## [0.58.0] - 2023-12-11
@@ -1425,9 +1355,7 @@ This release adds several features related to setting themes and default fonts.
 ### Added
 
 - Added serialization support for [`ExcelDateTime`] and [`Chrono`] date/time
-  types. See [Working with Serde - Serializing dates and times].
-
-  [Working with Serde - Serializing dates and times]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#serializing-dates-and-times
+  types. See Working with Serde - Serializing dates and times.
 
 
 ## [0.57.0] - 2023-12-09
@@ -1435,14 +1363,12 @@ This release adds several features related to setting themes and default fonts.
 ### Added
 
 - Added support for Serde serialization. This requires the `serde` feature flag
-  to be enabled. See [Working with Serde].
+  to be enabled. See Working with Serde.
 
 
 - Added support for writing `u64` and `i64` number within Excel's limitations.
   This implies a loss of precision outside Excel's integer range of +/-
   999,999,999,999,999 (15 digits).
-
-  [Working with Serde]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#working-with-serde
 
 ## [0.56.0] - 2023-11-27
 
@@ -1465,7 +1391,7 @@ This release adds several features related to setting themes and default fonts.
 
 - Added support for conditional formatting. See [Working with Conditional Formats].
 
-[Working with Conditional Formats]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/conditional_format/index.html
+[Working with Conditional Formats]: crate::conditional_format
 
 
 ## [0.54.0] - 2023-11-04
@@ -1484,13 +1410,6 @@ This release adds several features related to setting themes and default fonts.
 
 - Added option to turn on/off line smoothing for Line and Scatter charts via the
   [`ChartSeries::set_smooth()`] method.
-
-[`ChartDataTable`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartDataTable.html
-[`Chart::set_data_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_data_table
-[`ChartAxis::set_crossing()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_crossing
-[`ChartAxis::set_label_alignment()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_label_alignment
-[`ChartAxis::set_display_unit_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_display_unit_type
-[`ChartSeries::set_smooth()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_smooth
 
 
 ## [0.53.0] - 2023-10-30
@@ -1513,22 +1432,8 @@ This release adds several features related to setting themes and default fonts.
   [`Worksheet::write_row_with_format()`] and
   [`Worksheet::write_column_with_format()`].
 
-[`Chart::set_drop_lines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_drop_lines
-[`Chart::set_up_down_bars()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_up_down_bars
-[`Chart::set_high_low_lines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_high_low_lines
 
-[`ChartAxis::set_date_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_date_axis
-[`ChartAxis::set_text_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_text_axis
-[`ChartAxis::set_automatic_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_automatic_axis
-
-[`ChartAxis::set_min_date()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_min_date
-[`ChartAxis::set_max_date()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_max_date
-
-[`Worksheet::write_row_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_row_with_format
-[`Worksheet::write_column_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_column_with_format
-
-
-[Stock Chart]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#chart-stock-excel-stock-chart-example
+[Stock Chart]: crate::cookbook#chart-stock-excel-stock-chart-example
 
 ## [0.52.0] - 2023-10-20
 
@@ -1536,8 +1441,6 @@ This release adds several features related to setting themes and default fonts.
 
 - Added support for chart series error bars via the [`ChartErrorBars`] struct
   and methods.
-
-[`ChartErrorBars`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartErrorBars.html
 
 ### Fixed
 
@@ -1559,9 +1462,8 @@ This release adds several features related to setting themes and default fonts.
   [`ChartTrendline::set_label_font`] and [`ChartTrendline::set_label_format`] methods.
 
 
-[`ChartGradientFill`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartGradientFill.html
-[`ChartTrendline::set_label_font`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartTrendline.html#method.set_label_font
-[`ChartTrendline::set_label_format`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartTrendline.html#method.set_label_format
+[`ChartTrendline::set_label_font`]: crate::ChartTrendline::set_label_font
+[`ChartTrendline::set_label_format`]: crate::ChartTrendline::set_label_format
 
 
 ## [0.50.0] - 2023-10-12
@@ -1583,9 +1485,7 @@ This release adds several features related to setting themes and default fonts.
 - Fixed handling of [future functions] in table formulas.
 
 
-[`ChartTrendline`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartTrendline.html
-[`Worksheet::set_very_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_very_hidden
-[future functions]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Formula.html#formulas-added-in-excel-2010-and-later
+[future functions]: crate::Formula#formulas-added-in-excel-2010-and-later
 
 
 ## [0.49.0] - 2023-09-19
@@ -1598,10 +1498,6 @@ This release adds several features related to setting themes and default fonts.
   - [`Chart::show_na_as_empty_cell()`]
   - [`Chart::show_hidden_data()`]
 
-[`Chart::show_hidden_data()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.show_hidden_data
-[`Chart::show_empty_cells_as()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.show_empty_cells_as
-[`Chart::show_na_as_empty_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.show_na_as_empty_cell
-
 
 - Updated Polar's dependency and `PolarError` import to reflect changes in Polars v 0.33.2.
 
@@ -1611,15 +1507,13 @@ This release adds several features related to setting themes and default fonts.
 
 - Added support for custom total formulas to [`TableFunction`].
 
-[`TableFunction`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.TableFunction.html
-
 
 ## [0.47.0] - 2023-09-02
 
 ### Added
 
 - Added `wasm` feature flag to help compilation on Wasm/Javascript targets. Also
-  added mapping from a `XlsxError` to a `JsValue` error.
+  added mapping from a [`XlsxError`] to a `JsValue` error.
 
   See the [rust_xlsx_wasm_example] sample application that demonstrates
   accessing `rust_xlsxwriter` code from JavaScript, Node.js, Deno and Wasmtime.
@@ -1628,7 +1522,6 @@ This release adds several features related to setting themes and default fonts.
   interfaces that implement the `<W: Write>` trait.
 
 [rust_xlsx_wasm_example]: https://github.com/Clipi-12/rust_xlsx_wasm_example
-[`Workbook::save_to_writer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.save_to_writer
 
 
 ## [0.46.0] - 2023-08-20
@@ -1636,7 +1529,7 @@ This release adds several features related to setting themes and default fonts.
 ### Added
 
 - Added `polars` feature flag to help interoperability with Polars. Currently
-  it only implements `PolarsError` and `XlsxError` mapping but other
+  it only implements `PolarsError` and [`XlsxError`] mapping but other
   functionality may be added in the future. These changes are added to support
   the [`polars_excel_writer`] crate.
 
@@ -1669,9 +1562,6 @@ This release adds several features related to setting themes and default fonts.
 
 - Added support for worksheet [`Table`] header and cell formatting via the
   [`TableColumn::set_format()`] and [`TableColumn::set_header_format()`] methods.
-
-[`TableColumn::set_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn.html#method.set_format
-[`TableColumn::set_header_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn.html#method.set_header_format
 
 
 ## [0.42.0] - 2023-07-11
@@ -1717,20 +1607,20 @@ This release adds several features related to setting themes and default fonts.
   - [`cell_range_absolute()`] - Convert zero indexed row and col cell numbers to
     an absolute `$A$1:$B$1`
 
-[`cell_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.cell_range.html
-[`row_col_to_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.row_col_to_cell.html
-[`cell_range_absolute()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.cell_range_absolute.html
-[`column_number_to_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.column_number_to_name.html
-[`column_name_to_number()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.column_name_to_number.html
-[`row_col_to_cell_absolute()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.row_col_to_cell_absolute.html
+[`cell_range()`]: crate::utility::cell_range
+[`row_col_to_cell()`]: crate::utility::row_col_to_cell
+[`cell_range_absolute()`]: crate::utility::cell_range_absolute
+[`column_number_to_name()`]: crate::utility::column_number_to_name
+[`column_name_to_number()`]: crate::utility::column_name_to_number
+[`row_col_to_cell_absolute()`]: crate::utility::row_col_to_cell_absolute
 
 [GitHub Issue #45]: https://github.com/jmcnamara/rust_xlsxwriter/issues/45
 [GitHub Issue #47]: https://github.com/jmcnamara/rust_xlsxwriter/issues/47
 
-[Tutorial]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/tutorial/index.html
-[Cookbook]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html
-[`write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_datetime
-[`write_datetime_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_datetime_with_format
+[Tutorial]: crate::tutorial
+[Cookbook]: crate::cookbook
+[`write_datetime()`]: crate::Worksheet::write_datetime
+[`write_datetime_with_format()`]: crate::Worksheet::write_datetime_with_format
 
 
 ## [0.41.0] - 2023-06-20
@@ -1741,7 +1631,7 @@ This release adds several features related to setting themes and default fonts.
   compatibility with previous versions but it will be optionally off in the next
   and subsequent versions.
 
-  All date/time APIs support both the native `ExcelDateTime` and `Chrono` types
+  All date/time APIs support both the native [`ExcelDateTime`] and `Chrono` types
   via the [`IntoExcelDateTime`] trait.
 
   The `worksheet.write_date()` and `worksheet.write_time()` methods have been
@@ -1749,9 +1639,6 @@ This release adds several features related to setting themes and default fonts.
   [`Worksheet::write_datetime()`]. This is a soft deprecation.
 
 [`Chrono`]: https://docs.rs/chrono/latest/chrono
-[`ExcelDateTime`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html
-[`IntoExcelDateTime`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoExcelDateTime.html
-[`Worksheet::write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_datetime
 
 
 ## [0.40.0] - 2023-05-31
@@ -1760,9 +1647,6 @@ This release adds several features related to setting themes and default fonts.
   [`Worksheet::add_table()`] method.
 
 - Added support for the `bool` type in the generic [`Worksheet::write()`] method.
-
-[`Table`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Table.html
-[`Worksheet::add_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.add_table
 
 
 ## [0.39.0] - 2023-05-23
@@ -1784,15 +1668,7 @@ This release adds several features related to setting themes and default fonts.
 - Renamed/refactored `XlsxColor` to [`Color`] for API consistency. The
   `XlsxColor` type alias is still available for backward compatibility.
 
-[`Url`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Url.html
-[`Color`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.Color.html
-[`Formula`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Formula.html
 [Feature Request #16]: https://github.com/jmcnamara/rust_xlsxwriter/issues/16
-[`Worksheet::write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write
-[`Worksheet::write_row()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_row
-[`Worksheet::write_column()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_column
-[`Worksheet::write_row_matrix()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_row_matrix
-[`Worksheet::write_column_matrix()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_column_matrix
 
 
 ## [0.38.0] - 2023-05-05
@@ -1821,26 +1697,6 @@ This release adds several features related to setting themes and default fonts.
   - [`ChartSeries::set_invert_if_negative()`]
   - [`ChartSeries::set_invert_if_negative_color()`]
 
-[`ChartAxis::set_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_hidden
-[`ChartAxis::set_label_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_label_interval
-[`ChartAxis::set_label_position()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_label_position
-[`ChartAxis::set_log_base()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_log_base
-[`ChartAxis::set_major_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_gridlines
-[`ChartAxis::set_major_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_gridlines_line
-[`ChartAxis::set_major_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_tick_type
-[`ChartAxis::set_major_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_unit
-[`ChartAxis::set_max()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_max
-[`ChartAxis::set_min()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_min
-[`ChartAxis::set_minor_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_gridlines
-[`ChartAxis::set_minor_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_gridlines_line
-[`ChartAxis::set_minor_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_tick_type
-[`ChartAxis::set_minor_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_unit
-[`ChartAxis::set_position_between_ticks()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_position_between_ticks
-[`ChartAxis::set_reverse()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_reverse
-[`ChartAxis::set_tick_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_tick_interval
-[`ChartSeries::set_invert_if_negative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_invert_if_negative
-[`ChartSeries::set_invert_if_negative_color()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_invert_if_negative_color
-
 
 ## [0.37.0] - 2023-04-30
 
@@ -1855,9 +1711,6 @@ This release adds several features related to setting themes and default fonts.
 
   See [GitHub Feature Request #35].
 
-[`ChartFont`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartFont.html
-[`Worksheet::write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_string
-[`Worksheet::write_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_string
 [GitHub Feature Request #35]: https://github.com/jmcnamara/rust_xlsxwriter/issues/35
 
 
@@ -1869,7 +1722,7 @@ Fix cargo/release issue with 0.36.0 release.
 
 ### Added
 
-- Added performance improvement for applications that use a lot of `Format`
+- Added performance improvement for applications that use a lot of [`Format`]
   objects. [GitHub Issue #30].
 
 
@@ -1889,9 +1742,8 @@ Fix cargo/release issue with 0.36.0 release.
 - Added support for Chart Series data labels including custom data labels. See
   [`ChartDataLabel`], [`Chart::series.set_data_label()`] and [`Chart::series.set_custom_data_labels()`].
 
-[`ChartDataLabel`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartDataLabel.html
-[`Chart::series.set_data_label()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_data_label
-[`Chart::series.set_custom_data_labels()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_custom_data_labels
+[`Chart::series.set_data_label()`]: crate::ChartSeries::set_data_label
+[`Chart::series.set_custom_data_labels()`]: crate::ChartSeries::set_custom_data_labels
 
 
 ## [0.34.0] - 2023-04-12
@@ -1930,16 +1782,12 @@ Performance improvement release.
 
 - Added [`Chart::set_rotation()`] and [`Chart::set_hole_size()`] methods for Pie and Doughnut charts.
 
-- Added support to differentiate between `Color::Default` and
-  `Color::Automatic` colors for Excel elements. These are usually equivalent
+- Added support to differentiate between [`Color::Default`] and
+  [`Color::Automatic`] colors for Excel elements. These are usually equivalent
   but there are some cases where the "Automatic" color, which can be set at a
   system level, is different from the Default color.
 
 [Pie Chart]: https://rustxlsxwriter.github.io/examples/pie_chart.html
-[`ChartPoint`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartPoint.html
-[`ChartMarker`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartMarker.html
-[`Chart::set_rotation()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_rotation
-[`Chart::set_hole_size()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_hole_size
 
 
 ## [0.32.0] - 2023-04-03
@@ -1982,12 +1830,10 @@ Performance improvement release.
 - Added [`Chart::series.set_gap()`] and [`Chart::series.set_overlap()`] method to control layout
   of histogram style charts.
 
-[`ChartFormat`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartFormat.html
 [Chart Fill Pattern]: https://rustxlsxwriter.github.io/examples/chart_pattern.html
 [insert_image_to_fit]: https://rustxlsxwriter.github.io/examples/insert_image_to_fit.html
-[`Chart::series.set_gap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_gap
-[`Chart::series.set_overlap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_overlap
-[`Worksheet::insert_image_fit_to_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image_fit_to_cell
+[`Chart::series.set_gap()`]: crate::ChartSeries::set_gap
+[`Chart::series.set_overlap()`]: crate::ChartSeries::set_overlap
 
 
 ## [0.29.0] - 2023-03-16
@@ -2006,8 +1852,6 @@ Performance improvement release.
 
 - Added support for positioning or hiding Chart legends. See [`ChartLegend`].
 
-[`ChartLegend`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartLegend.html
-
 
 ## [0.27.0] - 2023-03-13
 
@@ -2025,12 +1869,8 @@ Performance improvement release.
   types via the [`IntoExcelData`] trait. See also the [Writing Generic data]
   example in the user guide.
 
-[`Chart`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html
 [Chart Examples]: https://rustxlsxwriter.github.io/examples/simple_chart.html
-[`IntoExcelData`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/trait.IntoExcelData.html
-[`Worksheet::write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write
 [Writing Generic data]: https://rustxlsxwriter.github.io/examples/generic_write.html
-[`Worksheet::insert_chart()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_chart
 
 
 ## [0.26.0] - 2023-02-03
@@ -2069,21 +1909,21 @@ Performance improvement release.
 
   | Previous name             | New name               |
   | :------------------------ | :--------------------- |
-  | `XlsxAlign`               | `FormatAlign`          |
-  | `XlsxBorder`              | `FormatBorder`         |
-  | `XlsxDiagonalBorder`      | `FormatDiagonalBorder` |
-  | `XlsxPattern`             | `FormatPattern`        |
-  | `XlsxScript`              | `FormatScript`         |
-  | `XlsxUnderline`           | `FormatUnderline`      |
+  | `XlsxAlign`               | [`FormatAlign`]          |
+  | `XlsxBorder`              | [`FormatBorder`]         |
+  | `XlsxDiagonalBorder`      | [`FormatDiagonalBorder`] |
+  | `XlsxPattern`             | [`FormatPattern`]        |
+  | `XlsxScript`              | [`FormatScript`]         |
+  | `XlsxUnderline`           | [`FormatUnderline`]      |
   |                           |                        |
-  | `XlsxObjectMovement`      | `ObjectMovement`       |
-  | `XlsxImagePosition`       | `HeaderImagePosition`  |
+  | `XlsxObjectMovement`      | [`ObjectMovement`]       |
+  | `XlsxImagePosition`       | [`HeaderImagePosition`]  |
   |                           |                        |
-  | `ProtectWorksheetOptions` | `ProtectionOptions`    |
-  | `Properties`              | `DocProperties`        |
+  | `ProtectWorksheetOptions` | [`ProtectionOptions`]    |
+  | `Properties`              | [`DocProperties`]        |
 
 
-- The `DocProperties::set_custom_property()` method replaces several type
+- The [`DocProperties::set_custom_property()`] method replaces several type
   specific methods with a single trait based generic method.
 
 
@@ -2100,10 +1940,7 @@ Performance improvement release.
 
   See also the [Working with Autofilters] section of the Users Guide.
 
-[`FilterCondition`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.FilterCondition.html
 [Working with Autofilters]: https://rustxlsxwriter.github.io/formulas/autofilters.html
-[`Worksheet::autofilter()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofilter
-[`Worksheet::filter_column()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.filter_column
 
 
 ## [0.24.0] - 2023-01-18
@@ -2116,9 +1953,7 @@ Performance improvement release.
 - Added the [ObjectMovement] enum to control how a worksheet object, such a
   an image, moves when the cells underneath it are moved, resized or deleted.
 
-[ObjectMovement]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.ObjectMovement.html
-[`Worksheet::set_row_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_row_hidden
-[`Worksheet::set_column_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_column_hidden
+[ObjectMovement]: crate::ObjectMovement
 
 ## [0.23.0] - 2023-01-16
 
@@ -2129,10 +1964,6 @@ Added more page setup methods.
 - Added [`Worksheet::set_selection()`] method to select a cell or range of cells in a worksheet.
 - Added [`Worksheet::set_top_left_cell()`] method to set the top and leftmost visible cell.
 - Added [`Worksheet::set_page_breaks()`] method to add page breaks to a worksheet.
-
-[`Worksheet::set_selection()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_selection
-[`Worksheet::set_page_breaks()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_page_breaks
-[`Worksheet::set_top_left_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_top_left_cell
 
 
 ## [0.22.0] - 2023-01-13
@@ -2149,10 +1980,6 @@ Added more page setup methods.
 
 
 [Worksheet protection]:  https://rustxlsxwriter.github.io/worksheet/protection.html
-[`Worksheet::protect()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.protect
-[`Worksheet::protect_with_options()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.protect_with_options
-[`Workbook::read_only_recommended()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.read_only_recommended
-[`Worksheet::protect_with_password()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.protect_with_password
 
 
 ## [0.21.0] - 2023-01-09
@@ -2163,15 +1990,12 @@ Added more page setup methods.
   Creation Date. For more details see [`DocProperties`] and
   [`workbook::set_properties()`].
 
-[`DocProperties`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.DocProperties.html
-[`workbook::set_properties()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.set_properties
+[`workbook::set_properties()`]: crate::Workbook::set_properties
 
 ### Changed
 
 - Change date/time parameters to references in [`Worksheet::write_datetime()`],
   `worksheet.write_date()` and `worksheet.write_time()` for consistency.
-
-[`Worksheet::write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_datetime
 
 
 ## [0.20.0] - 2023-01-06
@@ -2203,8 +2027,6 @@ Added more page setup methods.
 
 [Adding Autofilters]: https://rustxlsxwriter.github.io/examples/autofilter.html
 [Using defined names]: https://rustxlsxwriter.github.io/examples/defined_names.html
-[`Worksheet::autofilter()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofilter
-[`Workbook::define_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.define_name
 
 
 ## [0.18.0] - 2022-12-19
@@ -2218,8 +2040,6 @@ Added more page setup methods.
   See also the [Rich strings example] in the user guide.
 
 [Rich strings example]: https://rustxlsxwriter.github.io/examples/rich_strings.html
-[`Worksheet::write_rich_string_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_rich_string_with_format
-[`Worksheet::write_rich_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_rich_string
 
 ## [0.17.1] - 2022-12-18
 
@@ -2240,8 +2060,6 @@ Added more page setup methods.
 
 [Headers and Footers]: https://rustxlsxwriter.github.io/examples/headers.html
 [Adding a watermark]: https://rustxlsxwriter.github.io/examples/watermark.html
-[`Worksheet::set_footer_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_footer_image
-[`Worksheet::set_header_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header_image
 
 
 ## [0.16.0] - 2022-12-09
@@ -2259,10 +2077,6 @@ Added more page setup methods.
 - Added support for images in buffers via [`Image::new_from_buffer()`].
 
 - Added image accessibility features via [`Image::set_alt_text()`] and[`Image::set_decorative()`].
-
-[`Image::set_alt_text()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_alt_text
-[`Image::set_decorative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_decorative
-[`Image::new_from_buffer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.new_from_buffer
 
 
 ## [0.14.0] - 2022-12-05
@@ -2284,11 +2098,8 @@ Added more page setup methods.
 - The [`Workbook::save()`] method has been extended to handle paths or strings.
   The `workbook.save_to_path()` method has been removed. See [PR #15].
 
-[`Image`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
 [PR #15]: https://github.com/jmcnamara/rust_xlsxwriter/pull/15
 [images example]: https://rustxlsxwriter.github.io/examples/images.html
-[`Worksheet::insert_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image
-[`Worksheet::insert_image_with_offset()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image_with_offset
 
 
 ## [0.13.0] - 2022-11-21
@@ -2304,9 +2115,6 @@ Added more page setup methods.
 See also the [hyperlinks example] in the user guide.
 
 [hyperlinks example]: https://rustxlsxwriter.github.io/examples/hyperlinks.html
-[`Worksheet::write_url()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_url
-[`Worksheet::write_url_with_text()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_url_with_text
-[`Worksheet::write_url_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_url_with_format
 
 
 ## [0.12.1] - 2022-11-09
@@ -2326,9 +2134,7 @@ See also the [hyperlinks example] in the user guide.
 - Added support for Theme colors to [`Color`]. See also [Working with
   Colors] in the user guide.
 
-[`Color`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.Color.html
 [Working with Colors]: https://rustxlsxwriter.github.io/colors/intro.html
-[`Worksheet::merge_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.merge_range
 
 
 ## [0.11.0] - 2022-11-04
@@ -2345,11 +2151,6 @@ See also the [hyperlinks example] in the user guide.
 
   See also [Working with worksheet tabs] in the user guide.
 
-[`Worksheet::set_active()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_active
-[`Worksheet::set_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_hidden
-[`Worksheet::set_selected()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_selected
-[`Worksheet::set_tab_color()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_tab_color
-[`Worksheet::set_first_tab()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_first_tab
 [Working with worksheet tabs]: https://rustxlsxwriter.github.io/worksheet/tabs.html
 
 
@@ -2365,8 +2166,6 @@ See also the [hyperlinks example] in the user guide.
 
 [app_panes]: https://rustxlsxwriter.github.io/examples/panes.html
 [app_autofit]: https://rustxlsxwriter.github.io/examples/autofit.html
-[`Worksheet::autofit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
-[`Worksheet::set_freeze_panes()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_freeze_panes
 
 ## [0.9.0] - 2022-10-31
 
@@ -2394,15 +2193,7 @@ restructures the Workbook constructor/destructor sequence and introduces a
   also the `rust_xlsxwriter` documentation on [Creating Worksheets] and working
   with the borrow checker.
 
-[`Workbook::new()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.new
-[`Worksheet::new()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.new
-
-[`Workbook::save()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.save
 [Creating Worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
-[`Workbook::worksheets_mut()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.worksheets_mut
-[`Workbook::push_worksheet()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.push_worksheet
-[`Workbook::worksheet_from_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.worksheet_from_name
-[`Workbook::worksheet_from_index()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.worksheet_from_index
 
 
 ## [0.8.0] - 2022-10-28
@@ -2429,21 +2220,11 @@ restructures the Workbook constructor/destructor sequence and introduces a
   - [`Worksheet::set_print_fit_to_pages()`]
   - [`Worksheet::set_print_first_page_number()`]
 
-[`Worksheet::set_portrait()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_portrait
-[`Worksheet::set_landscape()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_landscape
-[`Worksheet::set_print_scale()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_scale
-[`Worksheet::set_print_fit_to_pages()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_fit_to_pages
-[`Worksheet::set_print_first_page_number()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_first_page_number
-
 - Page Setup - Margins
 
   - [`Worksheet::set_margins()`]
   - [`Worksheet::set_print_center_horizontally()`]
   - [`Worksheet::set_print_center_vertically()`]
-
-[`Worksheet::set_margins()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_margins
-[`Worksheet::set_print_center_horizontally()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_center_horizontally
-[`Worksheet::set_print_center_vertically()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_center_vertically
 
 
 - Page Setup - Header/Footer
@@ -2452,11 +2233,6 @@ restructures the Workbook constructor/destructor sequence and introduces a
   - [`Worksheet::set_footer()`]
   - [`Worksheet::set_header_footer_scale_with_doc()`]
   - [`Worksheet::set_header_footer_align_with_page()`]
-
-[`Worksheet::set_header()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header
-[`Worksheet::set_footer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_footer
-[`Worksheet::set_header_footer_scale_with_doc()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header_footer_scale_with_doc
-[`Worksheet::set_header_footer_align_with_page()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header_footer_align_with_page
 
 - Page Setup - Sheet
 
@@ -2468,15 +2244,6 @@ restructures the Workbook constructor/destructor sequence and introduces a
   - [`Worksheet::set_print_draft()`]
   - [`Worksheet::set_print_headings()`]
   - [`Worksheet::set_page_order()`]
-
-[`Worksheet::set_print_area()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_area
-[`Worksheet::set_repeat_rows()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_repeat_rows
-[`Worksheet::set_repeat_columns()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_repeat_columns
-[`Worksheet::set_print_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_gridlines
-[`Worksheet::set_print_black_and_white()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_black_and_white
-[`Worksheet::set_print_draft()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_draft
-[`Worksheet::set_print_headings()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_headings
-[`Worksheet::set_page_order()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_page_order
 
 ### Fixes
 
@@ -2498,9 +2265,6 @@ restructures the Workbook constructor/destructor sequence and introduces a
   See also the `rust_xlsxwriter` user documentation on [Adding Headers and
   Footers].
 
-[`Worksheet::set_header()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header
-[`Worksheet::set_footer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_footer
-[`Worksheet::set_margins()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_margins
 [Adding Headers and Footers]: https://rustxlsxwriter.github.io/worksheet/headers.html
 
 ## [0.5.0] - 2022-10-16
@@ -2516,25 +2280,15 @@ restructures the Workbook constructor/destructor sequence and introduces a
   - [`Worksheet::set_view_page_layout()`]
   - [`Worksheet::set_view_page_break_preview()`]
 
-[`Worksheet::set_zoom()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_zoom
-[`Worksheet::set_paper_size()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_paper_size
-[`Worksheet::set_page_order()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_page_order
-[`Worksheet::set_landscape()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_landscape
-[`Worksheet::set_view_page_layout()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_view_page_layout
-[`Worksheet::set_view_page_break_preview()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_view_page_break_preview
-
 ## [0.4.0] - 2022-10-10
 
 ### Added
 
 - Added support for array formulas and dynamic array formulas via
-  [`Worksheet::write_array()`] and
+  `Worksheet::write_array()` and
   [`Worksheet::write_dynamic_array_formula_with_format()`].
 
 See also the `rust_xlsxwriter` user documentation on [Dynamic Array support].
-
-[`Worksheet::write_array()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_array_formula
-[`Worksheet::write_dynamic_array_formula_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_dynamic_array_formula
 
 [Dynamic Array support]: https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
 
@@ -2551,8 +2305,6 @@ See also the `rust_xlsxwriter` user documentation on [Dynamic Array support].
 
 - Added [`Worksheet::write_boolean_with_format()`] method to support writing Excel boolean
   values.
-
-[`Worksheet::write_boolean_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_boolean
 
 ## [0.2.1] - 2022-09-22
 
