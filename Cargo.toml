@@ -65,7 +65,7 @@ enhanced_autofit = ["dep:ssfmt"]
 
 # `polars`: Adds support for mapping between `PolarsError` and
 # `rust_xlsxwriter::XlsxError` to make code that handles both types of errors
-# easier to write. See also `polars_write_excel`.
+# easier to write. See also `polars_excel_writer`.
 polars = ["dep:polars"]
 
 # `serde`: Adds support for Serde serialization.

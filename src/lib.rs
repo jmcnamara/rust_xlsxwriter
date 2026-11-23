@@ -26,11 +26,11 @@
 //! - Formula support, including new Excel 365 dynamic functions.
 //! - Charts.
 //! - Hyperlink support.
-//! - Page/Printing Setup support.
+//! - Page/Printing setup support.
 //! - Merged ranges.
 //! - Conditional formatting.
 //! - Data validation.
-//! - Cell Notes.
+//! - Cell notes.
 //! - Textboxes.
 //! - Checkboxes.
 //! - Sparklines.
@@ -40,12 +40,12 @@
 //! - Outline groupings.
 //! - Defined names.
 //! - Autofilters.
-//! - Worksheet Tables.
-//! - Pivot Tables.
+//! - Worksheet tables.
+//! - Pivot tables.
 //! - Serde serialization support.
 //! - Support for macros.
 //! - Custom UI/Ribbon elements.
-//! - Memory optimization mode for writing large files.
+//! - Memory optimization modes for writing large files.
 //!
 //! [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
 //!
@@ -213,9 +213,9 @@
 //!   it rarely creates a file that isn't compatible with Excel, and also that
 //!   it is easy to debug and maintain because it can be compared with an Excel
 //!   sample file using a simple diff.
-//! - **Performance**. The library is designed to be as fast and efficient as
-//!   possible. It also supports a constant memory mode for writing large files,
-//!   which keeps memory usage to a minimum.
+//! - **Performance**. The library is 1.6x faster than the similar C library
+//!   and 6.5x faster than the Python version. It also supports constant and low
+//!   memory modes for writing large files.
 //! - **Comprehensive documentation**. In addition to the API documentation, the
 //!   library has extensive user guides, a tutorial, and a cookbook of examples.
 //!   It also includes images of Excel with the output of most of the example
@@ -248,7 +248,7 @@
 //! - `rust_xlsxwriter` is 1.6x faster than C/libxlsxwriter.
 //! - `rust_xlsxwriter` is 6.5x faster than Python/XlsxWriter.
 //!
-//! See the [Performance] section for more details.
+//! See the [Performance] docs for more details.
 //!
 //! [Performance]: performance/index.html
 //!
@@ -290,8 +290,7 @@
 //! - `zmij`: Adds a dependency on `zmij`. This speeds up writing numeric
 //!   worksheet cells by about 10%.
 //!
-//! A `rust_xlsxwriter` feature can be enabled in your `Cargo.toml` file as
-//! follows:
+//! A `rust_xlsxwriter` feature can be added to a project as follows:
 //!
 //! ```bash
 //! cargo add rust_xlsxwriter -F constant_memory

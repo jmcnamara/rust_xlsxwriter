@@ -179,11 +179,11 @@ The ability to add different types/modes of worksheets means that you can mix
 smaller random-access worksheets with larger row-by-row worksheets. See the
 following for more information:
 
-- [`Worksheet::add_worksheet()`]
-- `Worksheet::add_worksheet_with_constant_memory()`
-- `Worksheet::add_worksheet_with_low_memory()`
+- [`Workbook::add_worksheet()`]
+- `Workbook::add_worksheet_with_constant_memory()`
+- `Workbook::add_worksheet_with_low_memory()`
 
-[`Worksheet::add_worksheet()`]: crate::Workbook::add_worksheet
+[`Workbook::add_worksheet()`]: crate::Workbook::add_worksheet
 
 ### Restrictions when using "constant memory" mode
 
@@ -192,8 +192,8 @@ There are some limitations and restrictions when using "constant memory" mode.
 - Data must be written in row-by-row order, and when you write to row `n`, you can
   no longer write to any row `< n`.
 - Constant memory mode uses a [tempfile] filehandle for each worksheet created
-  using `Worksheet::add_worksheet_with_constant_memory()` and
-  `Worksheet::add_worksheet_with_low_memory()`. This won't save memory if your
+  using `Workbook::add_worksheet_with_constant_memory()` and
+  `Workbook::add_worksheet_with_low_memory()`. This won't save memory if your
   temp directory is also mounted in memory. However, you can set the temp
   directory to a custom location using `Workbook::set_tempdir()`.
 - Functions that set formatting separately from data, such as

@@ -82,11 +82,11 @@ supported features are:
 - Formula support, including new Excel 365 dynamic functions.
 - Charts.
 - Hyperlink support.
-- Page/Printing Setup support.
+- Page/Printing setup support.
 - Merged ranges.
 - Conditional formatting.
 - Data validation.
-- Cell Notes.
+- Cell notes.
 - Textboxes.
 - Checkboxes.
 - Sparklines.
@@ -96,27 +96,27 @@ supported features are:
 - Outline groupings.
 - Defined names.
 - Autofilters.
-- Worksheet Tables.
-- Pivot Tables.
+- Worksheet tables.
+- Pivot tables.
 - Serde serialization support.
 - Support for macros.
 - Custom UI/Ribbon elements.
-- Memory optimization mode for writing large files.
+- Memory optimization modes for writing large files.
 
 
 [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
-[rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 
 
-# Motivation
+## Motivation
 
 The `rust_xlsxwriter` crate was designed and implemented based around the
 following design considerations:
 
 - **Fidelity with the Excel file format**. In most cases the output matches the
   output from Excel exactly.
-- **Performance**. The library is within 10% of the similar C library and it
-  also supports a constant memory mode for writing large files.
+- **Performance**. The library is 1.6x faster than the similar C library and
+  6.5x faster than the Python version. It also supports constant and low
+  memory modes for writing large files.
 - **Comprehensive documentation**. There is extensive API documentation as well
   as user guides, a tutorial, and a cookbook of examples.
 - **Feature richness**. The library supports a wide range of Excel features,
@@ -144,9 +144,9 @@ A relative performance comparison between the C, Rust, and Python versions is:
 - `rust_xlsxwriter` is 1.6x faster than C/libxlsxwriter.
 - `rust_xlsxwriter` is 6.5x faster than Python/XlsxWriter.
 
-See the [Performance] section for more details.
+See the [Performance] docs for more details.
 
-[Performance]:  https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html
+[Performance]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html
 [Constant Memory Mode]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html#constant-memory-mode
 
 
@@ -190,14 +190,14 @@ These are all off by default.
 - `zmij`: Adds a dependency on `zmij`. This speeds up writing numeric
   worksheet cells by around 10%. See the [Performance] documentation.
 
-A `rust_xlsxwriter` feature can be enabled in your `Cargo.toml` file as
-follows:
+A `rust_xlsxwriter` feature can be added to a project as follows:
 
 ```bash
 cargo add rust_xlsxwriter -F constant_memory
 ```
 
- [`IntoExcelDateTime`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoExcelDateTime.html
+[`IntoExcelDateTime`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoExcelDateTime.html
+
 
 ## Release notes
 
@@ -209,13 +209,14 @@ Recent changes:
 
 See the full [Release Notes and Changelog].
 
+
 ## See also
 
 - [User Guide]: Working with the `rust_xlsxwriter` library.
     - [Getting started]: A simple getting started guide on how to use
       `rust_xlsxwriter` in a project and write a Hello World example.
     - [Tutorial]: A larger example of using `rust_xlsxwriter` to write some
-       expense data to a spreadsheet.
+      expense data to a spreadsheet.
     - [Cookbook].
 - [The rust_xlsxwriter crate].
 - [The rust_xlsxwriter API docs at docs.rs].
