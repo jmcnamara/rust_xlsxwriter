@@ -48,6 +48,7 @@ mod background04;
 mod background05;
 mod background06;
 mod background07;
+mod background08;
 mod bootstrap01;
 mod bootstrap02;
 mod bootstrap03;
