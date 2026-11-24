@@ -1324,4 +1324,78 @@ mod worksheet_tests {
 
         assert!(got.contains("<xm:f>a_x005F_x0041_b!A1:E1</xm:f>"), "{got}");
     }
+    // Get the autofit column widths in column order.
+    fn autofit_widths(worksheet: &Worksheet) -> Vec<(ColNum, u32)> {
+        let mut widths: Vec<(ColNum, u32)> = worksheet
+            .changed_cols
+            .iter()
+            .filter(|(_, col_options)| col_options.autofit)
+            .map(|(col, col_options)| (*col, col_options.width))
+            .collect();
+        widths.sort_unstable();
+        widths
+    }
+
+    #[test]
+    fn test_autofit_empty_worksheet() {
+        let mut worksheet = Worksheet::new();
+
+        // Check for no panic and no column changes with an empty worksheet.
+        worksheet.autofit();
+
+        assert_eq!(autofit_widths(&worksheet), vec![]);
+    }
+
+    #[test]
+    fn test_autofit_empty_constant_memory_worksheet() {
+        let mut worksheet = Worksheet::new();
+        worksheet.use_constant_memory = true;
+
+        // Check for no panic and no column changes with an empty worksheet.
+        worksheet.autofit();
+
+        assert_eq!(autofit_widths(&worksheet), vec![]);
+    }
+
+    #[test]
+    fn test_autofit_sparse_data() {
+        let mut worksheet = Worksheet::new();
+
+        // Write a diagonal of strings and some cells far from the others.
+        for i in 0..20 {
+            worksheet
+                .write_string(i, i as ColNum, "x".repeat(i as usize + 1))
+                .unwrap();
+        }
+        worksheet.write_number(100, 30, 12345).unwrap();
+        worksheet.write_string(2, 16_000, "Far away").unwrap();
+        worksheet.write_blank(3, 16_383, &Format::new()).unwrap();
+
+        worksheet.autofit();
+
+        // Check for the widths of the stored cells only.
+        let mut expected: Vec<(ColNum, u32)> =
+            (0..20).map(|col| (col, 14 + 7 * u32::from(col))).collect();
+        expected.push((30, 42));
+        expected.push((16_000, 61));
+
+        assert_eq!(autofit_widths(&worksheet), expected);
+    }
+
+    #[test]
+    fn test_autofit_max_row() {
+        let mut worksheet = Worksheet::new();
+
+        worksheet.write_string(0, 0, "Short").unwrap();
+        worksheet
+            .write_string(5, 0, "A much longer string")
+            .unwrap();
+        worksheet.write_string(6, 1, "Ignored").unwrap();
+
+        worksheet.set_autofit_max_row(5);
+        worksheet.autofit();
+
+        // Check for the widths of rows before the max autofit row only.
+        assert_eq!(autofit_widths(&worksheet), vec![(0, 40)]);
+    }
 }

@@ -5,6 +5,15 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.105.0] - Unreleased
+
+### Fixed
+
+- Improved [`Worksheet::autofit()`] performance for worksheets with sparse data.
+  See [Issue #226].
+
+  [Issue #226]: https://github.com/jmcnamara/rust_xlsxwriter/issues/226
+
 ## [0.104.0] - 2026-11-22
 
 ### Added

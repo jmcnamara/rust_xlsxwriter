@@ -17885,129 +17885,129 @@ impl Worksheet {
             (self.dimensions.first_row, self.dimensions.last_row)
         };
 
-        // Iterate over all of the data in the worksheet and find the max data
-        // width for each column. It is possible to exit early if the user has
-        // set a maximum autofit row limit.
-        for row_num in first_row..=last_row {
+        // Iterate over all of the stored data in the worksheet and find the max
+        // data width for each column. It is possible to exit early if the user
+        // has set a maximum autofit row limit.
+        let (first_col, last_col) = (self.dimensions.first_col, self.dimensions.last_col);
+        if first_row > last_row || first_col > last_col {
+            return self;
+        }
+
+        for (&row_num, columns) in self.data_table.range(first_row..=last_row) {
             if row_num >= self.max_autofit_row {
                 break;
             }
 
-            if let Some(columns) = self.data_table.get(&row_num) {
-                for col_num in self.dimensions.first_col..=self.dimensions.last_col {
-                    if let Some(cell) = columns.get(&col_num) {
-                        let mut pixel_width = match cell {
-                            // For strings we do a calculation based on
-                            // character widths taken from Excel. For rich
-                            // strings we use the unformatted string. We also
-                            // split multi-line strings and handle each part
-                            // separately.
-                            CellType::String { string, .. }
-                            | CellType::InlineString { string, .. }
-                            | CellType::RichString {
-                                raw_string: string, ..
-                            } => {
-                                let mut max = 0;
-                                for segment in string.lines() {
-                                    let length = utility::pixel_width(segment);
-                                    max = cmp::max(max, length);
-                                }
-                                max
-                            }
+            for (&col_num, cell) in columns.range(first_col..=last_col) {
+                let mut pixel_width = match cell {
+                    // For strings we do a calculation based on
+                    // character widths taken from Excel. For rich
+                    // strings we use the unformatted string. We also
+                    // split multi-line strings and handle each part
+                    // separately.
+                    CellType::String { string, .. }
+                    | CellType::InlineString { string, .. }
+                    | CellType::RichString {
+                        raw_string: string, ..
+                    } => {
+                        let mut max = 0;
+                        for segment in string.lines() {
+                            let length = utility::pixel_width(segment);
+                            max = cmp::max(max, length);
+                        }
+                        max
+                    }
 
-                            // For numbers we use a workaround based on the
-                            // length or, if `ssfmt` is enabled, we use the
-                            // formatted string width.
-                            #[cfg(not(feature = "enhanced_autofit"))]
-                            CellType::Number { number, .. } => 7 * number.to_string().len() as u32,
-                            #[cfg(feature = "enhanced_autofit")]
-                            CellType::Number { number, xf_index } => self.formatted_number_width(
-                                row_num,
-                                col_num,
-                                *number,
-                                *xf_index,
-                                7 * number.to_string().len() as u32,
-                                &number_formatters,
-                            ),
+                    // For numbers we use a workaround based on the
+                    // length or, if `ssfmt` is enabled, we use the
+                    // formatted string width.
+                    #[cfg(not(feature = "enhanced_autofit"))]
+                    CellType::Number { number, .. } => 7 * number.to_string().len() as u32,
+                    #[cfg(feature = "enhanced_autofit")]
+                    CellType::Number { number, xf_index } => self.formatted_number_width(
+                        row_num,
+                        col_num,
+                        *number,
+                        *xf_index,
+                        7 * number.to_string().len() as u32,
+                        &number_formatters,
+                    ),
 
-                            // Datetimes are just numbers with a date format. If
-                            // `ssfmt` is enabled we use the formatted string
-                            // width otherwise we use an approximation based on
-                            // Excel's default format: mm/dd/yyyy.
-                            #[cfg(not(feature = "enhanced_autofit"))]
-                            CellType::DateTime { .. } => 68,
-                            #[cfg(feature = "enhanced_autofit")]
-                            CellType::DateTime { number, xf_index } => self.formatted_number_width(
-                                row_num,
-                                col_num,
-                                *number,
-                                *xf_index,
-                                68,
-                                &number_formatters,
-                            ),
+                    // Datetimes are just numbers with a date format. If
+                    // `ssfmt` is enabled we use the formatted string
+                    // width otherwise we use an approximation based on
+                    // Excel's default format: mm/dd/yyyy.
+                    #[cfg(not(feature = "enhanced_autofit"))]
+                    CellType::DateTime { .. } => 68,
+                    #[cfg(feature = "enhanced_autofit")]
+                    CellType::DateTime { number, xf_index } => self.formatted_number_width(
+                        row_num,
+                        col_num,
+                        *number,
+                        *xf_index,
+                        68,
+                        &number_formatters,
+                    ),
 
-                            // For Boolean types we use the Excel standard
-                            // widths for TRUE and FALSE.
-                            CellType::Boolean { boolean, .. } => {
-                                if *boolean {
-                                    31
-                                } else {
-                                    36
-                                }
-                            }
-
-                            // For formulas we autofit the result of the formula
-                            // if it has a non-zero/default value.
-                            CellType::Formula { result, .. }
-                            | CellType::ArrayFormula { result, .. } => {
-                                if result.as_ref() == "0" || result.is_empty() {
-                                    0
-                                } else {
-                                    utility::pixel_width(result)
-                                }
-                            }
-
-                            // Ignore the following types which don't add to the width.
-                            CellType::Blank { .. } | CellType::Error { .. } => 0,
-                        };
-
-                        // If the cell is in an autofilter header we add an
-                        // additional 16 pixels for the dropdown arrow.
-                        let is_autofilter_row = if self.use_constant_memory {
-                            self.cells_with_autofilter
-                                .contains_key(&(self.current_row, col_num))
+                    // For Boolean types we use the Excel standard
+                    // widths for TRUE and FALSE.
+                    CellType::Boolean { boolean, .. } => {
+                        if *boolean {
+                            31
                         } else {
-                            self.cells_with_autofilter.contains_key(&(row_num, col_num))
-                        };
-
-                        // Add autofilter dropdown padding.
-                        if pixel_width > 0 && is_autofilter_row {
-                            pixel_width += 16;
+                            36
                         }
+                    }
 
-                        // Add standard cell 7 pixel padding.
-                        if pixel_width > 0 {
-                            pixel_width += 7;
+                    // For formulas we autofit the result of the formula
+                    // if it has a non-zero/default value.
+                    CellType::Formula { result, .. } | CellType::ArrayFormula { result, .. } => {
+                        if result.as_ref() == "0" || result.is_empty() {
+                            0
+                        } else {
+                            utility::pixel_width(result)
                         }
+                    }
 
-                        // Limit the autofit width to Excel's limit for
-                        // `autofit()` or to a user defined value.
-                        pixel_width = std::cmp::min(pixel_width, self.max_autofit_width);
+                    // Ignore the following types which don't add to the width.
+                    CellType::Blank { .. } | CellType::Error { .. } => 0,
+                };
 
-                        // Update the max column width.
-                        if pixel_width > 0 {
-                            match max_widths.get_mut(&col_num) {
-                                // Update the max for the column.
-                                Some(max) => {
-                                    if pixel_width > *max {
-                                        *max = pixel_width;
-                                    }
-                                }
-                                None => {
-                                    // Add a new column entry and maximum.
-                                    max_widths.insert(col_num, pixel_width);
-                                }
+                // If the cell is in an autofilter header we add an
+                // additional 16 pixels for the dropdown arrow.
+                let is_autofilter_row = if self.use_constant_memory {
+                    self.cells_with_autofilter
+                        .contains_key(&(self.current_row, col_num))
+                } else {
+                    self.cells_with_autofilter.contains_key(&(row_num, col_num))
+                };
+
+                // Add autofilter dropdown padding.
+                if pixel_width > 0 && is_autofilter_row {
+                    pixel_width += 16;
+                }
+
+                // Add standard cell 7 pixel padding.
+                if pixel_width > 0 {
+                    pixel_width += 7;
+                }
+
+                // Limit the autofit width to Excel's limit for
+                // `autofit()` or to a user defined value.
+                pixel_width = std::cmp::min(pixel_width, self.max_autofit_width);
+
+                // Update the max column width.
+                if pixel_width > 0 {
+                    match max_widths.get_mut(&col_num) {
+                        // Update the max for the column.
+                        Some(max) => {
+                            if pixel_width > *max {
+                                *max = pixel_width;
                             }
+                        }
+                        None => {
+                            // Add a new column entry and maximum.
+                            max_widths.insert(col_num, pixel_width);
                         }
                     }
                 }
