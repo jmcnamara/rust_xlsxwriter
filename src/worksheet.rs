@@ -15456,10 +15456,16 @@ impl Worksheet {
         for col_num in self.filter_conditions.clone().keys() {
             // Iterate through each column filter conditions.
             let filter_condition = self.filter_conditions.get(col_num).unwrap().clone();
+            let filter_strings = Self::list_filter_strings(&filter_condition);
             for row_num in first_row..=last_row {
                 if filter_condition.is_list_filter {
                     // Handle list filters.
-                    if !self.row_matches_list_filter(row_num, *col_num, &filter_condition) {
+                    if !self.row_matches_list_filter(
+                        row_num,
+                        *col_num,
+                        &filter_condition,
+                        &filter_strings,
+                    ) {
                         self.set_row_hidden(row_num).unwrap();
                     }
                 } else {
@@ -15472,9 +15478,20 @@ impl Worksheet {
         }
     }
 
+    // Get the list filter strings, trimmed and in lowercase, for comparison with
+    // the cell strings in row_matches_list_filter().
+    fn list_filter_strings(filter_condition: &FilterCondition) -> Vec<String> {
+        filter_condition
+            .list
+            .iter()
+            .map(|filter| filter.string.to_lowercase().trim().to_string())
+            .collect()
+    }
+
     // Check if the data in a cell matches one of the values in the list of
     // filter conditions (which in the list filter case is a list of strings or
-    // number values).
+    // number values). The `filter_strings` are the list filter strings from
+    // list_filter_strings().
     //
     // Excel trims leading and trailing space and then does a lowercase
     // comparison. It also matches numbers against "numbers stored as strings".
@@ -15486,6 +15503,7 @@ impl Worksheet {
         row_num: RowNum,
         col_num: ColNum,
         filter_condition: &FilterCondition,
+        filter_strings: &[String],
     ) -> bool {
         let mut has_cell_data = false;
 
@@ -15498,12 +15516,11 @@ impl Worksheet {
                     | CellType::RichString {
                         raw_string: string, ..
                     } => {
-                        let cell_string = string.clone().to_lowercase().trim().to_string();
+                        let cell_string = string.to_lowercase();
+                        let cell_string = cell_string.trim();
 
-                        for filter in &filter_condition.list {
-                            if cell_string == filter.string.to_lowercase().trim() {
-                                return true;
-                            }
+                        if filter_strings.iter().any(|filter| filter == cell_string) {
+                            return true;
                         }
 
                         if filter_condition.should_match_blanks && cell_string.is_empty() {
@@ -15588,8 +15605,10 @@ impl Worksheet {
                     | CellType::RichString {
                         raw_string: string, ..
                     } => {
-                        let cell_string = string.clone().to_lowercase().trim().to_string();
-                        let filter_string = filter.string.to_lowercase().trim().to_string();
+                        let cell_string = string.to_lowercase();
+                        let cell_string = cell_string.trim();
+                        let filter_string = filter.string.to_lowercase();
+                        let filter_string = filter_string.trim();
 
                         match filter.criteria {
                             FilterCriteria::EqualTo => return cell_string == filter_string,
@@ -15603,22 +15622,20 @@ impl Worksheet {
                                 return cell_string >= filter_string
                             }
                             FilterCriteria::EndsWith => {
-                                return cell_string.ends_with(&filter_string)
+                                return cell_string.ends_with(filter_string)
                             }
                             FilterCriteria::DoesNotEndWith => {
-                                return !cell_string.ends_with(&filter_string)
+                                return !cell_string.ends_with(filter_string)
                             }
                             FilterCriteria::BeginsWith => {
-                                return cell_string.starts_with(&filter_string)
+                                return cell_string.starts_with(filter_string)
                             }
                             FilterCriteria::DoesNotBeginWith => {
-                                return !cell_string.starts_with(&filter_string)
+                                return !cell_string.starts_with(filter_string)
                             }
-                            FilterCriteria::Contains => {
-                                return cell_string.contains(&filter_string)
-                            }
+                            FilterCriteria::Contains => return cell_string.contains(filter_string),
                             FilterCriteria::DoesNotContain => {
-                                return !cell_string.contains(&filter_string)
+                                return !cell_string.contains(filter_string)
                             }
                         }
                     }

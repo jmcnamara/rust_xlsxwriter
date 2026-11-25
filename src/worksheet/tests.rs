@@ -212,13 +212,15 @@ mod worksheet_tests {
 
         let filter_condition = FilterCondition::new().add_list_blanks_filter();
 
-        assert!(!worksheet.row_matches_list_filter(0, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(3, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(4, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(5, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(7, 7, &filter_condition));
+        let filter_strings = Worksheet::list_filter_strings(&filter_condition);
+
+        assert!(!worksheet.row_matches_list_filter(0, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(3, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(4, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(5, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(7, 7, &filter_condition, &filter_strings));
     }
 
     #[test]
@@ -235,13 +237,15 @@ mod worksheet_tests {
 
         let filter_condition = FilterCondition::new().add_list_filter("South");
 
-        assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(3, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(4, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(5, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(6, 0, &filter_condition));
-        assert!(!worksheet.row_matches_list_filter(7, 0, &filter_condition));
+        let filter_strings = Worksheet::list_filter_strings(&filter_condition);
+
+        assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(3, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(4, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(5, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(6, 0, &filter_condition, &filter_strings));
+        assert!(!worksheet.row_matches_list_filter(7, 0, &filter_condition, &filter_strings));
     }
 
     #[test]
@@ -257,11 +261,13 @@ mod worksheet_tests {
 
         let filter_condition = FilterCondition::new().add_list_filter(1000);
 
-        assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(3, 0, &filter_condition));
-        assert!(worksheet.row_matches_list_filter(4, 0, &filter_condition));
-        assert!(!worksheet.row_matches_list_filter(5, 0, &filter_condition));
+        let filter_strings = Worksheet::list_filter_strings(&filter_condition);
+
+        assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(3, 0, &filter_condition, &filter_strings));
+        assert!(worksheet.row_matches_list_filter(4, 0, &filter_condition, &filter_strings));
+        assert!(!worksheet.row_matches_list_filter(5, 0, &filter_condition, &filter_strings));
     }
 
     #[test]

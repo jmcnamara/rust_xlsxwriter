@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #226]: https://github.com/jmcnamara/rust_xlsxwriter/issues/226
 
+- Reduced string allocations when applying autofilter list filters. See
+  [Issue #227].
+
+  [Issue #227]: https://github.com/jmcnamara/rust_xlsxwriter/issues/227
+
 ## [0.104.0] - 2026-11-22
 
 ### Added
