@@ -5729,4 +5729,41 @@ mod conditional_format_tests {
 
         assert_eq!(expected, got);
     }
+
+    #[test]
+    fn stop_if_true_ignored() {
+        // Check that "Stop if True" isn't written for conditional formats that
+        // don't support it in Excel.
+        let conditional_format = ConditionalFormatDataBar::new()
+            .use_classic_style()
+            .set_stop_if_true(true);
+
+        let got = conditional_format.rule(None, 1, "A1", "");
+        let expected = r#"<cfRule type="dataBar" priority="1"><dataBar><cfvo type="min" val="0"/><cfvo type="max" val="0"/><color rgb="FF638EC6"/></dataBar></cfRule>"#;
+
+        assert_eq!(expected, got);
+
+        let conditional_format = ConditionalFormat2ColorScale::new().set_stop_if_true(true);
+
+        let got = conditional_format.rule(None, 1, "A1", "");
+        let expected = r#"<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min" val="0"/><cfvo type="max" val="0"/><color rgb="FFFFEF9C"/><color rgb="FF63BE7B"/></colorScale></cfRule>"#;
+
+        assert_eq!(expected, got);
+
+        let conditional_format = ConditionalFormat3ColorScale::new().set_stop_if_true(true);
+
+        let got = conditional_format.rule(None, 1, "A1", "");
+        let expected = r#"<cfRule type="colorScale" priority="1"><colorScale><cfvo type="min" val="0"/><cfvo type="percentile" val="50"/><cfvo type="max" val="0"/><color rgb="FFF8696B"/><color rgb="FFFFEB84"/><color rgb="FF63BE7B"/></colorScale></cfRule>"#;
+
+        assert_eq!(expected, got);
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeArrows)
+            .set_stop_if_true(true);
+
+        let got = conditional_format.rule(None, 1, "A1", "");
+        let expected = r#"<cfRule type="iconSet" priority="1"><iconSet iconSet="3Arrows"><cfvo type="percent" val="0"/><cfvo type="percent" val="33"/><cfvo type="percent" val="67"/></iconSet></cfRule>"#;
+
+        assert_eq!(expected, got);
+    }
 }

@@ -3726,11 +3726,6 @@ impl ConditionalFormat2ColorScale {
         // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
 
-        // Set the "Stop if True" property.
-        if self.stop_if_true {
-            attributes.push(("stopIfTrue", "1".to_string()));
-        }
-
         // Write the rule.
         xml_start_tag(&mut writer, "cfRule", &attributes);
         xml_start_tag_only(&mut writer, "colorScale");
@@ -4260,11 +4255,6 @@ impl ConditionalFormat3ColorScale {
 
         // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
-
-        // Set the "Stop if True" property.
-        if self.stop_if_true {
-            attributes.push(("stopIfTrue", "1".to_string()));
-        }
 
         // Write the rule.
         xml_start_tag(&mut writer, "cfRule", &attributes);
@@ -5272,11 +5262,6 @@ impl ConditionalFormatDataBar {
         // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
 
-        // Set the "Stop if True" property.
-        if self.stop_if_true {
-            attributes.push(("stopIfTrue", "1".to_string()));
-        }
-
         // Write the rule.
         xml_start_tag(&mut writer, "cfRule", &attributes);
 
@@ -6122,11 +6107,6 @@ impl ConditionalFormatIconSet {
         // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
 
-        // Set the "Stop if True" property.
-        if self.stop_if_true {
-            attributes.push(("stopIfTrue", "1".to_string()));
-        }
-
         // Write the rule.
         xml_start_tag(&mut writer, "cfRule", &attributes);
 
@@ -6172,6 +6152,14 @@ impl ConditionalFormatIconSet {
         let mut attributes = vec![];
         if self.icon_type != ConditionalFormatIconType::ThreeTrafficLights {
             attributes.push(("iconSet", self.icon_type.to_string()));
+        }
+
+        if self.icon_only {
+            attributes.push(("showValue", "0".to_string()));
+        }
+
+        if self.is_reversed {
+            attributes.push(("reverse", "1".to_string()));
         }
 
         if self.has_custom_icons {
@@ -6245,38 +6233,27 @@ impl ConditionalFormatIconSet {
 
     // Write the <x14:cfvo> element.
     fn write_x14_type(writer: &mut Cursor<Vec<u8>>, icon: &ConditionalFormatCustomIcon) {
-        let mut attributes = vec![];
         let value = icon.value.value.as_ref();
 
-        match icon.rule_type {
+        let rule_type = match icon.rule_type {
             ConditionalFormatType::Automatic
             | ConditionalFormatType::Lowest
-            | ConditionalFormatType::Highest => {}
-            ConditionalFormatType::Number => {
-                attributes.push(("type", "num".to_string()));
-                xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_formula_element_only(writer, "xm:f", value);
-                xml_end_tag(writer, "x14:cfvo");
-            }
-            ConditionalFormatType::Percent => {
-                attributes.push(("type", "percent".to_string()));
-                xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_formula_element_only(writer, "xm:f", value);
-                xml_end_tag(writer, "x14:cfvo");
-            }
-            ConditionalFormatType::Formula => {
-                attributes.push(("type", "formula".to_string()));
-                xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_formula_element_only(writer, "xm:f", value);
-                xml_end_tag(writer, "x14:cfvo");
-            }
-            ConditionalFormatType::Percentile => {
-                attributes.push(("type", "percentile".to_string()));
-                xml_start_tag(writer, "x14:cfvo", &attributes);
-                xml_formula_element_only(writer, "xm:f", value);
-                xml_end_tag(writer, "x14:cfvo");
-            }
+            | ConditionalFormatType::Highest
+            | ConditionalFormatType::Percent => "percent",
+            ConditionalFormatType::Number => "num",
+            ConditionalFormatType::Formula => "formula",
+            ConditionalFormatType::Percentile => "percentile",
+        };
+
+        let mut attributes = vec![("type", rule_type.to_string())];
+
+        if icon.greater_than {
+            attributes.push(("gte", "0".to_string()));
         }
+
+        xml_start_tag(writer, "x14:cfvo", &attributes);
+        xml_formula_element_only(writer, "xm:f", value);
+        xml_end_tag(writer, "x14:cfvo");
     }
 }
 
@@ -7489,6 +7466,10 @@ macro_rules! generate_conditional_common_methods {
         /// feature of a conditional formatting rule when more than one rule is
         /// applied to a cell or a range of cells. When this parameter is set then
         /// subsequent rules are not evaluated if the current rule is true.
+        ///
+        /// Note, Excel doesn't support "Stop if True" for Data Bar, Color
+        /// Scale or Icon Set conditional formats so the option is ignored for
+        /// those types.
         ///
         /// # Parameters
         ///

@@ -12,7 +12,7 @@ use rust_xlsxwriter::{
 };
 
 // Create a rust_xlsxwriter file to compare against an Excel file.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -40,11 +40,55 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Check that "Stop If True" is ignored for icon sets, since Excel doesn't
+// allow it to be set for them.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write(0, 0, 10)?;
+    worksheet.write(1, 0, 20)?;
+    worksheet.write(2, 0, 30)?;
+    worksheet.write(3, 0, 40)?;
+
+    let icons = [
+        ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+        ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+        ConditionalFormatCustomIcon::new()
+            .set_rule(ConditionalFormatType::Percent, 0)
+            .set_greater_than(true),
+    ];
+    let conditional_format = ConditionalFormatIconSet::new()
+        .set_icon_type(ConditionalFormatIconType::ThreeArrows)
+        .set_icons(&icons)
+        .set_stop_if_true(true);
+
+    worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_cond_format20() {
     let test_runner = common::TestRunner::new()
         .set_name("cond_format20")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_cond_format20_stop_if_true() {
+    let test_runner = common::TestRunner::new()
+        .set_name("cond_format20")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

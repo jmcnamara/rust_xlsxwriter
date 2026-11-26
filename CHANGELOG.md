@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #227]: https://github.com/jmcnamara/rust_xlsxwriter/issues/227
 
+- Fixed several [`ConditionalFormatIconSet`] options that were ignored or
+  written incorrectly for Excel 2010+ icon sets (3 Stars, 3 Triangles, 5 Boxes
+  and custom icons): reversed icons, icons only, ">" rules, and Lowest/Automatic
+  rule types.
+
 ## [0.104.0] - 2026-11-22
 
 ### Added

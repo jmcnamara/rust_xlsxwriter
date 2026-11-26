@@ -23,15 +23,12 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         worksheet.write(row, 1, row + 1)?;
     }
 
-    let format1 = Format::new().set_background_color(Color::Green);
-    let format2 = Format::new().set_background_color(Color::Red);
+    let format1 = Format::new().set_background_color(Color::Red);
+    let format2 = Format::new().set_background_color(Color::Green);
 
-    // Manually set the indices to get the same order as the target file.
-    worksheet.format_dxf_index(&format2);
-    worksheet.format_dxf_index(&format1);
-
+    // Conditional format 1.
     let conditional_format = ConditionalFormatCell::new()
-        .set_rule(ConditionalFormatCellRule::GreaterThan(5))
+        .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(0))
         .set_format(&format1);
 
     worksheet.add_conditional_format(0, 0, 4, 0, &conditional_format)?;
@@ -42,8 +39,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.add_conditional_format(0, 1, 4, 1, &conditional_format)?;
 
+    // Conditional format 3.
     let conditional_format = ConditionalFormatCell::new()
-        .set_rule(ConditionalFormatCellRule::GreaterThan(0))
+        .set_rule(ConditionalFormatCellRule::GreaterThan(5))
         .set_format(&format2);
 
     worksheet.add_conditional_format(0, 0, 4, 0, &conditional_format)?;
