@@ -20057,6 +20057,14 @@ impl Worksheet {
             {
                 attributes.push(("customHeight", "1".to_string()));
             }
+
+            if row_options.level > 0 {
+                attributes.push(("outlineLevel", row_options.level.to_string()));
+            }
+
+            if row_options.collapsed {
+                attributes.push(("collapsed", "1".to_string()));
+            }
         } else if self.default_row_height != self.original_row_height {
             let height_in_chars = f64::from(self.default_row_height) * 0.75;
             attributes.push(("ht", height_in_chars.to_string()));

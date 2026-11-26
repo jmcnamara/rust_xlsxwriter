@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Issue #227]: https://github.com/jmcnamara/rust_xlsxwriter/issues/227
 
+- Fixed missing row outline levels from [`Worksheet::group_rows()`] in constant
+  and low memory modes. See [Issue #228].
+
+  [Issue #228]: https://github.com/jmcnamara/rust_xlsxwriter/issues/228
+
 - Fixed several [`ConditionalFormatIconSet`] options that were ignored or
   written incorrectly for Excel 2010+ icon sets (3 Stars, 3 Triangles, 5 Boxes
   and custom icons): reversed icons, icons only, ">" rules, and Lowest/Automatic

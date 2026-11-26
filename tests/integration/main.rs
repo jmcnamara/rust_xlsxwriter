@@ -882,6 +882,10 @@ mod optimize_autofit08;
 mod optimize_embed_image01;
 #[cfg(feature = "constant_memory")]
 mod optimize_embed_image02;
+#[cfg(feature = "constant_memory")]
+mod optimize_outline01;
+#[cfg(feature = "constant_memory")]
+mod optimize_outline02;
 #[cfg(feature = "serde")]
 #[cfg(feature = "constant_memory")]
 mod optimize_serde01;
