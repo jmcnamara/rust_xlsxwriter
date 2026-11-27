@@ -5831,6 +5831,10 @@ impl Chart {
             attributes.push(("u", "sng".to_string()));
         }
 
+        if font.strikethrough {
+            attributes.push(("strike", "sngStrike".to_string()));
+        }
+
         if font.has_baseline {
             attributes.push(("baseline", "0".to_string()));
         }
@@ -9124,7 +9128,7 @@ impl ChartTitle {
         let mut font = font.clone();
         font.has_default_bold = true;
 
-        if font.italic || font.is_latin() {
+        if font.italic || font.strikethrough || font.is_latin() {
             font.has_baseline = true;
         }
 
@@ -10021,7 +10025,7 @@ impl ChartDataLabel {
     pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartDataLabel {
         let mut font = font.clone();
 
-        if font.italic {
+        if font.italic || font.strikethrough {
             font.has_baseline = true;
         }
 
@@ -11048,7 +11052,7 @@ impl ChartAxis {
     pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartAxis {
         let mut font = font.clone();
 
-        if font.italic || font.is_latin() {
+        if font.italic || font.strikethrough || font.is_latin() {
             font.has_baseline = true;
         }
 

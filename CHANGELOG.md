@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed missing row outline levels from [`Worksheet::group_rows()`] in constant
   and low memory modes. See [Issue #228].
 
+- Fixed [`ShapeFont::set_strikethrough()`] and
+  [`ChartFont::set_strikethrough()`] which had no effect. See [Issue #228].
+
   [Issue #228]: https://github.com/jmcnamara/rust_xlsxwriter/issues/228
 
 - Fixed several [`ConditionalFormatIconSet`] options that were ignored or

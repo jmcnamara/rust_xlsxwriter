@@ -1114,6 +1114,10 @@ impl Drawing {
             attributes.push(("u", "sng".to_string()));
         }
 
+        if font.strikethrough {
+            attributes.push(("strike", "sngStrike".to_string()));
+        }
+
         if font.has_baseline {
             attributes.push(("baseline", "0".to_string()));
         }

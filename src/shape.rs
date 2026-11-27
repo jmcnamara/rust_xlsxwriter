@@ -3121,6 +3121,7 @@ impl ShapeFont {
     ///
     pub fn set_strikethrough(mut self) -> ShapeFont {
         self.strikethrough = true;
+        self.has_baseline = true;
         self
     }
 
