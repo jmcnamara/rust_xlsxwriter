@@ -3104,7 +3104,8 @@ impl ShapeFont {
     where
         T: Into<f64>,
     {
-        self.size = font_size.into() * 100.0;
+        // Font sizes are stored as integer hundredths of a point.
+        self.size = (font_size.into() * 100.0).round();
         self
     }
 

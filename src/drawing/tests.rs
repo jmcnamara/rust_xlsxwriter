@@ -8,7 +8,7 @@
 mod drawing_tests {
 
     use crate::test_functions::xml_to_vec;
-    use crate::{drawing::*, xmlwriter};
+    use crate::{drawing::*, xmlwriter, ShapeFont};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -98,6 +98,19 @@ mod drawing_tests {
                 </xdr:wsDr>
                 "#,
         );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_write_font_elements_fractional_size() {
+        let mut drawing = Drawing::new();
+        let font = ShapeFont::new().set_size(1.09);
+
+        drawing.write_font_elements("a:rPr", &font);
+
+        let got = xmlwriter::cursor_to_str(&drawing.writer);
+        let expected = r#"<a:rPr lang="en-US" sz="109"/>"#;
 
         assert_eq!(expected, got);
     }

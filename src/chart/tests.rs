@@ -7,7 +7,7 @@
 #[cfg(test)]
 mod chart_tests {
 
-    use crate::chart::{Chart, ChartRange, ChartSeries, ChartType, XlsxError};
+    use crate::chart::{Chart, ChartFont, ChartRange, ChartSeries, ChartType, XlsxError};
     use crate::test_functions::xml_to_vec;
     use crate::{xmlwriter, ChartRangeCacheDataType};
     use pretty_assertions::assert_eq;
@@ -293,5 +293,19 @@ mod chart_tests {
         let range = ChartRange::new_from_string(range_string);
         assert_eq!("'Sheet 1'!$A$1:$A$5", range.formula_string());
         assert_eq!("Sheet 1", range.sheet_name);
+    }
+
+    #[test]
+    fn test_write_font_elements_fractional_size() {
+        let mut chart = Chart::new(ChartType::Bar);
+        let mut font = ChartFont::new();
+        font.set_size(1.13);
+
+        chart.write_font_elements("a:defRPr", &font);
+
+        let got = xmlwriter::cursor_to_str(&chart.writer);
+        let expected = r#"<a:defRPr sz="113"/>"#;
+
+        assert_eq!(expected, got);
     }
 }
